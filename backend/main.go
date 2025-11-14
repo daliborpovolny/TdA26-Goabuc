@@ -39,7 +39,7 @@ func main() {
 	e.Use(AuthMiddleware(queries))
 
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+		return c.JSON(http.StatusOK, map[string]string{"organization": "Student Cyber Games"})
 	})
 
 	authHandler := NewAuthHandler(queries)
