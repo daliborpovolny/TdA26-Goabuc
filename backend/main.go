@@ -31,10 +31,6 @@ func main() {
 	defer db.Close()
 	fmt.Println("initialized db")
 
-	h := Handler{
-		queries: queries,
-	}
-
 	e := echo.New()
 	e.Debug = true // enabling this make echo log more stuff into the console
 
@@ -46,9 +42,11 @@ func main() {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	e.POST("/register", h.register)
-	e.POST("/login", h.login)
-	e.GET("/me", h.profile)
+	authHandler := NewAuthHandler(queries)
+
+	e.POST("/register", authHandler.register)
+	e.POST("/login", authHandler.login)
+	e.GET("/me", authHandler.profile)
 
 	e.Static("/static", "static")
 
