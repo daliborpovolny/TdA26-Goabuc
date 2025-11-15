@@ -7,7 +7,7 @@ import (
 	"time"
 
 	db "tourbackend/database/gen"
-	"tourbackend/handler"
+	"tourbackend/handlers"
 	"tourbackend/utils"
 
 	"github.com/labstack/echo/v4"
@@ -16,11 +16,11 @@ import (
 var COOKIE_LIFETIME = time.Hour * 24 * 7
 
 type AuthHandler struct {
-	*handler.Handler
+	*handlers.Handler
 }
 
 func NewAuthHandler(queries *db.Queries) *AuthHandler {
-	return &AuthHandler{handler.NewHandler(queries)}
+	return &AuthHandler{handlers.NewHandler(queries)}
 }
 
 type LoginRequest struct {

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 	db "tourbackend/database/gen"
-	"tourbackend/handler"
+	"tourbackend/handlers"
 	"tourbackend/utils"
 
 	"github.com/google/uuid"
@@ -12,12 +12,12 @@ import (
 )
 
 type CourseHandler struct {
-	*handler.Handler
+	*handlers.Handler
 }
 
 func NewCourseHandler(queries *db.Queries) *CourseHandler {
 	return &CourseHandler{
-		handler.NewHandler(queries),
+		handlers.NewHandler(queries),
 	}
 }
 
