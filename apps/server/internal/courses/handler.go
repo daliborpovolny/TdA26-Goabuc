@@ -3,9 +3,9 @@ package courses
 import (
 	"net/http"
 	"time"
-	db "tourbackend/database/gen"
-	"tourbackend/handlers"
-	"tourbackend/utils"
+	db "tourbackend/internal/database/gen"
+	"tourbackend/internal/handlers"
+	"tourbackend/internal/utils"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -15,9 +15,9 @@ type CourseHandler struct {
 	*handlers.Handler
 }
 
-func NewCourseHandler(queries *db.Queries) *CourseHandler {
+func NewCourseHandler(queries *db.Queries, isDeployed bool) *CourseHandler {
 	return &CourseHandler{
-		handlers.NewHandler(queries),
+		handlers.NewHandler(queries, isDeployed),
 	}
 }
 

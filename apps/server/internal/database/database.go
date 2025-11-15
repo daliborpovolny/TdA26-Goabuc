@@ -2,31 +2,33 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	_ "embed"
 	"fmt"
 	"os"
-	database "tourbackend/database/gen"
-	"tourbackend/utils"
 
-	"database/sql"
+	gen "tourbackend/internal/database/gen"
+	"tourbackend/internal/utils"
 
 	_ "modernc.org/sqlite"
 )
 
+var PATH_TO_DB string = "../../internal/database/db_file.db"
+
 //go:embed schema.sql
 var ddl string
 
-func Initialize() (*sql.DB, *database.Queries) {
+func Initialize() (*sql.DB, *gen.Queries) {
 
 	resetDB := os.Getenv("RESET_DB")
 
 	if resetDB == "true" {
-		os.Remove("./database/db_file.db")
+		os.Remove(PATH_TO_DB)
 	}
 
 	ctx := context.Background()
 
-	db, err := sql.Open("sqlite", "./database/db_file.db")
+	db, err := sql.Open("sqlite", PATH_TO_DB)
 	if err != nil {
 		panic(err)
 	}
@@ -36,7 +38,7 @@ func Initialize() (*sql.DB, *database.Queries) {
 		panic(err)
 	}
 
-	queries := database.New(db)
+	queries := gen.New(db)
 
 	if resetDB == "true" {
 		Seed(queries)
@@ -47,7 +49,7 @@ func Initialize() (*sql.DB, *database.Queries) {
 }
 
 // this inserts initial data into database which is useful for testing
-func Seed(queries *database.Queries) {
+func Seed(queries *gen.Queries) {
 
 	ctx := context.Background()
 
@@ -56,7 +58,7 @@ func Seed(queries *database.Queries) {
 		panic(err)
 	}
 
-	_, err = queries.CreateUser(ctx, database.CreateUserParams{
+	_, err = queries.CreateUser(ctx, gen.CreateUserParams{
 		FirstName: "Adminov",
 		LastName:  "Adminsky",
 		Email:     "adminov.adminksky@goabuc.cz",

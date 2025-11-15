@@ -1,4 +1,4 @@
-package main
+package auth
 
 import (
 	"context"
@@ -6,21 +6,24 @@ import (
 	"net/http"
 	"time"
 
-	db "tourbackend/database/gen"
-	"tourbackend/handlers"
-	"tourbackend/utils"
+	db "tourbackend/internal/database/gen"
+	"tourbackend/internal/handlers"
+	"tourbackend/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 var COOKIE_LIFETIME = time.Hour * 24 * 7
 
+var IS_DEPLOYED bool
+
 type AuthHandler struct {
 	*handlers.Handler
 }
 
-func NewAuthHandler(queries *db.Queries) *AuthHandler {
-	return &AuthHandler{handlers.NewHandler(queries)}
+func NewAuthHandler(queries *db.Queries, isDeployed bool) *AuthHandler {
+	IS_DEPLOYED = isDeployed
+	return &AuthHandler{handlers.NewHandler(queries, isDeployed)}
 }
 
 type LoginRequest struct {
@@ -28,7 +31,7 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-func (h *AuthHandler) login(c echo.Context) error {
+func (h *AuthHandler) Login(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
 	var req LoginRequest
@@ -78,7 +81,7 @@ type RegisterRequest struct {
 	Password  string `json:"password"`
 }
 
-func (h *AuthHandler) register(c echo.Context) error {
+func (h *AuthHandler) Register(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
 	var req RegisterRequest
@@ -131,7 +134,7 @@ func (h *AuthHandler) register(c echo.Context) error {
 	return r.JSONMsg(http.StatusCreated, "registered user")
 }
 
-func (h *AuthHandler) profile(c echo.Context) error {
+func (h *AuthHandler) Profile(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
 	if r.User == nil {

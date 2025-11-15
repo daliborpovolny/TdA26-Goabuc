@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	db "tourbackend/database/gen"
+	db "tourbackend/internal/database/gen"
 
 	"github.com/labstack/echo/v4"
 )
@@ -11,11 +11,12 @@ import (
 // the handler has a helper method called newReqCtx which adds creates a context for each request
 // this context allows interaction with the database and has a few helper methods like Error and JSONMsg
 type Handler struct {
-	queries *db.Queries
+	queries    *db.Queries
+	isDeployed bool
 }
 
-func NewHandler(queries *db.Queries) *Handler {
-	return &Handler{queries: queries}
+func NewHandler(queries *db.Queries, isDeployed bool) *Handler {
+	return &Handler{queries: queries, isDeployed: isDeployed}
 }
 
 type RequestCtx struct {

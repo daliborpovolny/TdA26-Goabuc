@@ -1,12 +1,12 @@
-package main
+package auth
 
 import (
-	db "tourbackend/database/gen"
+	db "tourbackend/internal/database/gen"
 
 	"github.com/labstack/echo/v4"
 )
 
-//* this file includes middlewares - ei code that is run before the actual code for an endpoint.
+//* this file includes middleware - ei code that is run before the actual code for an endpoint.
 
 // Checks if the request includes auth token,
 // if it does it validates the token and if the token is valid

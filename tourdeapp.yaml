@@ -1,0 +1,10 @@
+# $schema: https://portalbush.tourde.cloud/static/schema.json
+exposedPort: 80
+containers:
+  - name: caddy
+    image: registry.tourde.cloud/<slug>/caddy
+    port: 80
+build:
+  - name: caddy
+    context: ./apps/caddy
+    dockerfile: ./apps/caddy/Dockerfile

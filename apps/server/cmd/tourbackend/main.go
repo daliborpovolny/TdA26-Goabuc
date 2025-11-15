@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
-	"net/http"
-	"tourbackend/courses"
-	db "tourbackend/database"
+	"tourbackend/internal/auth"
+	"tourbackend/internal/courses"
+	db "tourbackend/internal/database"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -37,21 +38,21 @@ func main() {
 
 	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(AuthMiddleware(queries))
+	e.Use(auth.AuthMiddleware(queries))
 
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"organization": "Student Cyber Games"})
 	})
 
 	// Auth
-	authHandler := NewAuthHandler(queries)
+	authHandler := auth.NewAuthHandler(queries, IS_DEPLOYED)
 
-	e.POST("/register", authHandler.register)
-	e.POST("/login", authHandler.login)
-	e.GET("/me", authHandler.profile)
+	e.POST("/register", authHandler.Register)
+	e.POST("/login", authHandler.Login)
+	e.GET("/me", authHandler.Profile)
 
 	// Courses
-	coursesHandler := courses.NewCourseHandler(queries)
+	coursesHandler := courses.NewCourseHandler(queries, IS_DEPLOYED)
 
 	e.GET("/courses", coursesHandler.ListAllCourses)
 	e.POST("/courses", coursesHandler.CreateCourse)
@@ -60,7 +61,7 @@ func main() {
 	e.PUT("/courses/:uuid", coursesHandler.UpdateCourse)
 	e.DELETE("/courses/:uuid", coursesHandler.DeleteCourse)
 
-	e.Static("/static", "static")
+	e.Static("/static", "../../static")
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
