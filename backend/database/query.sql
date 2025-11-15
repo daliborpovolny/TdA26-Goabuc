@@ -22,3 +22,24 @@ INSERT INTO session (
 ) VALUES (
     ?, ?, ?, ?
 ) RETURNING *;
+
+--* Course
+
+-- name: CreateCourse :one
+INSERT INTO course (
+    uuid, name, description, created_at, updated_at
+) VALUES (
+    ?, ?, ?, ?, ?
+) RETURNING *;
+
+-- name: UpdateCourse :one
+UPDATE course SET name = ?, description = ?, updated_at = ? WHERE course.uuid = ? RETURNING *;
+
+-- name: DeleteCourse :execresult
+DELETE FROM course WHERE course.uuid = ?;
+
+-- name: GetCourse :one
+SELECT uuid, name, description, created_at, updated_at FROM course WHERE course.uuid == ?;
+
+-- name: ListAllCourses :many
+SELECT uuid, name, description, created_at, updated_at FROM course;

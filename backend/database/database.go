@@ -5,8 +5,8 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
-	"tourbackend/crypto"
 	database "tourbackend/database/gen"
+	"tourbackend/utils"
 
 	"database/sql"
 
@@ -51,7 +51,7 @@ func Seed(queries *database.Queries) {
 
 	ctx := context.Background()
 
-	hash, err := crypto.HashPassword("12345678")
+	hash, err := utils.HashPassword("12345678")
 	if err != nil {
 		panic(err)
 	}

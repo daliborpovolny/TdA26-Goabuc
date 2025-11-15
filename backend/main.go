@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"net/http"
+	"tourbackend/courses"
 	db "tourbackend/database"
 
 	"github.com/labstack/echo/v4"
@@ -42,11 +43,22 @@ func main() {
 		return c.JSON(http.StatusOK, map[string]string{"organization": "Student Cyber Games"})
 	})
 
+	// Auth
 	authHandler := NewAuthHandler(queries)
 
 	e.POST("/register", authHandler.register)
 	e.POST("/login", authHandler.login)
 	e.GET("/me", authHandler.profile)
+
+	// Courses
+	coursesHandler := courses.NewCourseHandler(queries)
+
+	e.GET("/courses", coursesHandler.ListAllCourses)
+	e.POST("/courses", coursesHandler.CreateCourse)
+
+	e.GET("/courses/:uuid", coursesHandler.GetCourse)
+	e.PUT("/courses/:uuid", coursesHandler.UpdateCourse)
+	e.DELETE("/courses/:uuid", coursesHandler.DeleteCourse)
 
 	e.Static("/static", "static")
 

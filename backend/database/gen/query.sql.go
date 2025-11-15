@@ -7,7 +7,45 @@ package database
 
 import (
 	"context"
+	"database/sql"
 )
+
+const createCourse = `-- name: CreateCourse :one
+
+INSERT INTO course (
+    uuid, name, description, created_at, updated_at
+) VALUES (
+    ?, ?, ?, ?, ?
+) RETURNING uuid, name, description, created_at, updated_at
+`
+
+type CreateCourseParams struct {
+	Uuid        string `json:"uuid"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+// * Course
+func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Course, error) {
+	row := q.db.QueryRowContext(ctx, createCourse,
+		arg.Uuid,
+		arg.Name,
+		arg.Description,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	var i Course
+	err := row.Scan(
+		&i.Uuid,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
 
 const createSession = `-- name: CreateSession :one
 
@@ -69,6 +107,31 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.LastName,
 		&i.Hash,
 		&i.Email,
+	)
+	return i, err
+}
+
+const deleteCourse = `-- name: DeleteCourse :execresult
+DELETE FROM course WHERE course.uuid = ?
+`
+
+func (q *Queries) DeleteCourse(ctx context.Context, uuid string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteCourse, uuid)
+}
+
+const getCourse = `-- name: GetCourse :one
+SELECT uuid, name, description, created_at, updated_at FROM course WHERE course.uuid == ?
+`
+
+func (q *Queries) GetCourse(ctx context.Context, uuid string) (Course, error) {
+	row := q.db.QueryRowContext(ctx, getCourse, uuid)
+	var i Course
+	err := row.Scan(
+		&i.Uuid,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -142,6 +205,68 @@ func (q *Queries) GetUserBySessionToken(ctx context.Context, token string) (GetU
 		&i.Token,
 		&i.CreatedAt,
 		&i.ExpiresAt,
+	)
+	return i, err
+}
+
+const listAllCourses = `-- name: ListAllCourses :many
+SELECT uuid, name, description, created_at, updated_at FROM course
+`
+
+func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
+	rows, err := q.db.QueryContext(ctx, listAllCourses)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Course
+	for rows.Next() {
+		var i Course
+		if err := rows.Scan(
+			&i.Uuid,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateCourse = `-- name: UpdateCourse :one
+UPDATE course SET name = ?, description = ?, updated_at = ? WHERE course.uuid = ? RETURNING uuid, name, description, created_at, updated_at
+`
+
+type UpdateCourseParams struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	UpdatedAt   int64  `json:"updated_at"`
+	Uuid        string `json:"uuid"`
+}
+
+func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) (Course, error) {
+	row := q.db.QueryRowContext(ctx, updateCourse,
+		arg.Name,
+		arg.Description,
+		arg.UpdatedAt,
+		arg.Uuid,
+	)
+	var i Course
+	err := row.Scan(
+		&i.Uuid,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

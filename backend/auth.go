@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"tourbackend/crypto"
 	db "tourbackend/database/gen"
 	"tourbackend/handler"
+	"tourbackend/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -41,12 +41,12 @@ func (h *AuthHandler) login(c echo.Context) error {
 		return err
 	}
 
-	isCorrect := crypto.CheckPasswordHash(req.Password, user.Hash)
+	isCorrect := utils.CheckPasswordHash(req.Password, user.Hash)
 	if !isCorrect {
 		return r.Error(http.StatusUnauthorized, "invalid password")
 	}
 
-	newToken, err := crypto.NewSessionToken()
+	newToken, err := utils.NewSessionToken()
 	if err != nil {
 		c.Logger().Errorf("failed to generate a session token: %v", err)
 		return r.Error(http.StatusInternalServerError, "internal server error")
@@ -86,7 +86,7 @@ func (h *AuthHandler) register(c echo.Context) error {
 		return r.Error(http.StatusBadRequest, "invalid request")
 	}
 
-	hash, err := crypto.HashPassword(req.Password)
+	hash, err := utils.HashPassword(req.Password)
 	if err != nil {
 		return r.Error(http.StatusBadRequest, "unhashable password")
 	}
@@ -98,7 +98,7 @@ func (h *AuthHandler) register(c echo.Context) error {
 		Email:     req.Email,
 	})
 	if err != nil {
-		if IsUniqueConstraintError(err) {
+		if utils.IsUniqueConstraintError(err) {
 			return r.Error(http.StatusBadRequest, "email already in use")
 		}
 
@@ -106,7 +106,7 @@ func (h *AuthHandler) register(c echo.Context) error {
 		return r.Error(http.StatusInternalServerError, "internal server error")
 	}
 
-	newToken, err := crypto.NewSessionToken()
+	newToken, err := utils.NewSessionToken()
 	if err != nil {
 		c.Logger().Errorf("failed to generate a session token: %v", err)
 		return r.Error(http.StatusInternalServerError, "internal server error")

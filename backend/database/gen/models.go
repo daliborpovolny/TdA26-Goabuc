@@ -4,6 +4,14 @@
 
 package database
 
+type Course struct {
+	Uuid        string `json:"uuid"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
 type Session struct {
 	ID        int64  `json:"id"`
 	UserID    int64  `json:"user_id"`

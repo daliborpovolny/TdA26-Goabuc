@@ -9,7 +9,7 @@ import (
 
 // The Handler is a struct which methods handle the individual endpoints
 // the handler has a helper method called newReqCtx which adds creates a context for each request
-// this context allows interaction with the database and has few helper methods like Error and JSONMsg
+// this context allows interaction with the database and has a few helper methods like Error and JSONMsg
 type Handler struct {
 	queries *db.Queries
 }
@@ -44,7 +44,8 @@ func (h *Handler) NewReqCtx(c echo.Context) *RequestCtx {
 // Helpers
 
 func (r *RequestCtx) Error(code int, msg string) error {
-	return r.Echo.JSON(code, map[string]string{"error": msg})
+	// perhaps we would like to log the error here in the future?
+	return r.Echo.JSON(code, map[string]string{"message": msg})
 }
 
 func (r *RequestCtx) JSONMsg(code int, msg string) error {
