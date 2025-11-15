@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	"tourbackend/internal/auth"
 	"tourbackend/internal/courses"
@@ -20,11 +21,26 @@ var IS_DEPLOYED bool
 // if this variable is true, then the db gets deleted and seeded each reload of the server
 var RESET_DB bool
 
+var STATIC_PATH string = "../../static"
+
 func main() {
 
 	// in future setting env vars should not be done here
 	os.Setenv("IS_DEPLOYED", "false")
 	os.Setenv("RESET_DB", "true")
+
+	// try to read the port number from env, if fails default to 3000
+	PORT_STRING := os.Getenv("PORT")
+	_, err := strconv.Atoi(PORT_STRING)
+	if err != nil || PORT_STRING == "" {
+		PORT_STRING = "3000"
+	}
+
+	// if env var sets the value of /static path -> respect it (this makes it work both locally and in docker)
+	ENV_STATIC_PATH := os.Getenv("STATIC_PATH")
+	if ENV_STATIC_PATH != "" {
+		STATIC_PATH = ENV_STATIC_PATH
+	}
 
 	IS_DEPLOYED = os.Getenv("IS_DEPLOYED") == "true"
 	RESET_DB = os.Getenv("RESET_DB") == "true"
@@ -61,7 +77,7 @@ func main() {
 	e.PUT("/courses/:uuid", coursesHandler.UpdateCourse)
 	e.DELETE("/courses/:uuid", coursesHandler.DeleteCourse)
 
-	e.Static("/static", "../../static")
+	e.Static("/static", STATIC_PATH)
 
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":" + PORT_STRING))
 }

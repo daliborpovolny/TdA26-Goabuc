@@ -20,6 +20,11 @@ var ddl string
 
 func Initialize() (*sql.DB, *gen.Queries) {
 
+	PATH_TO_DB_ENV := os.Getenv("PATH_TO_DB")
+	if PATH_TO_DB_ENV != "" {
+		PATH_TO_DB = PATH_TO_DB_ENV
+	}
+
 	resetDB := os.Getenv("RESET_DB")
 
 	if resetDB == "true" {
