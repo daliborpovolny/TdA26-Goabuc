@@ -10,10 +10,11 @@
     - in /apps/server/cmd/tourbackend run: `go run .`
     - runs on port 3000
     - if u change something you have to rerun the command
-    - note: it should be now possible to run the server directly from the directory you cloned it to (TdA26-Goabuc by default), using .bat (windows) or the .sh (Linux / Mac) file
-        - ##### Windows
-            - in the terminal, run `start_app.bat`
-        - ##### Linux & MacOS
+    - note: it should be now possible to run the server directly from the directory you cloned it to (TdA26-Goabuc by default), using the .bat (Windows) or the .sh (Linux / Mac) file
+    - also note that the .bat file now works for both frontend and backend simultaneously and opnens 2 new windows
+        - #### Windows
+            - in cmd, run `start_app.bat`
+        - #### Linux & MacOS
             - in bash, run `sudo chmod +x start_backend.sh` (if you haven't already)
             - run `./start_backend.sh`
             - please note that I am unable to test on MacOS
