@@ -6,10 +6,12 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"time"
 
 	gen "tourbackend/internal/database/gen"
 	"tourbackend/internal/utils"
 
+	"github.com/google/uuid"
 	_ "modernc.org/sqlite"
 )
 
@@ -72,4 +74,31 @@ func Seed(queries *gen.Queries) {
 	if err != nil {
 		panic(err)
 	}
+
+	now := time.Now().Unix()
+	_, err = queries.CreateCourse(ctx, gen.CreateCourseParams{
+		Uuid:        uuid.NewString(),
+		Name:        "Pottery for Beginners",
+		Description: "Intro into the wonderful world of pottery. No matter you experience you are welcome!",
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	})
+
+	now = time.Now().Unix()
+	_, err = queries.CreateCourse(ctx, gen.CreateCourseParams{
+		Uuid:        uuid.NewString(),
+		Name:        "Potions 101",
+		Description: "Intro into potion making, fast-paced course for serious sorcerers only",
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	})
+
+	now = time.Now().Unix()
+	_, err = queries.CreateCourse(ctx, gen.CreateCourseParams{
+		Uuid:        uuid.NewString(),
+		Name:        "Zebra Riding Advanced",
+		Description: "A guide to advanced zebra riding techniques, must already own a zebra",
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	})
 }
