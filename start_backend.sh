@@ -3,7 +3,8 @@ set -euo pipefail
 
 echo Running backend...
 
-path_to_main="./apps/server/cmd/tourbackend"
+def=$PWD
+path_to_main="$def/apps/server/cmd/tourbackend"
 
 if [[ -d "$path_to_main" ]]; then
     (
