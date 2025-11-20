@@ -41,6 +41,9 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	user, err := r.Queries.GetUserByEmail(r.Ctx, req.Email)
 	if err != nil {
+		if utils.IsNoRowsError(err) {
+			return r.Error(http.StatusBadRequest, "Unknown email")
+		}
 		return err
 	}
 

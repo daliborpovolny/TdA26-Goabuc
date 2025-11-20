@@ -52,7 +52,7 @@ func main() {
 	e := echo.New()
 	e.Debug = true // enabling this make echo log more stuff into the console
 
-	// e.Use(middleware.Logger())
+	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(auth.AuthMiddleware(queries))
 
