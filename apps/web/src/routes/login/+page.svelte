@@ -4,32 +4,30 @@
 	let email = '';
 	let password = '';
 
-	let loginPromise: Promise<any> | null = null
+	let loginPromise: Promise<any> | null = null;
 
 	function login() {
-		loginPromise = fetch("api/login", {
+		loginPromise = fetch('api/login', {
 			method: 'POST',
-			headers: {'Content-type': 'application/json'},
+			headers: { 'Content-type': 'application/json' },
 			credentials: 'include',
-			body: JSON.stringify({email, password})
-
-		}).then(async (res) => {
-			if (!res.ok) {
-				const err = await res.json()
-				throw new Error(err.message || "Login failed")
-			}
-			return res.json()
-		}).then((data) => {
-			
-			setTimeout( () => {
-				goto('/dashboard')
-			}, 1500)
-
-			return data;
+			body: JSON.stringify({ email, password })
 		})
+			.then(async (res) => {
+				if (!res.ok) {
+					const err = await res.json();
+					throw new Error(err.message || 'Login failed');
+				}
+				return res.json();
+			})
+			.then((data) => {
+				setTimeout(() => {
+					goto('/dashboard');
+				}, 1500);
+
+				return data;
+			});
 	}
-
-
 </script>
 
 <title>Login</title>
@@ -69,11 +67,11 @@
 
 	{#if loginPromise}
 		{#await loginPromise}
-			<p>Logging in...</p>	
+			<p>Logging in...</p>
 		{:then data}
 			<p class=": text-green-500">Success! Welcome {data.first_name}</p>
 		{:catch error}
-			<p class="capitalize text-red-500">{error.message}</p>
+			<p class="text-red-500 capitalize">{error.message}</p>
 		{/await}
 	{/if}
 </form>

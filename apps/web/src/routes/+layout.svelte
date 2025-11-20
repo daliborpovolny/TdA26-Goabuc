@@ -9,14 +9,13 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-
 <div class="mx-3">
-
-	<nav class="mx-3 flex gap-4
-            [&>a]:px-3 [&>a]:py-2
-            [&>a]:rounded-md
-            [&>a:hover]:bg-stone-200">
-	
+	<nav
+		class="mx-3 flex gap-4
+            [&>a]:rounded-md [&>a]:px-3
+            [&>a]:py-2
+            [&>a:hover]:bg-stone-200"
+	>
 		<a href="/">Home</a>
 		<a href="/courses">Courses</a>
 		<a href="/dashboard">Dashboard</a>
