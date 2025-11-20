@@ -27,7 +27,7 @@
 {:then data}
 	<ul>
 		{#each data as course}
-			<a href="courses/{course.uuid}"> {course.name} </a>
+			<a href="/courses/{course.uuid}"> {course.name} </a>
 			<p>{course.description}</p>
 			<br />
 		{/each}
