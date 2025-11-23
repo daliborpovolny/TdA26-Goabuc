@@ -8,8 +8,11 @@
 		})
 			.then(async (res) => {
 				if (!res.ok) {
-					const err = await res.json();
-					throw new Error(err.message || 'Login failed');
+					try {
+						const err = await res.json();
+					} catch {
+						throw new Error('Failed to get list of courses');
+					}
 				}
 				return res.json();
 			})
@@ -33,5 +36,5 @@
 		{/each}
 	</ul>
 {:catch error}
-	<p></p>
+	<p class="text-red-500 capitalize">{error.message}</p>
 {/await}
