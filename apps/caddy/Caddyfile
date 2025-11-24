@@ -1,4 +1,11 @@
 http://:80 {
+    # Match the exact path /api and internally rewrite it to /api/
+    # This prevents the 404 on the exact endpoint.
+    handle_path /api {
+        rewrite /api/
+        reverse_proxy 127.0.0.1:3000
+    }
+
     # 1. Match requests starting with /api/
     # 2. STRIP "/api" from the URI
     # 3. Forward the remaining path (e.g. "/") to the backend
