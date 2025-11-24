@@ -137,6 +137,12 @@ func (h *AuthHandler) Register(c echo.Context) error {
 	return r.JSONMsg(http.StatusCreated, "registered user")
 }
 
+type ProfileResponse struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Email     string `json:"email"`
+}
+
 func (h *AuthHandler) Profile(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
@@ -146,10 +152,10 @@ func (h *AuthHandler) Profile(c echo.Context) error {
 
 	c.Logger().Infof("returned profile of user: %v", r.User.Email)
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"first_name": r.User.FirstName,
-		"last_name":  r.User.LastName,
-		"email":      r.User.Email,
+	return c.JSON(http.StatusOK, ProfileResponse{
+		FirstName: r.User.FirstName,
+		LastName:  r.User.LastName,
+		Email:     r.User.Email,
 	})
 }
 
