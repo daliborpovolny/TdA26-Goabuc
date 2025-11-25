@@ -8,7 +8,7 @@ path_to_back="$PWD/apps/web"
 if [[ -d "$path_to_back" ]]; then
     (
         cd "$path_to_back"
-        npm run dev
+        npm run dev -- --host
     )
 fi
 
