@@ -1,8 +1,14 @@
 http://:80 {
-    handle_path /api* {
+    handle_path /api {
+        rewrite /api/
         reverse_proxy 127.0.0.1:3000
     }
 
+    handle_path /api/* {
+        reverse_proxy 127.0.0.1:3000
+    }
+
+    # Send everything else to SvelteKit
     handle {
         reverse_proxy 127.0.0.1:3001
     }
