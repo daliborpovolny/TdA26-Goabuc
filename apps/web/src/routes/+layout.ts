@@ -6,13 +6,11 @@ import { checkSession, isLoggedIn } from '$lib/auth.svelte.ts';
 import { browser } from '$app/environment';
 
 export const load: LayoutLoad = async ({ fetch, url }) => {
+	if (browser) {
+		if (!isLoggedIn()) {
+			await checkSession(fetch);
+		}
+	}
 
-    if (browser) {
-
-        if (!isLoggedIn()) {
-            await checkSession(fetch);
-        }
-    }
-    
-    return {};
+	return {};
 };

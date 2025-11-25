@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import {isLoggedIn} from '$lib/auth.svelte.ts'
+	import { isLoggedIn } from '$lib/auth.svelte.ts';
 
 	if (!isLoggedIn()) {
-		goto('/login')
+		goto('/login');
 	}
 
 	let coursesPromise: Promise<any[]> = loadCourses();
@@ -30,8 +30,7 @@
 <br />
 
 <div>
-	<a href="/edit/courses">Create new course</a>
-	<p>Click on a course to edit it</p>
+	<a href="/dashboard/edit/courses">Create new course</a>
 </div>
 
 <br />
@@ -41,7 +40,7 @@
 {:then data}
 	<ul>
 		{#each data as course}
-			<a href="/edit/courses/{course.uuid}"> {course.name} </a>
+			<a href="/dashboard/edit/courses/{course.uuid}"> {course.name} </a>
 			<br />
 			<br />
 		{/each}

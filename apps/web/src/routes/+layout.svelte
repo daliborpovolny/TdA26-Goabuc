@@ -2,7 +2,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 
-	import {isLoggedIn} from '$lib/auth.svelte.ts'
+	import { isLoggedIn } from '$lib/auth.svelte.ts';
 
 	let { children } = $props();
 </script>
@@ -22,12 +22,11 @@
 		<a href="/courses">Courses</a>
 
 		{#if isLoggedIn()}
-		<a href="/dashboard">Dashboard</a>			
+			<a href="/dashboard">Dashboard</a>
 		{:else}
-		<a href="/login">Login</a>
-		<a href="/register">Register</a>
+			<a href="/login">Login</a>
+			<a href="/register">Register</a>
 		{/if}
-
 	</nav>
 
 	<div class="mt-3">
