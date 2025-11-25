@@ -3,6 +3,7 @@ package courses
 import (
 	"net/http"
 	"time"
+	"tourbackend/internal/courses/materials"
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
 	"tourbackend/internal/utils"
@@ -13,11 +14,13 @@ import (
 
 type CourseHandler struct {
 	*handlers.Handler
+	*materials.MaterialsHandlers
 }
 
 func NewCourseHandler(queries *db.Queries, isDeployed bool) *CourseHandler {
 	return &CourseHandler{
 		handlers.NewHandler(queries, isDeployed),
+		materials.NewMaterialsHandlers(queries, isDeployed),
 	}
 }
 
@@ -76,13 +79,13 @@ type GetCourseResponse struct {
 func (h *CourseHandler) GetCourse(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
-	uuid := c.Param("uuid")
+	courseId := c.Param("courseId")
 
-	if uuid == "" {
+	if courseId == "" {
 		return r.Error(http.StatusBadRequest, "Must specify the course uuid.")
 	}
 
-	course, err := r.Queries.GetCourse(r.Ctx, uuid)
+	course, err := r.Queries.GetCourse(r.Ctx, courseId)
 	if err != nil {
 		if utils.IsNoRowsError(err) {
 			return r.Error(http.StatusNotFound, "The requested resource was not found.")
@@ -116,8 +119,8 @@ type UpdateCourseResponse struct {
 func (h *CourseHandler) UpdateCourse(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
-	uuid := c.Param("uuid")
-	if uuid == "" {
+	couresId := c.Param("courseId")
+	if couresId == "" {
 		return r.Error(http.StatusBadRequest, "invalid request")
 	}
 
@@ -132,7 +135,7 @@ func (h *CourseHandler) UpdateCourse(c echo.Context) error {
 		Name:        req.Name,
 		Description: req.Description,
 		UpdatedAt:   unixTime,
-		Uuid:        uuid,
+		Uuid:        couresId,
 	})
 	if err != nil {
 		if utils.IsNoRowsError(err) {
@@ -152,13 +155,13 @@ func (h *CourseHandler) UpdateCourse(c echo.Context) error {
 func (h *CourseHandler) DeleteCourse(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
-	uuid := c.Param("uuid")
+	couresId := c.Param("courseId")
 
-	if uuid == "" {
-		return r.Error(http.StatusBadRequest, "Uuid must be provided as path parameter")
+	if couresId == "" {
+		return r.Error(http.StatusBadRequest, "courseId must be provided as path parameter")
 	}
 
-	res, err := r.Queries.DeleteCourse(r.Ctx, uuid)
+	res, err := r.Queries.DeleteCourse(r.Ctx, couresId)
 	if err != nil {
 		return r.Error(http.StatusInternalServerError, "Failed to delete the course.")
 	}

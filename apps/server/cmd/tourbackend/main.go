@@ -56,35 +56,36 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(auth.AuthMiddleware(queries))
 
-	e.GET("/api", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{"organization": "Student 1 Cyber Games"})
+	e.GET("", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]string{"organization": "Student Cyber Games"})
 	})
 
-	e.GET("/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{"organization": "Student 2Cyber Games"})
-	})
-
-	e.GET("/api/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{"organization": "Student 4 Cyber Games"})
-	})
-
-	// Auth
+	//* Auth
 	authHandler := auth.NewAuthHandler(queries, IS_DEPLOYED)
 
 	e.POST("/register", authHandler.Register)
 	e.POST("/login", authHandler.Login)
 	e.GET("/me", authHandler.Profile)
 
-	// Courses
+	//* Courses
 	coursesHandler := courses.NewCourseHandler(queries, IS_DEPLOYED)
 
 	e.GET("/courses", coursesHandler.ListAllCourses)
 	e.POST("/courses", coursesHandler.CreateCourse)
 
-	e.GET("/courses/:uuid", coursesHandler.GetCourse)
-	e.PUT("/courses/:uuid", coursesHandler.UpdateCourse)
-	e.DELETE("/courses/:uuid", coursesHandler.DeleteCourse)
+	e.GET("/courses/:courseId", coursesHandler.GetCourse)
+	e.PUT("/courses/:courseId", coursesHandler.UpdateCourse)
+	e.DELETE("/courses/:courseId", coursesHandler.DeleteCourse)
 
+	//* Course materials
+	materials := e.Group("/courses/:courseId/materials")
+	materials.GET("", coursesHandler.ListMaterials)
+	materials.POST("", coursesHandler.CreateMaterial)
+
+	materials.PUT("/:materialId", coursesHandler.UpdateMaterial)
+	materials.DELETE("/:materialId", coursesHandler.DeleteMaterial)
+
+	//* Static
 	e.Static("/static", STATIC_PATH)
 
 	e.Logger.Fatal(e.Start(":" + PORT_STRING))
