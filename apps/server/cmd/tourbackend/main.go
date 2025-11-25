@@ -64,7 +64,7 @@ func main() {
 		return c.JSON(http.StatusOK, map[string]string{"organization": "Student 2Cyber Games"})
 	})
 
-	e.GET("/api", func(c echo.Context) error {
+	e.GET("/api/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"organization": "Student 4 Cyber Games"})
 	})
 
