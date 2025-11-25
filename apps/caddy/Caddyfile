@@ -1,21 +1,8 @@
 http://:80 {
-    # 1. Handle ALL requests starting with /api
-    route /api* {
-        # If the path is EXACTLY /api, rewrite it to /api/
-        # This makes the following 'strip_prefix' correctly result in just '/'
-        @api_no_slash path /api
-        rewrite @api_no_slash /api/
-        
-        # Strip '/api' from the URI before sending to the backend (127.0.0.1:3000)
-        # Request: /api/ -> Path sent to backend: /
-        # Request: /api/courses -> Path sent to backend: /courses
-        uri strip_prefix /api
-
-        # Proxy the modified request to the API Backend
+    handle_path /api* {
         reverse_proxy 127.0.0.1:3000
     }
 
-    # 2. Send everything else (the web app) to SvelteKit
     handle {
         reverse_proxy 127.0.0.1:3001
     }
