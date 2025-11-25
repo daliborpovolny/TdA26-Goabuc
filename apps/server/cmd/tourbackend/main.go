@@ -60,10 +60,6 @@ func main() {
 		return c.JSON(http.StatusOK, map[string]string{"organization": "Student Cyber Games"})
 	})
 
-	e.GET("/api/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{"organization": "Student Cyber Games"})
-	})
-
 	//* Auth
 	authHandler := auth.NewAuthHandler(queries, IS_DEPLOYED)
 

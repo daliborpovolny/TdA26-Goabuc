@@ -1,7 +1,4 @@
 http://:80 {
-    # 1. Match requests starting with /api/
-    # 2. STRIP "/api" from the URI
-    # 3. Forward the remaining path (e.g. "/") to the backend
     handle_path /api/* {
         reverse_proxy 127.0.0.1:3000
     }
