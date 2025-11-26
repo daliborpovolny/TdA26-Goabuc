@@ -43,3 +43,24 @@ SELECT uuid, name, description, created_at, updated_at FROM course WHERE course.
 
 -- name: ListAllCourses :many
 SELECT uuid, name, description, created_at, updated_at FROM course;
+
+--* Material
+
+-- name: CreateMaterial :one
+INSERT INTO material (
+    uuid, name, description, url, courseUuid
+) VALUES (
+    ?, ?, ?, ?, ?
+) RETURNING *;
+
+-- name: UpdateMaterial :one
+UPDATE material SET name = ?, description = ?, url = ? WHERE material.uuid = ? RETURNING *;
+
+-- name: DeleteMaterial :execresult
+DELETE FROM material WHERE material.uuid = ?;
+
+-- name: GetMaterial :one
+SELECT uuid, name, description, url, courseUuid FROM material WHERE material.uuid = ?;
+
+-- name: ListAllMaterialsOfCourse :many
+SELECT uuid, name, description, url, courseUuid FROM material WHERE material.courseUuid = ?;

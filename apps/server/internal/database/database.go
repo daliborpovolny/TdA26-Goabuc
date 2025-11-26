@@ -60,7 +60,7 @@ func Seed(queries *gen.Queries) {
 
 	ctx := context.Background()
 
-	hash, err := utils.HashPassword("12345678")
+	hash, err := utils.HashPassword("1234")
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +68,7 @@ func Seed(queries *gen.Queries) {
 	_, err = queries.CreateUser(ctx, gen.CreateUserParams{
 		FirstName: "Adminov",
 		LastName:  "Adminsky",
-		Email:     "adminov.adminksky@goabuc.cz",
+		Email:     "ad.min@goabuc.cz",
 		Hash:      hash,
 	})
 	if err != nil {

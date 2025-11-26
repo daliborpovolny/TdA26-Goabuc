@@ -24,3 +24,12 @@ CREATE TABLE IF NOT EXISTS course (
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS material (
+    uuid TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    url TEXT NOT NULL,
+    courseUuid TEXT NOT NULL,
+    FOREIGN KEY (courseUuid) REFERENCES course(uuid) ON DELETE CASCADE
+);

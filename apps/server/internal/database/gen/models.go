@@ -12,6 +12,14 @@ type Course struct {
 	UpdatedAt   int64  `json:"updated_at"`
 }
 
+type Material struct {
+	Uuid        string `json:"uuid"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Url         string `json:"url"`
+	Courseuuid  string `json:"courseuuid"`
+}
+
 type Session struct {
 	ID        int64  `json:"id"`
 	UserID    int64  `json:"user_id"`

@@ -8,6 +8,7 @@ import (
 
 	"tourbackend/internal/auth"
 	"tourbackend/internal/courses"
+	"tourbackend/internal/courses/materials"
 	db "tourbackend/internal/database"
 
 	"github.com/labstack/echo/v4"
@@ -78,12 +79,14 @@ func main() {
 	e.DELETE("/courses/:courseId", coursesHandler.DeleteCourse)
 
 	//* Course materials
-	materials := e.Group("/courses/:courseId/materials")
-	materials.GET("", coursesHandler.ListMaterials)
-	materials.POST("", coursesHandler.CreateMaterial)
+	materialsHandler := materials.NewMaterialsHandlers(STATIC_PATH, queries, IS_DEPLOYED)
 
-	materials.PUT("/:materialId", coursesHandler.UpdateMaterial)
-	materials.DELETE("/:materialId", coursesHandler.DeleteMaterial)
+	materials := e.Group("/courses/:courseId/materials")
+	materials.GET("", materialsHandler.ListMaterials)
+	materials.POST("", materialsHandler.CreateMaterial)
+
+	materials.PUT("/:materialId", materialsHandler.UpdateMaterial)
+	materials.DELETE("/:materialId", materialsHandler.DeleteMaterial)
 
 	//* Static
 	e.Static("/static", STATIC_PATH)

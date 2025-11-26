@@ -47,6 +47,43 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 	return i, err
 }
 
+const createMaterial = `-- name: CreateMaterial :one
+
+INSERT INTO material (
+    uuid, name, description, url, courseUuid
+) VALUES (
+    ?, ?, ?, ?, ?
+) RETURNING uuid, name, description, url, courseuuid
+`
+
+type CreateMaterialParams struct {
+	Uuid        string `json:"uuid"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Url         string `json:"url"`
+	Courseuuid  string `json:"courseuuid"`
+}
+
+// * Material
+func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) (Material, error) {
+	row := q.db.QueryRowContext(ctx, createMaterial,
+		arg.Uuid,
+		arg.Name,
+		arg.Description,
+		arg.Url,
+		arg.Courseuuid,
+	)
+	var i Material
+	err := row.Scan(
+		&i.Uuid,
+		&i.Name,
+		&i.Description,
+		&i.Url,
+		&i.Courseuuid,
+	)
+	return i, err
+}
+
 const createSession = `-- name: CreateSession :one
 
 INSERT INTO session (
@@ -119,6 +156,14 @@ func (q *Queries) DeleteCourse(ctx context.Context, uuid string) (sql.Result, er
 	return q.db.ExecContext(ctx, deleteCourse, uuid)
 }
 
+const deleteMaterial = `-- name: DeleteMaterial :execresult
+DELETE FROM material WHERE material.uuid = ?
+`
+
+func (q *Queries) DeleteMaterial(ctx context.Context, uuid string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteMaterial, uuid)
+}
+
 const getCourse = `-- name: GetCourse :one
 SELECT uuid, name, description, created_at, updated_at FROM course WHERE course.uuid == ?
 `
@@ -132,6 +177,23 @@ func (q *Queries) GetCourse(ctx context.Context, uuid string) (Course, error) {
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getMaterial = `-- name: GetMaterial :one
+SELECT uuid, name, description, url, courseUuid FROM material WHERE material.uuid = ?
+`
+
+func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error) {
+	row := q.db.QueryRowContext(ctx, getMaterial, uuid)
+	var i Material
+	err := row.Scan(
+		&i.Uuid,
+		&i.Name,
+		&i.Description,
+		&i.Url,
+		&i.Courseuuid,
 	)
 	return i, err
 }
@@ -242,6 +304,39 @@ func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
 	return items, nil
 }
 
+const listAllMaterialsOfCourse = `-- name: ListAllMaterialsOfCourse :many
+SELECT uuid, name, description, url, courseUuid FROM material WHERE material.courseUuid = ?
+`
+
+func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseuuid string) ([]Material, error) {
+	rows, err := q.db.QueryContext(ctx, listAllMaterialsOfCourse, courseuuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Material
+	for rows.Next() {
+		var i Material
+		if err := rows.Scan(
+			&i.Uuid,
+			&i.Name,
+			&i.Description,
+			&i.Url,
+			&i.Courseuuid,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateCourse = `-- name: UpdateCourse :one
 UPDATE course SET name = ?, description = ?, updated_at = ? WHERE course.uuid = ? RETURNING uuid, name, description, created_at, updated_at
 `
@@ -267,6 +362,35 @@ func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) (Cou
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateMaterial = `-- name: UpdateMaterial :one
+UPDATE material SET name = ?, description = ?, url = ? WHERE material.uuid = ? RETURNING uuid, name, description, url, courseuuid
+`
+
+type UpdateMaterialParams struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Url         string `json:"url"`
+	Uuid        string `json:"uuid"`
+}
+
+func (q *Queries) UpdateMaterial(ctx context.Context, arg UpdateMaterialParams) (Material, error) {
+	row := q.db.QueryRowContext(ctx, updateMaterial,
+		arg.Name,
+		arg.Description,
+		arg.Url,
+		arg.Uuid,
+	)
+	var i Material
+	err := row.Scan(
+		&i.Uuid,
+		&i.Name,
+		&i.Description,
+		&i.Url,
+		&i.Courseuuid,
 	)
 	return i, err
 }

@@ -3,7 +3,6 @@ package courses
 import (
 	"net/http"
 	"time"
-	"tourbackend/internal/courses/materials"
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
 	"tourbackend/internal/utils"
@@ -14,13 +13,11 @@ import (
 
 type CourseHandler struct {
 	*handlers.Handler
-	*materials.MaterialsHandlers
 }
 
 func NewCourseHandler(queries *db.Queries, isDeployed bool) *CourseHandler {
 	return &CourseHandler{
 		handlers.NewHandler(queries, isDeployed),
-		materials.NewMaterialsHandlers(queries, isDeployed),
 	}
 }
 
