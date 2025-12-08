@@ -84,7 +84,7 @@ func (h *CourseHandler) GetCourse(c echo.Context) error {
 			return r.Error(http.StatusInternalServerError, "Failed to fetch from the database")
 		}
 		if err == CourseNotFound {
-			return r.Error(http.StatusBadRequest, "Unknown courseId")
+			return r.Error(http.StatusNotFound, "Unknown courseId")
 		}
 		return r.Error(http.StatusInternalServerError, "Failed to get course")
 	}
