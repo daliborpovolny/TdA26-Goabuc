@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
 
@@ -26,19 +25,23 @@ var ALLOWED_FILES = map[string]bool{
 	"audio/mpeg": true, // .mp3
 }
 
-type MaterialsHandlers struct {
+type Handler struct {
 	*handlers.Handler
+	service    *Service
 	staticPath string
 }
 
-func NewMaterialsHandlers(staticPath string, queries *db.Queries, isDeployed bool) *MaterialsHandlers {
-	return &MaterialsHandlers{
+func NewHandler(staticPath string, queries *db.Queries, isDeployed bool, service *Service) *Handler {
+	return &Handler{
 		handlers.NewHandler(queries, isDeployed),
+		service,
 		staticPath,
 	}
 }
 
-type Material interface{}
+type Material interface {
+	GetType() string
+}
 
 type FileMaterial struct {
 	Uuid        string
@@ -50,6 +53,10 @@ type FileMaterial struct {
 	SizeBytes   int
 }
 
+func (f FileMaterial) GetType() string {
+	return f.Type
+}
+
 type UrlMaterial struct {
 	Uuid        string
 	Type        string
@@ -59,52 +66,26 @@ type UrlMaterial struct {
 	FaviconUrl  string
 }
 
-func (h *MaterialsHandlers) ListMaterials(c echo.Context) error {
+func (f UrlMaterial) GetType() string {
+	return f.Type
+}
+
+func (h *Handler) ListMaterials(c echo.Context) error {
 	r := h.NewReqCtx(c)
 	courseId := c.Param("courseId")
 
-	materials, err := r.Queries.ListAllMaterialsOfCourse(r.Ctx, courseId)
+	mats, err := h.service.ListMaterials(courseId, r.Ctx)
 	if err != nil {
-		return r.Error(http.StatusInternalServerError, "Failed to fetch courses from the database.")
-	}
-
-	formattedMaterials := make([]Material, 0, len(materials))
-	for _, material := range materials {
-		if strings.HasPrefix(material.Url, "/this-site") {
-			formattedMaterials = append(formattedMaterials, FileMaterial{
-				Uuid:        material.Uuid,
-				Type:        "url",
-				Description: material.Description,
-				FileUrl:     material.Url,
-				MimeType:    "mime",
-				SizeBytes:   0,
-			})
-		} else {
-
-			urlParts := strings.SplitAfterN(material.Url, "/", 4)
-			fmt.Println(urlParts)
-
-			urlBaseSite := urlParts[0] + urlParts[1] + urlParts[2]
-			fmt.Println(urlBaseSite)
-
-			faviconUrl := urlBaseSite + "/favicon.ico"
-			fmt.Println(faviconUrl)
-
-			formattedMaterials = append(formattedMaterials, UrlMaterial{
-				Uuid:        material.Uuid,
-				Type:        "url",
-				Name:        material.Name,
-				Description: material.Description,
-				Url:         material.Url,
-				FaviconUrl:  faviconUrl,
-			})
+		if err == FailedToFetchMaterials {
+			return r.Error(http.StatusInternalServerError, "failed to fetch materials from db")
 		}
+		return r.Error(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.String(http.StatusOK, "List materials, Coures: "+courseId)
+	return c.JSON(http.StatusOK, mats)
 }
 
-func (h *MaterialsHandlers) CreateMaterial(c echo.Context) error {
+func (h *Handler) CreateMaterial(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
 	courseId := c.Param("courseId")
@@ -191,14 +172,14 @@ func (h *MaterialsHandlers) CreateMaterial(c echo.Context) error {
 	return c.String(http.StatusOK, "Create material, Coures: "+courseId)
 }
 
-func (h *MaterialsHandlers) UpdateMaterial(c echo.Context) error {
+func (h *Handler) UpdateMaterial(c echo.Context) error {
 	courseId := c.Param("courseId")
 	materialId := c.Param("materialId")
 
 	return c.String(http.StatusOK, "Update material, Course: "+courseId+" Material:"+materialId)
 }
 
-func (h *MaterialsHandlers) DeleteMaterial(c echo.Context) error {
+func (h *Handler) DeleteMaterial(c echo.Context) error {
 	courseId := c.Param("courseId")
 	materialId := c.Param("materialId")
 

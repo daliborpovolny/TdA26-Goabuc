@@ -68,8 +68,11 @@ func main() {
 	e.POST("/login", authHandler.Login)
 	e.GET("/me", authHandler.Profile)
 
-	//* Courses
-	coursesHandler := courses.NewCourseHandler(queries, IS_DEPLOYED)
+	//* Courses and it's deps (materials and quizzes - TODO)
+	matsService := materials.NewService(queries, STATIC_PATH)
+	courseService := courses.NewService(queries, matsService)
+
+	coursesHandler := courses.NewCourseHandler(queries, IS_DEPLOYED, courseService)
 
 	e.GET("/courses", coursesHandler.ListAllCourses)
 	e.POST("/courses", coursesHandler.CreateCourse)
@@ -79,7 +82,7 @@ func main() {
 	e.DELETE("/courses/:courseId", coursesHandler.DeleteCourse)
 
 	//* Course materials
-	materialsHandler := materials.NewMaterialsHandlers(STATIC_PATH, queries, IS_DEPLOYED)
+	materialsHandler := materials.NewHandler(STATIC_PATH, queries, IS_DEPLOYED, matsService)
 
 	materials := e.Group("/courses/:courseId/materials")
 	materials.GET("", materialsHandler.ListMaterials)
@@ -90,6 +93,8 @@ func main() {
 
 	//* Static
 	e.Static("/static", STATIC_PATH)
+
+	fmt.Println("ready!")
 
 	e.Logger.Fatal(e.Start(":" + PORT_STRING))
 }
