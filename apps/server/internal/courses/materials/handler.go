@@ -2,28 +2,13 @@ package materials
 
 import (
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
-
-var MAX_SIZE = int64(30 * 1024 * 1024)
-
-var ALLOWED_FILES = map[string]bool{
-	"application/pdf": true, // .pdf
-	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true, // .docx
-	"text/plain": true, // .txt
-	"image/png":  true, // .png
-	"image/jpeg": true, // .jpeg and .jpg
-	"image/gif":  true, // .gif
-	"video/mp4":  true, // .mp4
-	"audio/mpeg": true, // .mp3
-}
 
 type Handler struct {
 	*handlers.Handler
@@ -39,149 +24,198 @@ func NewHandler(staticPath string, queries *db.Queries, isDeployed bool, service
 	}
 }
 
-type Material interface {
-	GetType() string
-}
-
-type FileMaterial struct {
-	Uuid        string
-	Type        string
-	Name        string
-	Description string
-	FileUrl     string
-	MimeType    string
-	SizeBytes   int
-}
-
-func (f FileMaterial) GetType() string {
-	return f.Type
-}
-
-type UrlMaterial struct {
-	Uuid        string
-	Type        string
-	Name        string
-	Description string
-	Url         string
-	FaviconUrl  string
-}
-
-func (f UrlMaterial) GetType() string {
-	return f.Type
-}
-
 func (h *Handler) ListMaterials(c echo.Context) error {
 	r := h.NewReqCtx(c)
 	courseId := c.Param("courseId")
 
-	mats, err := h.service.ListMaterials(courseId, r.Ctx)
+	req := c.Request()
+
+	mats, err := h.service.ListMaterials(courseId, req.Host, req.URL.Scheme, r.Ctx)
 	if err != nil {
-		if err == FailedToFetchMaterials {
-			return r.Error(http.StatusInternalServerError, "failed to fetch materials from db")
+		if err == CourseNotFound {
+			return r.Error(http.StatusBadRequest, "Unknown course id")
 		}
-		return r.Error(http.StatusInternalServerError, err.Error())
+		fmt.Println(err)
+		return r.Error(http.StatusInternalServerError, "Failed to fetch materials from db")
 	}
 
 	return c.JSON(http.StatusOK, mats)
 }
 
-func (h *Handler) CreateMaterial(c echo.Context) error {
-	r := h.NewReqCtx(c)
+type CreateUrlMaterialRequest struct {
+	MatType     string `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Url         string `json:"url"`
+}
+
+func (h *Handler) collectFileMaterialParams(c echo.Context, r *handlers.RequestCtx) (*CreateFileMaterialParams, error) {
 
 	courseId := c.Param("courseId")
 
-	materialType := c.FormValue("type")
 	name := c.FormValue("name")
+	if name == "" {
+		return nil, r.Error(http.StatusBadRequest, "name of the material must be provided")
+	}
+
 	description := c.FormValue("description")
 
-	if materialType == "" || (materialType != "url" && materialType != "file") {
-		return r.Error(http.StatusBadRequest, "type of the material must be provided, either 'file' or 'url'")
-	}
-
-	if name == "" {
-		return r.Error(http.StatusBadRequest, "name of the material must be provided")
-	}
+	fmt.Println("in file")
 
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
-		return r.Error(http.StatusBadRequest, "file is required")
-	}
-
-	if fileHeader.Size > MAX_SIZE {
-		return r.Error(http.StatusBadRequest, "file is too big, max 30MB")
-	}
-
-	src, err := fileHeader.Open()
-	if err != nil {
-		fmt.Println("error when opening file header", err)
-		return r.Error(http.StatusInternalServerError, "failed to open the file header")
-	}
-	defer src.Close()
-
-	// read the mimetype
-	buf := make([]byte, 512)
-	n, _ := src.Read(buf)
-
-	mimeType := http.DetectContentType(buf[:n])
-	fmt.Println(mimeType)
-
-	if !ALLOWED_FILES[mimeType] {
-		fmt.Println("forbiden file type: ", mimeType)
-		return r.Error(http.StatusBadRequest, "forbiden file type")
-	}
-
-	// 	rewind the cursor
-	if _, err := src.Seek(0, io.SeekStart); err != nil {
-		return err
-	}
-
-	pathToFolder := h.staticPath + "/uploads/" + courseId + "/materials"
-	materialId := uuid.NewString()
-	pathToFile := pathToFolder + "/" + materialId
-
-	err = os.Mkdir(pathToFolder, 0755)
-	if err != nil {
-		fmt.Println("wrong path to folder")
-		panic(err)
-	}
-	dst, err := os.Create(pathToFile)
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
-
-	if _, err := io.Copy(dst, src); err != nil {
-		return err
+		return nil, r.Error(http.StatusBadRequest, "file is required")
 	}
 
 	req := c.Request()
 	scheme := c.Scheme()
 	host := req.Host
 
-	_, err = r.Queries.CreateMaterial(r.Ctx, db.CreateMaterialParams{
-		Uuid:        materialId,
-		Name:        name,
-		Description: description,
-		Url:         scheme + "://" + host + "/static/uploads/" + courseId + "/materials/" + materialId,
-	})
-	if err != nil {
-		fmt.Println("failed to create material in the db", err)
-		return r.Error(http.StatusInternalServerError, "failed to save the material to the db")
+	return &CreateFileMaterialParams{
+		fileHeader:  fileHeader,
+		uuid:        uuid.NewString(),
+		name:        name,
+		description: description,
+		courseId:    courseId,
+		scheme:      scheme,
+		host:        host,
+	}, nil
+
+}
+
+func (h *Handler) handleCreateFileMaterialErrors(err error, r *handlers.RequestCtx) error {
+	if err == TooBigMaterialFile {
+		return r.Error(http.StatusBadRequest, "File is too big")
+	}
+	if err == FailedToOpenMaterialFile {
+		return r.Error(http.StatusBadRequest, "Failed to open the file")
+	}
+	if err == ForbiddenFileType {
+		return r.Error(http.StatusBadRequest, "Forbidden file type")
+	}
+	fmt.Println(err)
+	return r.Error(http.StatusInternalServerError, "Creating file material failed")
+}
+
+func (h *Handler) CreateMaterial(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	formMaterialType := c.FormValue("type")
+
+	if formMaterialType == "file" {
+
+		params, err := h.collectFileMaterialParams(c, r)
+		if err != nil {
+			return err
+		}
+		_, err = h.service.CreateFileMaterial(params, r.Ctx)
+		if err != nil {
+			return h.handleCreateFileMaterialErrors(err, r)
+		}
+		return r.JSONMsg(http.StatusCreated, "Created material")
+
+	} else if formMaterialType != "" {
+		return r.Error(http.StatusBadRequest, "Only file materials can be uploaded through a form")
 	}
 
-	return c.String(http.StatusOK, "Create material, Coures: "+courseId)
+	var req CreateUrlMaterialRequest
+	if err := c.Bind(&req); err != nil {
+		return r.Error(http.StatusBadRequest, "invalid create url material request")
+	}
+
+	if req.MatType == "url" {
+
+		courseId := c.Param("courseId")
+
+		if req.Name == "" {
+			return r.Error(http.StatusBadRequest, "name of the material must be provided")
+		}
+
+		_, err := h.service.CreateUrlMaterial(CreateUrlMaterialParams{
+			uuid:        uuid.NewString(),
+			name:        req.Name,
+			description: req.Description,
+			courseId:    courseId,
+			url:         "https://www.youtube.com/watch?v=3jL4S4X97sQ",
+		}, r.Ctx)
+		if err != nil {
+			fmt.Println(err)
+			return r.Error(http.StatusInternalServerError, "Failed to create url material")
+		}
+		return r.JSONMsg(http.StatusCreated, "Created url material")
+	} else {
+		return r.Error(http.StatusBadRequest, "Only url materials can be uploaded through json")
+	}
 }
 
 func (h *Handler) UpdateMaterial(c echo.Context) error {
-	courseId := c.Param("courseId")
+	r := h.NewReqCtx(c)
+
 	materialId := c.Param("materialId")
 
-	return c.String(http.StatusOK, "Update material, Course: "+courseId+" Material:"+materialId)
+	formMaterialType := c.FormValue("type")
+
+	if formMaterialType == "file" {
+
+		params, err := h.collectFileMaterialParams(c, r)
+		if err != nil {
+			return err
+		}
+		params.uuid = materialId // override new uuid created in collect
+
+		_, err = h.service.UpdateFileMaterial(params, r.Ctx)
+		if err != nil {
+			return h.handleCreateFileMaterialErrors(err, r)
+		}
+		return r.JSONMsg(http.StatusCreated, "Updated material")
+
+	} else if formMaterialType != "" {
+		return r.Error(http.StatusBadRequest, "Only file materials can be uploaded through a form")
+	}
+
+	var req CreateUrlMaterialRequest
+	if err := c.Bind(&req); err != nil {
+		return r.Error(http.StatusBadRequest, "invalid create url material request")
+	}
+
+	if req.MatType == "url" {
+
+		courseId := c.Param("courseId")
+
+		if req.Name == "" {
+			return r.Error(http.StatusBadRequest, "name of the material must be provided")
+		}
+
+		_, err := h.service.CreateUrlMaterial(CreateUrlMaterialParams{
+			uuid:        materialId,
+			name:        req.Name,
+			description: req.Description,
+			courseId:    courseId,
+			url:         "https://www.youtube.com/watch?v=3jL4S4X97sQ",
+		}, r.Ctx)
+		if err != nil {
+			fmt.Println(err)
+			return r.Error(http.StatusInternalServerError, "Failed to create url material")
+		}
+		return r.JSONMsg(http.StatusCreated, "Created url material")
+	} else {
+		return r.Error(http.StatusBadRequest, "Only url materials can be uploaded through json")
+	}
 }
 
 func (h *Handler) DeleteMaterial(c echo.Context) error {
-	courseId := c.Param("courseId")
+	r := h.NewReqCtx(c)
+
+	// courseId := c.Param("courseId")
 	materialId := c.Param("materialId")
 
-	return c.String(http.StatusOK, "Delete material: Course:"+courseId+" Material:"+materialId)
+	err := h.service.DeleteMaterial(materialId, r.Ctx)
+	if err != nil {
+		if err == CourseNotFound {
+			return r.Error(http.StatusBadRequest, "Material not found")
+		}
+		return r.Error(http.StatusInternalServerError, "Failed to delete material")
+	}
+
+	return r.JSONMsg(http.StatusNoContent, "Material deleted")
 }

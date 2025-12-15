@@ -20,16 +20,14 @@ var PATH_TO_DB string = "../../internal/database/db_file.db"
 //go:embed schema.sql
 var ddl string
 
-func Initialize() (*sql.DB, *gen.Queries) {
+func Initialize(resetDB bool, seed bool) (*sql.DB, *gen.Queries) {
 
 	PATH_TO_DB_ENV := os.Getenv("PATH_TO_DB")
 	if PATH_TO_DB_ENV != "" {
 		PATH_TO_DB = PATH_TO_DB_ENV
 	}
 
-	resetDB := os.Getenv("RESET_DB")
-
-	if resetDB == "true" {
+	if resetDB {
 		os.Remove(PATH_TO_DB)
 	}
 
@@ -40,14 +38,16 @@ func Initialize() (*sql.DB, *gen.Queries) {
 		panic(err)
 	}
 
-	// create tables
-	if _, err := db.ExecContext(ctx, ddl); err != nil {
-		panic(err)
+	if resetDB {
+		// create tables
+		if _, err := db.ExecContext(ctx, ddl); err != nil {
+			panic(err)
+		}
 	}
 
 	queries := gen.New(db)
 
-	if resetDB == "true" {
+	if seed {
 		Seed(queries)
 		fmt.Println("db reseted and seeded")
 	}

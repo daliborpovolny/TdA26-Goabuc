@@ -37,7 +37,7 @@ type GetCourseResponse struct {
 	Quizzes     []string             `json:"quizzes"`
 }
 
-func (s *Service) GetCourse(courseId string, ctx context.Context) (*GetCourseResponse, error) {
+func (s *Service) GetCourse(courseId string, host string, scheme string, ctx context.Context) (*GetCourseResponse, error) {
 
 	course, err := s.q.GetCourse(ctx, courseId)
 	if err != nil {
@@ -47,7 +47,7 @@ func (s *Service) GetCourse(courseId string, ctx context.Context) (*GetCourseRes
 		return nil, FailedToFetchCourse
 	}
 
-	mats, err := s.materialsService.ListMaterials(courseId, ctx)
+	mats, err := s.materialsService.ListMaterials(courseId, host, scheme, ctx)
 
 	courseDetail := GetCourseResponse{
 		Uuid:        course.Uuid,

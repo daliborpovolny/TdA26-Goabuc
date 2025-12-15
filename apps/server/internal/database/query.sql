@@ -44,6 +44,9 @@ SELECT uuid, name, description, created_at, updated_at FROM course WHERE course.
 -- name: ListAllCourses :many
 SELECT uuid, name, description, created_at, updated_at FROM course;
 
+-- name: CheckCourseExists :one
+SELECT EXISTS (SELECT 1 FROM course WHERE uuid = ?) AS course_exists;
+
 --* Material
 
 -- name: CreateMaterial :one

@@ -45,8 +45,9 @@ func main() {
 
 	IS_DEPLOYED = os.Getenv("IS_DEPLOYED") == "true"
 	RESET_DB = os.Getenv("RESET_DB") == "true"
+	RESET_DB = false
 
-	db, queries := db.Initialize()
+	db, queries := db.Initialize(RESET_DB, RESET_DB)
 	defer db.Close()
 	fmt.Println("initialized db")
 

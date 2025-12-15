@@ -78,7 +78,8 @@ func (h *CourseHandler) GetCourse(c echo.Context) error {
 		return r.Error(http.StatusBadRequest, "Must specify the course uuid.")
 	}
 
-	courseDetail, err := h.service.GetCourse(courseId, r.Ctx)
+	req := c.Request()
+	courseDetail, err := h.service.GetCourse(courseId, req.Host, c.Scheme(), r.Ctx)
 	if err != nil {
 		if err == FailedToFetchCourse {
 			return r.Error(http.StatusInternalServerError, "Failed to fetch from the database")

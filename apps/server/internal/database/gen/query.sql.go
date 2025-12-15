@@ -10,6 +10,17 @@ import (
 	"database/sql"
 )
 
+const checkCourseExists = `-- name: CheckCourseExists :one
+SELECT EXISTS (SELECT 1 FROM course WHERE uuid = ?) AS course_exists
+`
+
+func (q *Queries) CheckCourseExists(ctx context.Context, uuid string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, checkCourseExists, uuid)
+	var course_exists int64
+	err := row.Scan(&course_exists)
+	return course_exists, err
+}
+
 const createCourse = `-- name: CreateCourse :one
 
 INSERT INTO course (
