@@ -33,10 +33,43 @@
 	<p>Loading course detail...</p>
 {:then data}
 	<div>
-		<h2>{data.name}</h2>
+		<h1 class="text-2xl">{data.name}</h1>
 		<br />
 		<p>{data.description}</p>
 	</div>
+
+	{#if data.materials && data.materials.length > 0}
+		<br />
+		<h1 class="text-xl">Materials</h1>
+		<br />
+
+		{console.log(data)}
+
+		{#each data.materials as material}
+			{#if material.Type === 'file'}
+				<div>
+					<p>Name: {material.Name}</p>
+					<p>Description: {material.Description}</p>
+					<a class="border border-black bg-stone-200 p-1" href={material.FileUrl}>View</a>
+					<a
+						class="border border-black bg-stone-200 p-1"
+						download={material.Name + material.FileUrl.split('.').pop()}
+						href={material.FileUrl}>Download</a
+					>
+				</div>
+			{:else if material.Type === 'url'}
+				<div>
+					<p>Name: {material.Name}</p>
+					<p>Description: {material.Description}</p>
+					<a class="border border-black bg-stone-200 p-1" href={material.Url}>View</a>
+				</div>
+			{:else}
+				<p>Invalid material type</p>
+			{/if}
+			<br />
+			<br />
+		{/each}
+	{/if}
 {:catch error}
 	<p class="text-red-500 capitalize">{error.message}</p>
 {/await}

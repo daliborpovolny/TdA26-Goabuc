@@ -26,6 +26,8 @@
 	}
 </script>
 
+<title>Dashboard</title>
+
 <h1>Manage Courses</h1>
 <br />
 

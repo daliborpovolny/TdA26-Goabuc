@@ -2,6 +2,8 @@
 	import { page } from '$app/state';
 
 	let course = $state<any | null>(null);
+	$inspect(course);
+
 	let loadingCourse = $state(true);
 
 	let courseName = $state('');
@@ -68,15 +70,97 @@
 			setTimeout(() => (updateStatus = 'idle'), 4000);
 		}
 	}
+
+	async function createFileMaterial(e: SubmitEvent) {
+		e.preventDefault();
+
+		const form = e.target as HTMLFormElement;
+		const formData = new FormData(form);
+
+		const res = await fetch(`/api/courses/${course.uuid}/materials`, {
+			method: 'POST',
+			body: formData
+		});
+
+		if (!res.ok) {
+			console.log(await res.text());
+		} else {
+			console.log('uploaded');
+		}
+
+		loadCourseDetail();
+	}
+
+	async function updateFileMaterial(e: SubmitEvent) {
+		e.preventDefault();
+
+		const form = e.target as HTMLFormElement;
+		const formData = new FormData(form);
+
+		const res = await fetch(`/api/courses/${course.uuid}/materials/uuidTODO`, {
+			method: 'PUT',
+			body: formData
+		});
+
+		if (!res.ok) {
+			console.log(await res.text());
+		} else {
+			console.log('updated');
+		}
+
+		loadCourseDetail();
+	}
+
+	async function createUrlMaterial(e: SubmitEvent) {
+		e.preventDefault();
+
+		const form = e.target as HTMLFormElement;
+		const formData = Object.fromEntries(new FormData(form).entries());
+
+		const res = await fetch(`/api/courses/${course.uuid}/materials`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(formData)
+		});
+
+		if (!res.ok) {
+			console.log(await res.text());
+		} else {
+			console.log('uploaded');
+		}
+
+		loadCourseDetail();
+	}
+
+	async function updateUrlMaterial(e: SubmitEvent) {
+		e.preventDefault();
+
+		const form = e.target as HTMLFormElement;
+		const formData = Object.fromEntries(new FormData(form).entries());
+
+		const res = await fetch(`/api/courses/${course.uuid}/materials`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(formData)
+		});
+
+		if (!res.ok) {
+			console.log(await res.text());
+		} else {
+			console.log('updated');
+		}
+
+		loadCourseDetail();
+	}
 </script>
 
 <div class="mx-auto max-w-2xl space-y-8 p-6">
 	{#if loadingCourse}
 		<p class="text-gray-600">Loading course detail...</p>
 	{:else if course != null}
-		<div class="rounded-lg border border-stone-300 bg-stone-50 p-6">
-			<h2 class="mb-4 text-xl font-semibold text-gray-800">Edit Course</h2>
+		<h2 class="mb-4 text-4xl font-semibold text-gray-800">Edit Course</h2>
 
+		<div class="rounded-lg border border-stone-300 bg-stone-50 p-6">
 			<form onsubmit={updateCourse} class="space-y-4">
 				<div>
 					<label class="text-sm font-medium text-gray-700" for="course_name">Name</label><br />
@@ -123,84 +207,177 @@
 
 		<!-- Add Materials Section -->
 		<div>
-			<h1 class="mb-3 text-2xl font-semibold text-gray-800">Materials</h1>
+			<h1 class="mb-3 text-2xl font-semibold text-gray-800">Add Materials</h1>
 			<div class="flex gap-4">
 				<button
-					onclick={() => (createNewMaterial = createNewMaterial == 'url' ? 'file' : 'url')}
-					class="rounded-md border border-stone-400 bg-stone-100 px-4 py-2 text-gray-800 hover:bg-stone-200"
+					onclick={() =>
+						(createNewMaterial =
+							createNewMaterial == 'url' || createNewMaterial == 'idle' ? 'file' : 'idle')}
+					class="rounded-md border border-stone-400 bg-stone-100 px-4 py-2 text-gray-800 hover:bg-stone-200 {createNewMaterial ===
+					'file'
+						? 'bg-stone-200'
+						: ''}"
 				>
 					New File Material
 				</button>
 				<button
-					onclick={() => (createNewMaterial = createNewMaterial == 'file' ? 'url' : 'file')}
-					class="rounded-md border border-stone-400 bg-stone-100 px-4 py-2 text-gray-800 hover:bg-stone-200"
+					onclick={() =>
+						(createNewMaterial =
+							createNewMaterial == 'file' || createNewMaterial == 'idle' ? 'url' : 'idle')}
+					class="rounded-md border border-stone-400 bg-stone-100 px-4 py-2 text-gray-800 hover:bg-stone-200 {createNewMaterial ===
+					'url'
+						? 'bg-stone-200'
+						: ''}"
 				>
-					New Link Material
+					New Url Material
 				</button>
 			</div>
 
 			<br />
 
-			{#if createNewMaterial == 'file'}
-				<div class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4">
+			{#if createNewMaterial === 'file'}
+				<form
+					class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4"
+					method="POST"
+					enctype="multipart/form-data"
+					onsubmit={createFileMaterial}
+				>
+					<!-- required by API -->
+					<input type="hidden" name="type" value="file" />
+
 					<div class="flex flex-col">
-						<label class="text-sm font-medium text-gray-700" for="file_material_name">Name</label>
+						<label class="text-sm font-medium text-gray-700" for="name">Name</label>
 						<input
 							type="text"
-							name="file_material_name"
+							name="name"
+							required
 							class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
 						/>
 					</div>
 
 					<div class="flex flex-col">
-						<label class="text-sm font-medium text-gray-700" for="file_material_description"
-							>Description</label
-						>
+						<label class="text-sm font-medium text-gray-700" for="description">Description</label>
 						<textarea
-							name="file_material_description"
+							name="description"
 							class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
 						></textarea>
 					</div>
 
 					<div class="flex flex-col">
-						<label class="text-sm font-medium text-gray-700" for="file_file">File</label>
-						<input type="file" name="file_file" class="mt-1 text-gray-900" />
+						<label class="text-sm font-medium text-gray-700" for="file">File</label>
+						<input type="file" name="file" required class="mt-1 text-gray-900" />
 					</div>
-				</div>
+
+					<button class="rounded-md bg-stone-800 px-4 py-2 text-white hover:bg-stone-700">
+						Create
+					</button>
+				</form>
 			{:else if createNewMaterial == 'url'}
-				<div class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4">
+				<form
+					method="POST"
+					onsubmit={createUrlMaterial}
+					class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4"
+				>
+					<input type="hidden" name="type" value="url" />
+
 					<div class="flex flex-col">
-						<label class="text-sm font-medium text-gray-700">Name</label>
+						<label class="text-sm font-medium text-gray-700" for="name">Name</label>
 						<input
 							type="text"
+							name="name"
 							class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
 						/>
 					</div>
 
 					<div class="flex flex-col">
-						<label class="text-sm font-medium text-gray-700">Description</label>
+						<label class="text-sm font-medium text-gray-700" for="description">Description</label>
 						<textarea
+							name="description"
 							class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
 						></textarea>
 					</div>
 
 					<div class="flex flex-col">
-						<label class="text-sm font-medium text-gray-700">URL</label>
+						<label class="text-sm font-medium text-gray-700" for="url">URL</label>
 						<input
 							type="url"
+							name="url"
 							class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
 						/>
 					</div>
-				</div>
+
+					<button class="rounded-md bg-stone-800 px-4 py-2 text-white hover:bg-stone-700">
+						Create
+					</button>
+				</form>
 			{/if}
 
-			<br /><br /><br /><br />
+			<br />
 
-			<ul>
-				<div>mat1</div>
-				<div>mat2</div>
-				<div>...</div>
-			</ul>
+			{#if course.materials && course.materials.length > 0}
+				<h1 class="mb-3 text-2xl font-semibold text-gray-800">Edit Materials</h1>
+
+				<br />
+
+				<ul>
+					{#each course.materials as material}
+						{#if material.Type === 'file'}
+							<form
+								class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4"
+								method="POST"
+								enctype="multipart/form-data"
+								onsubmit={updateFileMaterial}
+							>
+								<!-- required by API -->
+								<input type="hidden" name="type" value="file" />
+
+								<div class="flex flex-col">
+									<label class="text-sm font-medium text-gray-700" for="name">Name</label>
+									<input
+										type="text"
+										name="name"
+										value={material.Name}
+										required
+										class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
+									/>
+								</div>
+
+								<div class="flex flex-col">
+									<label class="text-sm font-medium text-gray-700" for="description"
+										>Description</label
+									>
+									<textarea
+										name="description"
+										value={material.Description}
+										class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
+									></textarea>
+								</div>
+
+								<div class="flex flex-col">
+									<label class="text-sm font-medium text-gray-700" for="file">File</label>
+									<input type="file" name="file" class="mt-1 text-gray-900" />
+								</div>
+
+								<button class="rounded-md bg-stone-800 px-4 py-2 text-white hover:bg-stone-700">
+									Update
+								</button>
+
+								<button class="rounded-md bg-red-800 px-4 py-2 text-white hover:bg-red-700">
+									Remove
+								</button>
+							</form>
+							<br />
+						{:else if material.Type === 'url'}
+							<p>URL</p>
+						{:else}
+							<p>Invalid material type</p>
+						{/if}
+					{/each}
+				</ul>
+			{/if}
+
+			<br />
+			<br />
 		</div>
 	{:else}
 		<p class="text-red-600">Course not found.</p>

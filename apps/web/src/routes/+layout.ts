@@ -1,5 +1,5 @@
-export const ssr = false; // disables SSR → SPA mode
-export const csr = true; // ensure client-side rendering
+// export const ssr = false; // disables SSR → SPA mode
+// export const csr = true; // ensu	re client-side rendering
 
 import type { LayoutLoad } from './$types';
 import { checkSession, isLoggedIn } from '$lib/auth.svelte.ts';
