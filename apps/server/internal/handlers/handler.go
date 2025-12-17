@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"log/slog"
+	"net/http"
 	db "tourbackend/internal/database/gen"
 
 	"github.com/labstack/echo/v4"
@@ -47,6 +49,17 @@ func (h *Handler) NewReqCtx(c echo.Context) *RequestCtx {
 func (r *RequestCtx) Error(code int, msg string) error {
 	// perhaps we would like to log the error here in the future?
 	return r.Echo.JSON(code, map[string]string{"message": msg})
+}
+
+// returns a classic 500 Internal Server Error and logs the error
+func (r *RequestCtx) ServerError(err error) error {
+	slog.ErrorContext(
+		r.Ctx,
+		"internal server error",
+		"error", err,
+	)
+
+	return r.Echo.JSON(http.StatusInternalServerError, map[string]string{"message": "Internal server error"})
 }
 
 func (r *RequestCtx) JSONMsg(code int, msg string) error {

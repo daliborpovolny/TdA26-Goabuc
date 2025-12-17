@@ -42,13 +42,13 @@ type Material interface {
 }
 
 type FileMaterial struct {
-	Uuid        string
-	Type        string
-	Name        string
-	Description string
-	FileUrl     string
-	MimeType    string
-	SizeBytes   int
+	Uuid        string `json:"uuid"`
+	Type        string `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	FileUrl     string `json:"fileUrl"`
+	MimeType    string `json:"mimeType"`
+	SizeBytes   int    `json:"sizeBytes"`
 }
 
 func (f FileMaterial) GetType() string {
@@ -56,12 +56,12 @@ func (f FileMaterial) GetType() string {
 }
 
 type UrlMaterial struct {
-	Uuid        string
-	Type        string
-	Name        string
-	Description string
-	Url         string
-	FaviconUrl  string
+	Uuid        string `json:"uuid"`
+	Type        string `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Url         string `json:"url"`
+	FaviconUrl  string `json:"faviconUrl"`
 }
 
 func (f UrlMaterial) GetType() string {
@@ -75,6 +75,21 @@ type Service struct {
 
 func NewService(queries *database.Queries, staticPath string) *Service {
 	return &Service{queries, staticPath}
+}
+
+func (s *Service) deriveFaviconUrl(url string) string {
+	if strings.HasPrefix(url, "http") {
+		parts := strings.Split(url, "//")
+		host := parts[1]
+		base := strings.Split(host, "/")[0]
+		faviconUrl := base + "/favicon.ico"
+		fmt.Println(parts, host, base, faviconUrl)
+		return faviconUrl
+	}
+
+	urlParts := strings.Split(url, "/")
+	faviconUrl := urlParts[0] + "/favicon.ico"
+	return faviconUrl
 }
 
 func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx context.Context) ([]Material, error) {
@@ -101,6 +116,8 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 	formattedMaterials := make([]Material, 0, len(dbMaterials))
 	for _, material := range dbMaterials {
 
+		fmt.Println(material)
+
 		expectedUrlStartForLocalFile := scheme + "://" + host + "/api/static/uploads"
 		if strings.HasPrefix(material.Url, expectedUrlStartForLocalFile) {
 
@@ -115,9 +132,7 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 			})
 		} else {
 
-			urlParts := strings.SplitAfterN(material.Url, "/", 4)
-			urlBaseSite := urlParts[0] + urlParts[1] + urlParts[2]
-			faviconUrl := urlBaseSite + "/favicon.ico"
+			faviconUrl := s.deriveFaviconUrl(material.Url)
 
 			formattedMaterials = append(formattedMaterials, UrlMaterial{
 				Uuid:        material.Uuid,
@@ -147,7 +162,11 @@ func (s *Service) checkFileType(src multipart.File) (bool, string, error) {
 	}
 
 	mimeType := m.String()
-	println("Detected:", mimeType)
+	moreParts := strings.Split(mimeType, ";")
+	if len(moreParts) > 1 {
+		mimeType = moreParts[0]
+	}
+	fmt.Println(mimeType)
 
 	if _, err := src.Seek(0, io.SeekStart); err != nil {
 		return false, "", FailedToRewindCursorAfterFileTypeCheck
@@ -328,6 +347,20 @@ func (s *Service) UpdateFileMaterial(params *CreateFileMaterialParams, ctx conte
 		Name:        params.name,
 		Uuid:        params.uuid,
 		Url:         url,
+		Description: params.description,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &material, nil
+}
+
+func (s *Service) UpdateUrlMaterial(params *CreateUrlMaterialParams, ctx context.Context) (*database.Material, error) {
+
+	material, err := s.q.UpdateMaterial(ctx, database.UpdateMaterialParams{
+		Name:        params.name,
+		Uuid:        params.uuid,
+		Url:         params.url,
 		Description: params.description,
 	})
 	if err != nil {

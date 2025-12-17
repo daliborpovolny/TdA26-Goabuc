@@ -162,7 +162,7 @@ func (h *CourseHandler) DeleteCourse(c echo.Context) error {
 		return r.Error(http.StatusInternalServerError, "Failed to delete the course.")
 	}
 
-	return r.JSONMsg(http.StatusNoContent, "Deleted the course.")
+	return c.NoContent(http.StatusNoContent)
 }
 
 type ListAllCoursesResponse struct {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 	"tourbackend/internal/courses"
 	"tourbackend/internal/courses/materials"
 	db "tourbackend/internal/database"
+	"tourbackend/internal/middlewares"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -52,9 +54,11 @@ func main() {
 	fmt.Println("initialized db")
 
 	e := echo.New()
-	e.Debug = true // enabling this make echo log more stuff into the console
+	// e.Debug = true // enabling this make echo log more stuff into the console
 
-	e.Use(middleware.Logger())
+	slog.SetDefault(middlewares.Logger)
+	e.Use(middlewares.LoggerMiddleware)
+
 	e.Use(middleware.Recover())
 	e.Use(auth.AuthMiddleware(queries))
 
