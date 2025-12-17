@@ -15,14 +15,11 @@ import (
 
 var COOKIE_LIFETIME = time.Hour * 24 * 7
 
-var IS_DEPLOYED bool
-
 type AuthHandler struct {
 	*handlers.Handler
 }
 
 func NewAuthHandler(queries *db.Queries, isDeployed bool) *AuthHandler {
-	IS_DEPLOYED = isDeployed
 	return &AuthHandler{handlers.NewHandler(queries, isDeployed)}
 }
 
@@ -58,7 +55,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		return r.Error(http.StatusInternalServerError, "internal server error")
 	}
 
-	cookie := createHttpCookie(newToken)
+	cookie := h.createHttpCookie(newToken)
 
 	_, err = r.Queries.CreateSession(r.Ctx, db.CreateSessionParams{
 		UserID:    user.ID,
@@ -118,7 +115,7 @@ func (h *AuthHandler) Register(c echo.Context) error {
 		return r.Error(http.StatusInternalServerError, "internal server error")
 	}
 
-	cookie := createHttpCookie(newToken)
+	cookie := h.createHttpCookie(newToken)
 
 	_, err = r.Queries.CreateSession(r.Ctx, db.CreateSessionParams{
 		UserID:    user.ID,
@@ -159,13 +156,13 @@ func (h *AuthHandler) Profile(c echo.Context) error {
 	})
 }
 
-func createHttpCookie(tokenValue string) *http.Cookie {
+func (h *AuthHandler) createHttpCookie(tokenValue string) *http.Cookie {
 	return &http.Cookie{
 		Name:     "auth_token",
 		Value:    tokenValue,
 		Expires:  time.Now().Add(COOKIE_LIFETIME),
 		HttpOnly: true,
-		Secure:   IS_DEPLOYED,
+		Secure:   h.IsDeployed,
 	}
 }
 

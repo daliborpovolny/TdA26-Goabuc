@@ -38,6 +38,9 @@ COPY static ./static
 ENV PORT=3000
 ENV PATH_TO_DB="db_file.db"
 ENV STATIC_PATH="./static"
+ENV IS_DEPLOYED="true"
+ENV RESET_DB="true"
+ENV SEED="true"
 
 EXPOSE 3000
 

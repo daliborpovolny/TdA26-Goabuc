@@ -14,11 +14,11 @@ import (
 // this context allows interaction with the database and has a few helper methods like Error and JSONMsg
 type Handler struct {
 	queries    *db.Queries
-	isDeployed bool
+	IsDeployed bool
 }
 
 func NewHandler(queries *db.Queries, isDeployed bool) *Handler {
-	return &Handler{queries: queries, isDeployed: isDeployed}
+	return &Handler{queries: queries, IsDeployed: isDeployed}
 }
 
 type RequestCtx struct {

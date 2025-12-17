@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"tourbackend/internal/auth"
 	"tourbackend/internal/courses"
@@ -15,6 +17,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
+	"github.com/joho/godotenv"
 )
 
 // this variable changes some stuff based on whether the app is deployed or not
@@ -28,9 +32,9 @@ var STATIC_PATH string = "../../static"
 
 func main() {
 
-	// in future setting env vars should not be done here
-	os.Setenv("IS_DEPLOYED", "false")
-	os.Setenv("RESET_DB", "true")
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found")
+	}
 
 	// try to read the port number from env, if fails default to 3000
 	PORT_STRING := os.Getenv("PORT")
@@ -45,11 +49,11 @@ func main() {
 		STATIC_PATH = ENV_STATIC_PATH
 	}
 
-	IS_DEPLOYED = os.Getenv("IS_DEPLOYED") == "true"
-	RESET_DB = os.Getenv("RESET_DB") == "true"
-	RESET_DB = false
+	IS_DEPLOYED = strings.ToLower(os.Getenv("IS_DEPLOYED")) == "true"
+	RESET_DB = strings.ToLower(os.Getenv("RESET_DB")) == "true"
+	SEED := strings.ToLower(os.Getenv("SEED")) == "true"
 
-	db, queries := db.Initialize(RESET_DB, RESET_DB)
+	db, queries := db.Initialize(RESET_DB, SEED)
 	defer db.Close()
 	fmt.Println("initialized db")
 
