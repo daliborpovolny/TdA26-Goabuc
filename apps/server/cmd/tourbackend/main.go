@@ -76,6 +76,7 @@ func main() {
 	e.POST("/register", authHandler.Register)
 	e.POST("/login", authHandler.Login)
 	e.GET("/me", authHandler.Profile)
+	e.POST("/logout", authHandler.Logout)
 
 	//* Courses and it's deps (materials and quizzes - TODO)
 	matsService := materials.NewService(queries, STATIC_PATH)

@@ -282,6 +282,15 @@ func (q *Queries) GetUserBySessionToken(ctx context.Context, token string) (GetU
 	return i, err
 }
 
+const invalidateSession = `-- name: InvalidateSession :exec
+DELETE FROM session WHERE token = ?
+`
+
+func (q *Queries) InvalidateSession(ctx context.Context, token string) error {
+	_, err := q.db.ExecContext(ctx, invalidateSession, token)
+	return err
+}
+
 const listAllCourses = `-- name: ListAllCourses :many
 SELECT uuid, name, description, created_at, updated_at FROM course
 `

@@ -23,6 +23,9 @@ INSERT INTO session (
     ?, ?, ?, ?
 ) RETURNING *;
 
+-- name: InvalidateSession :exec
+DELETE FROM session WHERE token = ?;
+
 --* Course
 
 -- name: CreateCourse :one

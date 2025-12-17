@@ -166,6 +166,22 @@ func (h *AuthHandler) createHttpCookie(tokenValue string) *http.Cookie {
 	}
 }
 
+func (h *AuthHandler) Logout(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	cookie, err := c.Cookie("auth_token")
+	if err != nil {
+		return r.Error(http.StatusBadRequest, "not logged in")
+	}
+
+	err = r.Queries.InvalidateSession(r.Ctx, cookie.Value)
+	if err != nil {
+		return r.ServerError(err)
+	}
+
+	return r.JSONMsg(http.StatusOK, "logged out")
+}
+
 func validateToken(token string, queries *db.Queries, ctx context.Context) (*db.User, error) {
 
 	authInfo, err := queries.GetUserBySessionToken(ctx, token)

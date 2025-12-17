@@ -20,6 +20,22 @@ type Material struct {
 	Courseuuid  string `json:"courseuuid"`
 }
 
+type Question struct {
+	Uuid           string `json:"uuid"`
+	Quizzuuid      string `json:"quizzuuid"`
+	Type           string `json:"type"`
+	QuestionText   string `json:"question_text"`
+	Options        string `json:"options"`
+	CorrectIndices string `json:"correct_indices"`
+}
+
+type Quizz struct {
+	Uuid          string `json:"uuid"`
+	Courseuuid    string `json:"courseuuid"`
+	Title         string `json:"title"`
+	Attemptscount int64  `json:"attemptscount"`
+}
+
 type Session struct {
 	ID        int64  `json:"id"`
 	UserID    int64  `json:"user_id"`

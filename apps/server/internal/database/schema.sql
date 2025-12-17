@@ -33,3 +33,21 @@ CREATE TABLE IF NOT EXISTS material (
     courseUuid TEXT NOT NULL,
     FOREIGN KEY (courseUuid) REFERENCES course(uuid) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS quizz (
+    uuid TEXT PRIMARY KEY,
+    courseUuid TEXT NOT NULL,
+    title TEXT NOT NULL,
+    attemptsCount INTEGER NOT NULL,
+    FOREIGN KEY (courseUuid) REFERENCES course(uuid) ON DELETE CASCADE
+)
+
+CREATE TABLE IF NOT EXISTS  question (
+    uuid TEXT PRIMARY KEY,
+    quizzUuid TEXT NOT NULL,
+    type TEXT NOT NULL,
+    question_text TEXT NOT NULL,
+    options TEXT NOT NULL,
+    correct_indices TEXT NOT NULL,
+    FOREIGN KEY (quizzUuid) REFERENCES quizz(uuid) ON DELETE CASCADE
+)
