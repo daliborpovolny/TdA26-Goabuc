@@ -110,7 +110,7 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 		if ok != 1 {
 			return nil, CourseNotFound
 		}
-		return nil, nil
+		return []Material{}, nil
 	}
 
 	formattedMaterials := make([]Material, 0, len(dbMaterials))
