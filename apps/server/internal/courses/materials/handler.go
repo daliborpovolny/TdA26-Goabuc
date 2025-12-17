@@ -40,6 +40,10 @@ func (h *Handler) ListMaterials(c echo.Context) error {
 		return r.Error(http.StatusInternalServerError, "Failed to fetch materials from db")
 	}
 
+	if mats == nil {
+		mats = []Material{}
+	}
+
 	return c.JSON(http.StatusOK, mats)
 }
 
