@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { checkSession } from '$lib/auth.svelte';
+	import { auth } from '$lib/auth.svelte';
 
 	let email = '';
 	let password = '';
@@ -22,7 +22,7 @@
 				return res.json();
 			})
 			.then((data) => {
-				checkSession(fetch);
+				auth.check();
 
 				setTimeout(() => {
 					goto('/dashboard');

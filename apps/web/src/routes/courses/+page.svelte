@@ -22,13 +22,13 @@
 	}
 </script>
 
-<h1>Courses</h1>
+<h1 class="ml-2">Courses</h1>
 <br />
 
 {#await coursesPromise}
 	<p>Loading</p>
 {:then data}
-	<ul>
+	<ul class="ml-4">
 		{#each data as course}
 			<a href="/courses/{course.uuid}"> {course.name} </a>
 			<p>{course.description}</p>

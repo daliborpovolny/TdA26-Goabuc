@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { isLoggedIn } from '$lib/auth.svelte.ts';
+	import { auth } from '$lib/auth.svelte.ts';
 
-	if (!isLoggedIn()) {
+	if (!auth.isLoggedIn) {
 		goto('/login');
 	}
 
@@ -26,27 +26,30 @@
 	}
 </script>
 
-<title>Dashboard</title>
+<div class="ml-4">
+	<title>Dashboard</title>
 
-<h1>Manage Courses</h1>
-<br />
+	<br />
+	<h1>Manage Courses</h1>
+	<br />
 
-<div>
-	<a href="/dashboard/edit/courses">Create new course</a>
+	<div>
+		<a href="/dashboard/edit/courses">Create new course</a>
+	</div>
+
+	<br />
+
+	{#await coursesPromise}
+		<p>Loading</p>
+	{:then data}
+		<ul>
+			{#each data as course}
+				<a href="/dashboard/edit/courses/{course.uuid}"> {course.name} </a>
+				<br />
+				<br />
+			{/each}
+		</ul>
+	{:catch error}
+		<p></p>
+	{/await}
 </div>
-
-<br />
-
-{#await coursesPromise}
-	<p>Loading</p>
-{:then data}
-	<ul>
-		{#each data as course}
-			<a href="/dashboard/edit/courses/{course.uuid}"> {course.name} </a>
-			<br />
-			<br />
-		{/each}
-	</ul>
-{:catch error}
-	<p></p>
-{/await}
