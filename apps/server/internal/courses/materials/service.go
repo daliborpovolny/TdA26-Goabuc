@@ -179,6 +179,19 @@ func (s *Service) isFileAllowed(src multipart.File) (bool, string, error) {
 	return false, "", nil
 }
 
+func (s *Service) isFileAllowedHeader(file *multipart.FileHeader) (string, bool) {
+	if file == nil {
+		return "", false
+	}
+
+	mime := file.Header.Get("Content-Type")
+	ok := ALLOWED_FILES[mime]
+	if ok {
+		return mime, true
+	}
+	return "", false
+}
+
 // removes old material file when a new one is uploaded
 func (s *Service) removeOldMaterialFile(materialId string, courseId string) error {
 
@@ -267,10 +280,11 @@ func (s *Service) CreateFileMaterial(req *CreateFileMaterialRequest, materialId 
 		return nil, err
 	}
 
-	ok, mime, err := s.isFileAllowed(src)
-	if err != nil {
-		return nil, err
-	}
+	// ok, mime, err := s.isFileAllowed(src)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	mime, ok := s.isFileAllowedHeader(fileHeader)
 
 	if !ok {
 		return nil, ErrFileTypeForbidden
@@ -382,10 +396,12 @@ func (s *Service) UpdateFileMaterial(req *UpdateFileMaterialRequest, fileHeader 
 			return nil, err
 		}
 
-		ok, mime, err := s.isFileAllowed(src)
-		if err != nil {
-			return nil, err
-		}
+		// ok, mime, err := s.isFileAllowed(src)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		mime, ok := s.isFileAllowedHeader(fileHeader)
+
 		if !ok {
 			return nil, ErrFileTypeForbidden
 		}
