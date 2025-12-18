@@ -1,8 +1,6 @@
 package materials
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	db "tourbackend/internal/database/gen"
@@ -14,94 +12,38 @@ import (
 
 type Handler struct {
 	*handlers.Handler
-	service    *Service
-	staticPath string
+	service      *Service
+	pathToStatic string
 }
 
-func NewHandler(staticPath string, queries *db.Queries, isDeployed bool, service *Service) *Handler {
+func NewHandler(pathToStatic string, service *Service, queries *db.Queries, isDeployed bool) *Handler {
 	return &Handler{
 		handlers.NewHandler(queries, isDeployed),
 		service,
-		staticPath,
+		pathToStatic,
 	}
 }
 
+// List Materials
+
 func (h *Handler) ListMaterials(c echo.Context) error {
 	r := h.NewReqCtx(c)
-	courseId := c.Param("courseId")
 
+	courseId := c.Param("courseId")
 	req := c.Request()
 
 	mats, err := h.service.ListMaterials(courseId, req.Host, req.URL.Scheme, r.Ctx)
 	if err != nil {
-		if err == CourseNotFound {
-			return r.Error(http.StatusBadRequest, "Unknown course id")
+		if err == ErrCourseNotFound {
+			return r.Error(http.StatusNotFound, "Unknown course id")
 		}
-		fmt.Println(err)
-		return r.Error(http.StatusInternalServerError, "Failed to fetch materials from db")
-	}
-
-	if mats == nil {
-		mats = []Material{}
+		r.ServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, mats)
 }
 
-type CreateUrlMaterialRequest struct {
-	MatType     string `json:"type"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Url         string `json:"url"`
-}
-
-var errNoName = errors.New("material has no name")
-var errNoFile = errors.New("no file")
-
-func (h *Handler) collectFileMaterialParams(c echo.Context) (*CreateFileMaterialParams, error) {
-
-	courseId := c.Param("courseId")
-
-	name := c.FormValue("name")
-	if name == "" {
-		return nil, errNoName
-	}
-
-	description := c.FormValue("description")
-
-	fileHeader, err := c.FormFile("file")
-	if err != nil {
-		fileHeader = nil
-	}
-
-	req := c.Request()
-	scheme := c.Scheme()
-	host := req.Host
-
-	return &CreateFileMaterialParams{
-		fileHeader:  fileHeader,
-		uuid:        uuid.NewString(),
-		name:        name,
-		description: description,
-		courseId:    courseId,
-		scheme:      scheme,
-		host:        host,
-	}, nil
-
-}
-
-func (h *Handler) handleCreateFileMaterialErrors(err error, r *handlers.RequestCtx) error {
-	if err == TooBigMaterialFile {
-		return r.Error(http.StatusBadRequest, "File is too big")
-	}
-	if err == FailedToOpenMaterialFile {
-		return r.Error(http.StatusBadRequest, "Failed to open the file")
-	}
-	if err == ForbiddenFileType {
-		return r.Error(http.StatusBadRequest, "Forbidden file type")
-	}
-	return r.ServerError(err)
-}
+// Create Material
 
 func (h *Handler) CreateMaterial(c echo.Context) error {
 	r := h.NewReqCtx(c)
@@ -109,182 +51,189 @@ func (h *Handler) CreateMaterial(c echo.Context) error {
 	contentType := c.Request().Header["Content-Type"]
 
 	if strings.Contains(contentType[0], "multipart/form-data") {
-		fmt.Println("creating file material")
-
-		if c.FormValue("type") != "file" {
-			return r.Error(http.StatusBadRequest, "only file material can be uploaded through a form")
-		}
-
-		params, err := h.collectFileMaterialParams(c)
-		if err != nil {
-			if err == errNoName {
-				return r.Error(http.StatusBadRequest, "material must have a name")
-			}
-			return r.ServerError(err)
-		}
-
-		if params.fileHeader == nil {
-			return r.Error(http.StatusBadRequest, "must include a file")
-		}
-
-		dbMat, fileInfo, err := h.service.CreateFileMaterial(params, r.Ctx)
-		if err != nil {
-			return h.handleCreateFileMaterialErrors(err, r)
-		}
-
-		return c.JSON(http.StatusCreated, FileMaterial{
-			Uuid:        dbMat.Uuid,
-			Type:        "file",
-			Name:        dbMat.Name,
-			Description: dbMat.Description,
-			FileUrl:     dbMat.Url,
-			MimeType:    fileInfo.mime,
-			SizeBytes:   int(fileInfo.size),
-		})
+		return h.createFileMaterial(r)
 
 	} else if strings.Contains(contentType[0], "application/json") {
-
-		var req CreateUrlMaterialRequest
-		if err := c.Bind(&req); err != nil {
-			return r.Error(http.StatusBadRequest, "invalid create url material request")
-		}
-
-		courseId := c.Param("courseId")
-
-		if req.Name == "" {
-			return r.Error(http.StatusBadRequest, "name of the material must be provided")
-		}
-
-		dbMat, err := h.service.CreateUrlMaterial(CreateUrlMaterialParams{
-			uuid:        uuid.NewString(),
-			name:        req.Name,
-			description: req.Description,
-			courseId:    courseId,
-			url:         req.Url,
-		}, r.Ctx)
-		if err != nil {
-			return r.ServerError(err)
-		}
-
-		return c.JSON(http.StatusOK, UrlMaterial{
-			Uuid:        dbMat.Uuid,
-			Type:        "url",
-			Name:        dbMat.Name,
-			Description: dbMat.Description,
-			Url:         dbMat.Url,
-			FaviconUrl:  h.service.deriveFaviconUrl(dbMat.Url),
-		})
-
+		return h.createUrlMaterial(r)
 	} else {
 		return r.Error(http.StatusBadRequest, "bad request")
 	}
 }
 
-type UpdateUrlMaterialRequest struct {
-	MatType     string  `json:"type"`
-	Name        *string `json:"name"`
-	Description *string `json:"description"`
-	Url         *string `json:"url"`
+type CreateFileMaterialRequest struct {
+	CourseId string `param:"courseId"`
+
+	MatType string `form:"type"`
+	Name    string `form:"name"`
+
+	Description string `form:"description"`
 }
 
+func (h *Handler) createFileMaterial(r *handlers.RequestCtx) error {
+	var req CreateFileMaterialRequest
+	if err := r.Echo.Bind(&req); err != nil {
+		return r.Error(http.StatusBadRequest, err.Error())
+	}
+
+	if req.MatType != "file" {
+		return r.Error(http.StatusBadRequest, "only file material can be created through form")
+	}
+
+	if req.Name == "" {
+		return r.Error(http.StatusBadRequest, "name is required")
+	}
+
+	file, err := r.Echo.FormFile("file")
+	if err != nil {
+		return r.Error(http.StatusBadRequest, "file is required")
+	}
+
+	httpReq := r.Echo.Request()
+
+	mat, err := h.service.CreateFileMaterial(&req, uuid.NewString(), file, r.Echo.Scheme(), httpReq.Host, r.Ctx)
+	if err != nil {
+		if err == ErrFileTooBig {
+			return r.Error(http.StatusBadRequest, "file is too big")
+		}
+		if err == ErrFileTypeForbidden {
+			return r.Error(http.StatusBadRequest, "file type forbidden")
+		}
+		return r.ServerError(err)
+	}
+
+	return r.Echo.JSON(http.StatusCreated, mat)
+}
+
+type CreateUrlMaterialRequest struct {
+	CourseId string `param:"courseId"`
+
+	MatType string `json:"type"`
+	Name    string `json:"name"`
+	Url     string `json:"url"`
+
+	Description string `json:"description"`
+}
+
+func (h *Handler) createUrlMaterial(r *handlers.RequestCtx) error {
+	var req CreateUrlMaterialRequest
+	if err := r.Echo.Bind(&req); err != nil {
+		return r.Error(http.StatusBadRequest, err.Error())
+	}
+
+	if req.MatType != "url" {
+		return r.Error(http.StatusBadRequest, "only url material can be created through form")
+	}
+
+	if req.Name == "" {
+		return r.Error(http.StatusBadRequest, "name is required")
+	}
+
+	mat, err := h.service.CreateUrlMaterial(req, uuid.NewString(), r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+
+	return r.Echo.JSON(http.StatusCreated, mat)
+}
+
+// Update Materials
+
 func (h *Handler) UpdateMaterial(c echo.Context) error {
-	fmt.Println("in udpfasdasdf")
 	r := h.NewReqCtx(c)
 
 	contentType := c.Request().Header["Content-Type"]
 
 	if strings.Contains(contentType[0], "multipart/form-data") {
-		fmt.Println("in file!")
-
-		if c.FormValue("type") != "file" {
-			return r.Error(http.StatusBadRequest, "only file material can be uploaded through a form")
-		}
-
-		fileHeader, err := c.FormFile("file")
-		if err != nil {
-			fileHeader = nil
-		}
-
-		name := c.FormValue("name")
-		if name == "" {
-			return r.Error(http.StatusBadRequest, "name must be included")
-		}
-
-		desc := c.FormValue("description")
-
-		req := c.Request()
-		scheme := c.Scheme()
-		host := req.Host
-
-		fmt.Println("collected all")
-		dbMat, fileInfo, err := h.service.UpdateFileMaterial(&UpdateFileMaterialParms{
-			uuid:        c.Param("materialId"),
-			courseId:    c.Param("courseId"),
-			fileHeader:  fileHeader,
-			url:         nil,
-			name:        &name,
-			description: &desc,
-			scheme:      scheme,
-			host:        host,
-		}, r.Ctx)
-		if err != nil {
-			return h.handleCreateFileMaterialErrors(err, r)
-		}
-
-		return c.JSON(http.StatusCreated, FileMaterial{
-			Uuid:        dbMat.Uuid,
-			Type:        "file",
-			Name:        dbMat.Name,
-			Description: dbMat.Description,
-			FileUrl:     dbMat.Url,
-			MimeType:    fileInfo.mime,
-			SizeBytes:   int(fileInfo.size),
-		})
+		return h.updateFileMaterial(r)
 
 	} else if strings.Contains(contentType[0], "application/json") {
-
-		var req UpdateUrlMaterialRequest
-		if err := c.Bind(&req); err != nil {
-			return r.Error(http.StatusBadRequest, "invalid create url material request")
-		}
-
-		materialId := c.Param("materialId")
-
-		if req.Name == nil {
-			return r.Error(http.StatusBadRequest, "name of the material must be provided")
-		}
-
-		dbMat, err := h.service.UpdateUrlMaterial(req.Name, req.Description, req.Url, materialId, r.Ctx)
-		if err != nil {
-			return r.ServerError(err)
-		}
-
-		return c.JSON(http.StatusOK, UrlMaterial{
-			Uuid:        dbMat.Uuid,
-			Type:        "url",
-			Name:        dbMat.Name,
-			Description: dbMat.Description,
-			Url:         dbMat.Url,
-			FaviconUrl:  h.service.deriveFaviconUrl(dbMat.Url),
-		})
-
+		return h.updateUrlMaterial(r)
 	} else {
 		return r.Error(http.StatusBadRequest, "bad request")
 	}
 }
 
+type UpdateFileMaterialRequest struct {
+	CourseId   string `param:"courseId"`
+	MaterialId string `param:"materialId"`
+
+	MatType string `form:"type"`
+
+	Name        *string `form:"name"`
+	Description *string `form:"description"`
+}
+
+func (h *Handler) updateFileMaterial(r *handlers.RequestCtx) error {
+	var req UpdateFileMaterialRequest
+	if err := r.Echo.Bind(&req); err != nil {
+		return r.Error(http.StatusBadRequest, err.Error())
+	}
+
+	if req.MatType != "file" {
+		return r.Error(http.StatusBadRequest, "only file material can be updated through form")
+	}
+
+	file, err := r.Echo.FormFile("file")
+	if err != nil {
+		file = nil
+	}
+
+	httpReq := r.Echo.Request()
+
+	mat, err := h.service.UpdateFileMaterial(&req, file, r.Echo.Scheme(), httpReq.Host, r.Ctx)
+	if err != nil {
+		if err == ErrFileTooBig {
+			return r.Error(http.StatusBadRequest, "file is too big")
+		}
+		if err == ErrFileTypeForbidden {
+			return r.Error(http.StatusBadRequest, "file type forbidden")
+		}
+		return r.ServerError(err)
+	}
+
+	return r.Echo.JSON(http.StatusCreated, mat)
+}
+
+type UpdateUrlMaterialRequest struct {
+	CourseId   string `param:"courseId"`
+	MaterialId string `param:"materialId"`
+
+	MatType string `json:"type"`
+
+	Name        *string `json:"name"`
+	Url         *string `json:"url"`
+	Description *string `json:"description"`
+}
+
+func (h *Handler) updateUrlMaterial(r *handlers.RequestCtx) error {
+	var req UpdateUrlMaterialRequest
+	if err := r.Echo.Bind(&req); err != nil {
+		return r.Error(http.StatusBadRequest, err.Error())
+	}
+
+	if req.MatType != "url" {
+		return r.Error(http.StatusBadRequest, "only url material can be updated through form")
+	}
+
+	mat, err := h.service.UpdateUrlMaterial(&req, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+
+	return r.Echo.JSON(http.StatusCreated, mat)
+}
+
 func (h *Handler) DeleteMaterial(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
-	// courseId := c.Param("courseId")
 	materialId := c.Param("materialId")
 
 	err := h.service.DeleteMaterial(materialId, r.Ctx)
 	if err != nil {
-		if err == CourseNotFound {
+		if err == ErrCourseNotFound {
 			return r.Error(http.StatusBadRequest, "Material not found")
 		}
-		return r.Error(http.StatusInternalServerError, "Failed to delete material")
+		return r.ServerError(err)
 	}
 
 	return c.NoContent(http.StatusNoContent)

@@ -568,7 +568,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Question'
-      required: [uuid, title, questions]
+      required: [title, questions]
 
     Question:
       oneOf:
@@ -593,7 +593,7 @@ components:
             type: string
         correctIndex:
           type: integer
-      required: [uuid, type, question, options, correctIndex]
+      required: [type, question, options, correctIndex]
 
     MultipleChoiceQuestion:
       type: object
@@ -613,7 +613,7 @@ components:
           type: array
           items:
             type: integer
-      required: [uuid, type, question, options, correctIndices]
+      required: [type, question, options, correctIndices]
 
     QuizSubmitRequest:
       type: object
@@ -635,6 +635,9 @@ components:
           type: array
           items:
             type: integer
+        comment:
+          type: string
+          description: Optional comment or explanation for the answer
 
     QuizSubmitResponse:
       type: object
@@ -688,3 +691,4 @@ components:
           type: string
         edited:
           type: boolean
+

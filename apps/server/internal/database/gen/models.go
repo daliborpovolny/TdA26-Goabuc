@@ -4,6 +4,14 @@
 
 package database
 
+import (
+	"database/sql"
+)
+
+type Admin struct {
+	UserID interface{} `json:"user_id"`
+}
+
 type Course struct {
 	Uuid        string `json:"uuid"`
 	Name        string `json:"name"`
@@ -12,23 +20,23 @@ type Course struct {
 	UpdatedAt   int64  `json:"updated_at"`
 }
 
-type FileMaterialMetadatum struct {
-	Size         int64       `json:"size"`
-	Mime         string      `json:"mime"`
-	MaterialUuid interface{} `json:"material_uuid"`
-}
-
 type Material struct {
-	Uuid        string `json:"uuid"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Url         string `json:"url"`
-	Courseuuid  string `json:"courseuuid"`
+	Uuid        string         `json:"uuid"`
+	CourseUuid  string         `json:"course_uuid"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Url         string         `json:"url"`
+	Type        string         `json:"type"`
+	FaviconUrl  sql.NullString `json:"favicon_url"`
+	MimeType    sql.NullString `json:"mime_type"`
+	ByteSize    sql.NullInt64  `json:"byte_size"`
+	CreatedAt   int64          `json:"created_at"`
+	UpdatedAt   int64          `json:"updated_at"`
 }
 
 type Question struct {
 	Uuid           string `json:"uuid"`
-	Quizzuuid      string `json:"quizzuuid"`
+	QuizzUuid      string `json:"quizz_uuid"`
 	Type           string `json:"type"`
 	QuestionText   string `json:"question_text"`
 	Options        string `json:"options"`
@@ -37,9 +45,11 @@ type Question struct {
 
 type Quizz struct {
 	Uuid          string `json:"uuid"`
-	Courseuuid    string `json:"courseuuid"`
+	CourseUuid    string `json:"course_uuid"`
 	Title         string `json:"title"`
-	Attemptscount int64  `json:"attemptscount"`
+	AttemptsCount int64  `json:"attempts_count"`
+	CreatedAt     int64  `json:"created_at"`
+	UpdatedAt     int64  `json:"updated_at"`
 }
 
 type Session struct {

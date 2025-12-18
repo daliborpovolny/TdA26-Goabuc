@@ -92,7 +92,7 @@ func main() {
 	e.DELETE("/courses/:courseId", coursesHandler.DeleteCourse)
 
 	//* Course materials
-	materialsHandler := materials.NewHandler(STATIC_PATH, queries, IS_DEPLOYED, matsService)
+	materialsHandler := materials.NewHandler(STATIC_PATH, matsService, queries, IS_DEPLOYED)
 
 	materials := e.Group("/courses/:courseId/materials")
 	materials.GET("", materialsHandler.ListMaterials)

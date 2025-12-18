@@ -2,6 +2,7 @@ package materials
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 	database "tourbackend/internal/database/gen"
 	"tourbackend/internal/utils"
 
@@ -80,12 +82,15 @@ func NewService(queries *database.Queries, staticPath string) *Service {
 }
 
 func (s *Service) deriveFaviconUrl(url string) string {
+
 	if strings.HasPrefix(url, "http") {
 		parts := strings.Split(url, "//")
+
 		host := parts[1]
+
 		base := strings.Split(host, "/")[0]
+
 		faviconUrl := base + "/favicon.ico"
-		fmt.Println(parts, host, base, faviconUrl)
 		return faviconUrl
 	}
 
@@ -98,19 +103,17 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 
 	dbMaterials, err := s.q.ListAllMaterialsOfCourse(ctx, courseId)
 	if err != nil {
-		fmt.Println(err)
-		return nil, FailedToFetchMaterials
+		return nil, err
 	}
 
 	if len(dbMaterials) == 0 {
 		ok, err := s.q.CheckCourseExists(ctx, courseId)
 		if err != nil {
-			fmt.Println(err)
-			return nil, errors.New("failed to check the course id")
+			return nil, err
 		}
 
 		if ok != 1 {
-			return nil, CourseNotFound
+			return nil, ErrCourseNotFound
 		}
 		return []Material{}, nil
 	}
@@ -118,13 +121,7 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 	formattedMaterials := make([]Material, 0, len(dbMaterials))
 	for _, material := range dbMaterials {
 
-		expectedUrlStartForLocalFile := scheme + "://" + host + "/api/static/uploads"
-		if strings.HasPrefix(material.Url, expectedUrlStartForLocalFile) {
-
-			fileInfo, err := s.q.GetFileMaterialMetadata(ctx, material.Uuid)
-			if err != nil {
-				return nil, err
-			}
+		if material.Type == "file" {
 
 			formattedMaterials = append(formattedMaterials, FileMaterial{
 				Uuid:        material.Uuid,
@@ -132,12 +129,10 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 				Name:        material.Name,
 				Description: material.Description,
 				FileUrl:     material.Url,
-				MimeType:    fileInfo.Mime,
-				SizeBytes:   int(fileInfo.Size),
+				MimeType:    material.MimeType.String,
+				SizeBytes:   int(material.ByteSize.Int64),
 			})
 		} else {
-
-			faviconUrl := s.deriveFaviconUrl(material.Url)
 
 			formattedMaterials = append(formattedMaterials, UrlMaterial{
 				Uuid:        material.Uuid,
@@ -145,85 +140,53 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 				Name:        material.Name,
 				Description: material.Description,
 				Url:         material.Url,
-				FaviconUrl:  faviconUrl,
+				FaviconUrl:  material.FaviconUrl.String,
 			})
 		}
 	}
 	return formattedMaterials, nil
 }
 
-func (s *Service) checkFileSize(fileHeader *multipart.FileHeader) (bool, int64) {
-	if fileHeader.Size > MAX_SIZE {
-		return false, 0
-	}
-	return true, fileHeader.Size
-}
-
-func (s *Service) checkFileType(src multipart.File) (bool, string, error) {
+func (s *Service) getMimeType(src multipart.File) (string, error) {
 
 	m, err := mimetype.DetectReader(src)
+	if err != nil {
+		return "", err
+	}
+
+	mimeType := m.String()
+
+	if _, err := src.Seek(0, io.SeekStart); err != nil {
+		return "", nil
+	}
+
+	return mimeType, nil
+}
+
+// checks if the file type is allowed, returns bool, mime and error
+func (s *Service) isFileAllowed(src multipart.File) (bool, string, error) {
+
+	mime, err := s.getMimeType(src)
 	if err != nil {
 		return false, "", err
 	}
 
-	mimeType := m.String()
-	moreParts := strings.Split(mimeType, ";")
-	if len(moreParts) > 1 {
-		mimeType = moreParts[0]
+	for key := range ALLOWED_FILES {
+		if strings.Contains(mime, key) {
+			return true, key, nil
+		}
 	}
-
-	if _, err := src.Seek(0, io.SeekStart); err != nil {
-		return false, "", FailedToRewindCursorAfterFileTypeCheck
-	}
-
-	if !ALLOWED_FILES[mimeType] {
-		return false, "", nil
-	}
-
-	return true, mimeType, nil
+	return false, "", nil
 }
 
-func (s *Service) saveFileToStatic(
-	params *CreateFileMaterialParams,
-	src multipart.File,
-	ext string,
-) (string, error) {
+// removes old material file when a new one is uploaded
+func (s *Service) removeOldMaterialFile(materialId string, courseId string) error {
 
-	pathToUploads := s.staticPath + "/uploads/"
-	pathToCourseFolder := pathToUploads + "/" + params.courseId
-	pathToMaterialsFolder := pathToCourseFolder + "/materials"
+	pathToMaterialsFolder := s.staticPath + "/uploads/" + courseId + "/materials"
 
-	pathToFile := pathToMaterialsFolder + "/" + params.uuid + ext
-
-	err := os.Mkdir(pathToUploads, 0755)
-	if err != nil {
-		if !errors.Is(err, os.ErrExist) {
-			fmt.Println("failed to create materials folder, wrong path", err)
-			return "", err
-		}
-	}
-
-	err = os.Mkdir(pathToCourseFolder, 0755)
-	if err != nil {
-		if !errors.Is(err, os.ErrExist) {
-			fmt.Println("failed to create course folder, wrong path", err)
-			return "", err
-		}
-	}
-
-	err = os.Mkdir(pathToMaterialsFolder, 0755)
-	if err != nil {
-		if !errors.Is(err, os.ErrExist) {
-			fmt.Println("failed to create materials folder, wrong path", err)
-			return "", err
-		}
-	}
-
-	// delete former materials if any - this could be done only on updates but whatever!
-	prefix := params.uuid
 	entries, err := os.ReadDir(pathToMaterialsFolder)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	for _, entry := range entries {
@@ -232,104 +195,118 @@ func (s *Service) saveFileToStatic(
 		}
 
 		name := entry.Name()
-		fmt.Println(name)
-
-		if strings.HasPrefix(name, prefix) {
-
+		if strings.HasPrefix(name, materialId) {
 			err := os.Remove(filepath.Join(pathToMaterialsFolder, name))
 			if err != nil {
-				return "", err
+				return err
 			}
+		}
+	}
+	return nil
+}
+
+// saves given file to the static folder
+func (s *Service) saveFileToStatic(
+	materialId string,
+	courseId string,
+	src multipart.File,
+	ext string,
+) error {
+
+	pathToUploads := s.staticPath + "/uploads"
+	pathToCourseFolder := pathToUploads + "/" + courseId
+	pathToMaterialsFolder := pathToCourseFolder + "/materials"
+
+	pathToFile := pathToMaterialsFolder + "/" + materialId + ext
+
+	err := os.Mkdir(pathToUploads, 0755)
+	if err != nil {
+		if !errors.Is(err, os.ErrExist) {
+			fmt.Println("failed to create materials folder, wrong path", err)
+			return err
+		}
+	}
+
+	err = os.Mkdir(pathToCourseFolder, 0755)
+	if err != nil {
+		if !errors.Is(err, os.ErrExist) {
+			fmt.Println("failed to create course folder, wrong path", err)
+			return err
+		}
+	}
+
+	err = os.Mkdir(pathToMaterialsFolder, 0755)
+	if err != nil {
+		if !errors.Is(err, os.ErrExist) {
+			fmt.Println("failed to create materials folder, wrong path", err)
+			return err
 		}
 	}
 
 	dst, err := os.Create(pathToFile)
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return err
 	}
 	defer dst.Close()
 
 	if _, err := io.Copy(dst, src); err != nil {
-		return "", err
+		return err
+	}
+	return nil
+}
+
+func (s *Service) CreateFileMaterial(req *CreateFileMaterialRequest, materialId string, fileHeader *multipart.FileHeader, scheme string, host string, ctx context.Context) (Material, error) {
+
+	if fileHeader.Size > MAX_SIZE {
+		return nil, ErrFileTooBig
 	}
 
-	return params.scheme + "://" + params.host + "/api/static/uploads/" + params.courseId + "/materials/" + params.uuid + ext, nil
+	src, err := fileHeader.Open()
+	if err != nil {
+		return nil, err
+	}
 
-}
+	ok, mime, err := s.isFileAllowed(src)
+	if err != nil {
+		return nil, err
+	}
 
-type CreateFileMaterialParams struct {
-	fileHeader *multipart.FileHeader
-
-	uuid        string
-	name        string
-	description string
-	courseId    string
-
-	scheme string
-	host   string
-}
-
-type SavedFileInfo struct {
-	url  string
-	size int64
-	mime string
-}
-
-func (s *Service) checkAndSaveFile(params *CreateFileMaterialParams) (SavedFileInfo, error) {
-	ok, size := s.checkFileSize(params.fileHeader)
 	if !ok {
-		return SavedFileInfo{}, TooBigMaterialFile
+		return nil, ErrFileTypeForbidden
 	}
 
-	src, err := params.fileHeader.Open()
-	if err != nil {
-		fmt.Println(err)
-		return SavedFileInfo{}, FailedToOpenMaterialFile
-	}
-	defer src.Close()
+	fileExt := MIME_TO_EXT[mime]
 
-	ok, mimeType, err := s.checkFileType(src)
-	if err != nil {
-		return SavedFileInfo{}, FailedToRewindCursorAfterFileTypeCheck
-	}
-	if !ok {
-		return SavedFileInfo{}, ForbiddenFileType
-	}
+	err = s.saveFileToStatic(materialId, req.CourseId, src, fileExt)
 
-	url, err := s.saveFileToStatic(params, src, MIME_TO_EXT[mimeType])
-	if err != nil {
-		return SavedFileInfo{}, err
-	}
+	url := scheme + "://" + host + "/api/static/uploads/" + req.CourseId + "/materials/" + materialId + fileExt
 
-	return SavedFileInfo{url, size, mimeType}, nil
-}
+	now := time.Now().Unix()
 
-func (s *Service) CreateFileMaterial(params *CreateFileMaterialParams, ctx context.Context) (*database.Material, SavedFileInfo, error) {
-
-	saveFileInfo, err := s.checkAndSaveFile(params)
-	if err != nil {
-		return nil, SavedFileInfo{}, err
-	}
-
-	dbMaterial, err := s.q.CreateMaterial(ctx, database.CreateMaterialParams{
-		Uuid:        params.uuid,
-		Name:        params.name,
-		Description: params.description,
-		Url:         saveFileInfo.url,
-		Courseuuid:  params.courseId,
+	dbMat, err := s.q.CreateMaterial(ctx, database.CreateMaterialParams{
+		Uuid:        materialId,
+		CourseUuid:  req.CourseId,
+		Name:        req.Name,
+		Description: req.Description,
+		Url:         url,
+		Type:        "file",
+		MimeType:    sql.NullString{String: mime, Valid: true},
+		ByteSize:    sql.NullInt64{Int64: fileHeader.Size, Valid: true},
+		CreatedAt:   now,
+		UpdatedAt:   now,
 	})
 	if err != nil {
-		return nil, SavedFileInfo{}, err
+		return nil, err
 	}
 
-	_, err = s.q.CreateFileMaterialMetadata(ctx, database.CreateFileMaterialMetadataParams{
-		MaterialUuid: dbMaterial.Uuid,
-		Size:         saveFileInfo.size,
-		Mime:         saveFileInfo.mime,
-	})
-
-	return &dbMaterial, saveFileInfo, nil
+	return FileMaterial{
+		Uuid:        dbMat.Uuid,
+		Type:        dbMat.Type,
+		Name:        dbMat.Name,
+		Description: dbMat.Description,
+		FileUrl:     dbMat.Url,
+	}, nil
 }
 
 type CreateUrlMaterialParams struct {
@@ -341,41 +318,33 @@ type CreateUrlMaterialParams struct {
 	url string
 }
 
-func (s *Service) CreateUrlMaterial(params CreateUrlMaterialParams, ctx context.Context) (*database.Material, error) {
+func (s *Service) CreateUrlMaterial(req CreateUrlMaterialRequest, materialId string, ctx context.Context) (Material, error) {
 
-	dbMaterial, err := s.q.CreateMaterial(ctx, database.CreateMaterialParams{
-		Uuid:        params.uuid,
-		Name:        params.name,
-		Description: params.description,
-		Url:         params.url,
-		Courseuuid:  params.courseId,
+	now := time.Now().Unix()
+
+	dbMat, err := s.q.CreateMaterial(ctx, database.CreateMaterialParams{
+		Uuid:        materialId,
+		CourseUuid:  req.CourseId,
+		Name:        req.Name,
+		Description: req.Description,
+		Url:         req.Url,
+		Type:        "url",
+		FaviconUrl:  sql.NullString{String: s.deriveFaviconUrl(req.Url), Valid: true},
+		UpdatedAt:   now,
+		CreatedAt:   now,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &dbMaterial, nil
-}
-
-func (s *Service) DeleteMaterial(materialId string, ctx context.Context) error {
-
-	res, err := s.q.DeleteMaterial(ctx, materialId)
-	if err != nil {
-		fmt.Println(err)
-		return errors.New("failed to delete material from db")
-	}
-
-	n, err := res.RowsAffected()
-	if err != nil {
-		fmt.Println(err)
-		return errors.New("failed to delete material from db")
-	}
-
-	if n == 0 {
-		return CourseNotFound
-	}
-
-	return nil
+	return UrlMaterial{
+		Uuid:        dbMat.Uuid,
+		Type:        dbMat.Type,
+		Name:        dbMat.Name,
+		Description: dbMat.Description,
+		Url:         dbMat.Url,
+		FaviconUrl:  dbMat.FaviconUrl.String,
+	}, nil
 }
 
 type UpdateFileMaterialParms struct {
@@ -392,60 +361,121 @@ type UpdateFileMaterialParms struct {
 	host   string
 }
 
-func (s *Service) UpdateFileMaterial(params *UpdateFileMaterialParms, ctx context.Context) (*database.Material, SavedFileInfo, error) {
+func (s *Service) UpdateFileMaterial(req *UpdateFileMaterialRequest, fileHeader *multipart.FileHeader, scheme string, host string, ctx context.Context) (Material, error) {
 
-	if params.fileHeader != nil {
+	var byteSize = sql.NullInt64{}
+	var mimeType *string
+	var url *string
 
-		saveFileInfo, err := s.checkAndSaveFile(&CreateFileMaterialParams{
-			fileHeader:  params.fileHeader,
-			uuid:        params.uuid,
-			courseId:    params.courseId,
-			name:        "",
-			description: "",
-			scheme:      params.scheme,
-			host:        params.host,
-		})
+	if fileHeader != nil {
+
+		if fileHeader.Size > MAX_SIZE {
+			return nil, ErrFileTooBig
+		}
+		byteSize.Valid = true
+		byteSize.Int64 = fileHeader.Size
+
+		src, err := fileHeader.Open()
 		if err != nil {
-			return nil, SavedFileInfo{}, err
+			return nil, err
 		}
 
-		_, err = s.q.UpdateFileMaterialMetadata(ctx, database.UpdateFileMaterialMetadataParams{
-			MaterialUuid: params.uuid,
-			Size:         saveFileInfo.size,
-			Mime:         saveFileInfo.mime,
-		})
+		ok, mime, err := s.isFileAllowed(src)
 		if err != nil {
-			return nil, SavedFileInfo{}, err
+			return nil, err
+		}
+		if !ok {
+			return nil, ErrFileTypeForbidden
 		}
 
-		params.url = &saveFileInfo.url
+		err = s.removeOldMaterialFile(req.MaterialId, req.CourseId)
+		if err != nil {
+			return nil, err
+		}
+
+		fileExt := MIME_TO_EXT[mime]
+
+		err = s.saveFileToStatic(req.MaterialId, req.CourseId, src, fileExt)
+		if err != nil {
+			return nil, err
+		}
+		newUrl := scheme + "://" + host + "/api/static/uploads/" + req.CourseId + "/materials/" + req.MaterialId + fileExt
+		url = &newUrl
+
+		mimeType = &mime
 	}
 
-	material, err := s.q.UpdateMaterialPartial(ctx, database.UpdateMaterialPartialParams{
-		Name:        utils.ToSqlNullString(params.name),
-		Uuid:        params.uuid,
-		Url:         utils.ToSqlNullString(params.url),
-		Description: utils.ToSqlNullString(params.description),
-	})
-	if err != nil {
-		return nil, SavedFileInfo{}, err
-	}
+	now := time.Now().Unix()
 
-	dbInfo, err := s.q.GetFileMaterialMetadata(ctx, params.uuid)
-
-	return &material, SavedFileInfo{material.Url, dbInfo.Size, dbInfo.Mime}, nil
-}
-
-func (s *Service) UpdateUrlMaterial(name *string, description *string, url *string, uuid string, ctx context.Context) (*database.Material, error) {
-
-	material, err := s.q.UpdateMaterialPartial(ctx, database.UpdateMaterialPartialParams{
-		Name:        utils.ToSqlNullString(name),
-		Uuid:        uuid,
+	dbMat, err := s.q.UpdateMaterialPartial(ctx, database.UpdateMaterialPartialParams{
+		Uuid:        req.MaterialId,
+		Name:        utils.ToSqlNullString(req.Name),
+		Description: utils.ToSqlNullString(req.Description),
 		Url:         utils.ToSqlNullString(url),
-		Description: utils.ToSqlNullString(description),
+		MimeType:    utils.ToSqlNullString(mimeType),
+		ByteSize:    byteSize,
+		UpdatedAt:   now,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &material, nil
+
+	return FileMaterial{
+		Uuid:        dbMat.Uuid,
+		Type:        dbMat.Type,
+		Name:        dbMat.Name,
+		Description: dbMat.Description,
+		FileUrl:     dbMat.Url,
+	}, nil
+}
+
+func (s *Service) UpdateUrlMaterial(req *UpdateUrlMaterialRequest, ctx context.Context) (Material, error) {
+
+	faviconUrl := sql.NullString{}
+
+	if req.Url != nil {
+		faviconUrl.Valid = true
+		faviconUrl.String = s.deriveFaviconUrl(*req.Url)
+	}
+
+	now := time.Now().Unix()
+
+	dbMat, err := s.q.UpdateMaterialPartial(ctx, database.UpdateMaterialPartialParams{
+		Uuid:        req.MaterialId,
+		Name:        utils.ToSqlNullString(req.Name),
+		Description: utils.ToSqlNullString(req.Description),
+		Url:         utils.ToSqlNullString(req.Url),
+		FaviconUrl:  faviconUrl,
+		UpdatedAt:   now,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return UrlMaterial{
+		Uuid:        dbMat.Uuid,
+		Type:        dbMat.Type,
+		Name:        dbMat.Name,
+		Description: dbMat.Description,
+		Url:         dbMat.Url,
+		FaviconUrl:  dbMat.FaviconUrl.String,
+	}, nil
+}
+
+func (s *Service) DeleteMaterial(materialId string, ctx context.Context) error {
+
+	res, err := s.q.DeleteMaterial(ctx, materialId)
+	if err != nil {
+		return err
+	}
+
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return ErrCourseNotFound
+	}
+
+	return nil
 }

@@ -58,56 +58,57 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 	return i, err
 }
 
-const createFileMaterialMetadata = `-- name: CreateFileMaterialMetadata :one
-INSERT INTO file_material_metadata (material_uuid, size, mime) VALUES (?, ?, ?) RETURNING size, mime, material_uuid
-`
-
-type CreateFileMaterialMetadataParams struct {
-	MaterialUuid interface{} `json:"material_uuid"`
-	Size         int64       `json:"size"`
-	Mime         string      `json:"mime"`
-}
-
-func (q *Queries) CreateFileMaterialMetadata(ctx context.Context, arg CreateFileMaterialMetadataParams) (FileMaterialMetadatum, error) {
-	row := q.db.QueryRowContext(ctx, createFileMaterialMetadata, arg.MaterialUuid, arg.Size, arg.Mime)
-	var i FileMaterialMetadatum
-	err := row.Scan(&i.Size, &i.Mime, &i.MaterialUuid)
-	return i, err
-}
-
 const createMaterial = `-- name: CreateMaterial :one
 
 INSERT INTO material (
-    uuid, name, description, url, courseUuid
+    uuid, course_uuid, name, description, url, type, favicon_url, byte_size, mime_type, created_at, updated_at
 ) VALUES (
-    ?, ?, ?, ?, ?
-) RETURNING uuid, name, description, url, courseuuid
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+) RETURNING uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
 `
 
 type CreateMaterialParams struct {
-	Uuid        string `json:"uuid"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Url         string `json:"url"`
-	Courseuuid  string `json:"courseuuid"`
+	Uuid        string         `json:"uuid"`
+	CourseUuid  string         `json:"course_uuid"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Url         string         `json:"url"`
+	Type        string         `json:"type"`
+	FaviconUrl  sql.NullString `json:"favicon_url"`
+	ByteSize    sql.NullInt64  `json:"byte_size"`
+	MimeType    sql.NullString `json:"mime_type"`
+	CreatedAt   int64          `json:"created_at"`
+	UpdatedAt   int64          `json:"updated_at"`
 }
 
 // * Material
 func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) (Material, error) {
 	row := q.db.QueryRowContext(ctx, createMaterial,
 		arg.Uuid,
+		arg.CourseUuid,
 		arg.Name,
 		arg.Description,
 		arg.Url,
-		arg.Courseuuid,
+		arg.Type,
+		arg.FaviconUrl,
+		arg.ByteSize,
+		arg.MimeType,
+		arg.CreatedAt,
+		arg.UpdatedAt,
 	)
 	var i Material
 	err := row.Scan(
 		&i.Uuid,
+		&i.CourseUuid,
 		&i.Name,
 		&i.Description,
 		&i.Url,
-		&i.Courseuuid,
+		&i.Type,
+		&i.FaviconUrl,
+		&i.MimeType,
+		&i.ByteSize,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -209,19 +210,8 @@ func (q *Queries) GetCourse(ctx context.Context, uuid string) (Course, error) {
 	return i, err
 }
 
-const getFileMaterialMetadata = `-- name: GetFileMaterialMetadata :one
-SELECT size, mime, material_uuid FROM file_material_metadata WHERE material_uuid = ?
-`
-
-func (q *Queries) GetFileMaterialMetadata(ctx context.Context, materialUuid interface{}) (FileMaterialMetadatum, error) {
-	row := q.db.QueryRowContext(ctx, getFileMaterialMetadata, materialUuid)
-	var i FileMaterialMetadatum
-	err := row.Scan(&i.Size, &i.Mime, &i.MaterialUuid)
-	return i, err
-}
-
 const getMaterial = `-- name: GetMaterial :one
-SELECT uuid, name, description, url, courseUuid FROM material WHERE material.uuid = ?
+SELECT uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at FROM material WHERE material.uuid = ?
 `
 
 func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error) {
@@ -229,10 +219,16 @@ func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error
 	var i Material
 	err := row.Scan(
 		&i.Uuid,
+		&i.CourseUuid,
 		&i.Name,
 		&i.Description,
 		&i.Url,
-		&i.Courseuuid,
+		&i.Type,
+		&i.FaviconUrl,
+		&i.MimeType,
+		&i.ByteSize,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -353,11 +349,11 @@ func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
 }
 
 const listAllMaterialsOfCourse = `-- name: ListAllMaterialsOfCourse :many
-SELECT uuid, name, description, url, courseUuid FROM material WHERE material.courseUuid = ?
+SELECT uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at FROM material WHERE material.course_uuid = ?
 `
 
-func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseuuid string) ([]Material, error) {
-	rows, err := q.db.QueryContext(ctx, listAllMaterialsOfCourse, courseuuid)
+func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid string) ([]Material, error) {
+	rows, err := q.db.QueryContext(ctx, listAllMaterialsOfCourse, courseUuid)
 	if err != nil {
 		return nil, err
 	}
@@ -367,10 +363,16 @@ func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseuuid strin
 		var i Material
 		if err := rows.Scan(
 			&i.Uuid,
+			&i.CourseUuid,
 			&i.Name,
 			&i.Description,
 			&i.Url,
-			&i.Courseuuid,
+			&i.Type,
+			&i.FaviconUrl,
+			&i.MimeType,
+			&i.ByteSize,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -383,6 +385,17 @@ func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseuuid strin
 		return nil, err
 	}
 	return items, nil
+}
+
+const makeUserAdmin = `-- name: MakeUserAdmin :exec
+
+INSERT INTO admin (user_id) VALUES (?)
+`
+
+// * Admin
+func (q *Queries) MakeUserAdmin(ctx context.Context, userID interface{}) error {
+	_, err := q.db.ExecContext(ctx, makeUserAdmin, userID)
+	return err
 }
 
 const updateCourse = `-- name: UpdateCourse :one
@@ -414,25 +427,8 @@ func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) (Cou
 	return i, err
 }
 
-const updateFileMaterialMetadata = `-- name: UpdateFileMaterialMetadata :one
-UPDATE file_material_metadata SET size = ?, mime = ? WHERE material_uuid = ? RETURNING size, mime, material_uuid
-`
-
-type UpdateFileMaterialMetadataParams struct {
-	Size         int64       `json:"size"`
-	Mime         string      `json:"mime"`
-	MaterialUuid interface{} `json:"material_uuid"`
-}
-
-func (q *Queries) UpdateFileMaterialMetadata(ctx context.Context, arg UpdateFileMaterialMetadataParams) (FileMaterialMetadatum, error) {
-	row := q.db.QueryRowContext(ctx, updateFileMaterialMetadata, arg.Size, arg.Mime, arg.MaterialUuid)
-	var i FileMaterialMetadatum
-	err := row.Scan(&i.Size, &i.Mime, &i.MaterialUuid)
-	return i, err
-}
-
 const updateMaterial = `-- name: UpdateMaterial :one
-UPDATE material SET name = ?, description = ?, url = ? WHERE material.uuid = ? RETURNING uuid, name, description, url, courseuuid
+UPDATE material SET name = ?, description = ?, url = ? WHERE material.uuid = ? RETURNING uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
 `
 
 type UpdateMaterialParams struct {
@@ -452,10 +448,16 @@ func (q *Queries) UpdateMaterial(ctx context.Context, arg UpdateMaterialParams) 
 	var i Material
 	err := row.Scan(
 		&i.Uuid,
+		&i.CourseUuid,
 		&i.Name,
 		&i.Description,
 		&i.Url,
-		&i.Courseuuid,
+		&i.Type,
+		&i.FaviconUrl,
+		&i.MimeType,
+		&i.ByteSize,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -463,16 +465,24 @@ func (q *Queries) UpdateMaterial(ctx context.Context, arg UpdateMaterialParams) 
 const updateMaterialPartial = `-- name: UpdateMaterialPartial :one
 UPDATE material
 SET
-  name        = COALESCE(?1, name),
-  description = COALESCE(?2, description),
-  url   = COALESCE(?3, url)
-WHERE uuid = ?4 RETURNING uuid, name, description, url, courseuuid
+    name        = COALESCE(?1, name),
+    description = COALESCE(?2, description),
+    url         = COALESCE(?3, url),
+    favicon_url = COALESCE(?4, favicon_url),
+    byte_size   = COALESCE(?5, byte_size),
+    mime_type   = COALESCE(?6, mime_type),
+    updated_at  = ?7
+WHERE uuid = ?8 RETURNING uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
 `
 
 type UpdateMaterialPartialParams struct {
 	Name        sql.NullString `json:"name"`
 	Description sql.NullString `json:"description"`
 	Url         sql.NullString `json:"url"`
+	FaviconUrl  sql.NullString `json:"favicon_url"`
+	ByteSize    sql.NullInt64  `json:"byte_size"`
+	MimeType    sql.NullString `json:"mime_type"`
+	UpdatedAt   int64          `json:"updated_at"`
 	Uuid        string         `json:"uuid"`
 }
 
@@ -481,15 +491,25 @@ func (q *Queries) UpdateMaterialPartial(ctx context.Context, arg UpdateMaterialP
 		arg.Name,
 		arg.Description,
 		arg.Url,
+		arg.FaviconUrl,
+		arg.ByteSize,
+		arg.MimeType,
+		arg.UpdatedAt,
 		arg.Uuid,
 	)
 	var i Material
 	err := row.Scan(
 		&i.Uuid,
+		&i.CourseUuid,
 		&i.Name,
 		&i.Description,
 		&i.Url,
-		&i.Courseuuid,
+		&i.Type,
+		&i.FaviconUrl,
+		&i.MimeType,
+		&i.ByteSize,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

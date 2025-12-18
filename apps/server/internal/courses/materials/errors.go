@@ -3,10 +3,7 @@ package materials
 import "errors"
 
 var (
-	FailedToFetchMaterials                 = errors.New("failed to fetch materials from db")
-	FailedToOpenMaterialFile               = errors.New("failed to open the material file")
-	FailedToRewindCursorAfterFileTypeCheck = errors.New("failed to rewind cursor after file type check")
-	TooBigMaterialFile                     = errors.New("too big material file max is 30MB")
-	ForbiddenFileType                      = errors.New("forbidden file type")
-	CourseNotFound                         = errors.New("unknown course id")
+	ErrFileTooBig        = errors.New("too big material file max is 30MB")
+	ErrFileTypeForbidden = errors.New("forbidden file type")
+	ErrCourseNotFound    = errors.New("unknown course id")
 )
