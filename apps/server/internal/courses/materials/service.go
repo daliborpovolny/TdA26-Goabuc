@@ -35,10 +35,22 @@ var MIME_TO_EXT = map[string]string{
 	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
 	"text/plain": ".txt",
 	"image/png":  ".png",
-	"image/jpeg": ".jpeg and .jpg",
+	"image/jpeg": ".jpeg",
 	"image/gif":  ".gif",
 	"video/mp4":  ".mp4",
 	"audio/mpeg": ".mp3",
+}
+
+var EXT_TO_MIME = map[string]string{
+	".pdf":  "application/pdf",
+	".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	".txt":  "text/plain",
+	".png":  "image/png",
+	".jpg":  "image/jpeg",
+	".jpeg": "image/jpeg",
+	"gif":   "image/gif",
+	".mp4":  "video/mp4",
+	".mp3":  "audio/mpeg",
 }
 
 type Material interface {
@@ -184,8 +196,15 @@ func (s *Service) isFileAllowedHeader(file *multipart.FileHeader) (string, bool)
 		return "", false
 	}
 
-	mime := file.Header.Get("Content-Type")
-	ok := ALLOWED_FILES[mime]
+	filename := file.Filename
+	ext := strings.ToLower(filepath.Ext(filename))
+	mime, ok := EXT_TO_MIME[ext]
+	if ok {
+		return mime, ok
+	}
+
+	mime = file.Header.Get("Content-Type")
+	ok = ALLOWED_FILES[mime]
 	if ok {
 		return mime, true
 	}
