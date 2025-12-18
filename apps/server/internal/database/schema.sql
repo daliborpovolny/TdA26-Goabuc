@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS quizz (
     title TEXT NOT NULL,
     attemptsCount INTEGER NOT NULL,
     FOREIGN KEY (courseUuid) REFERENCES course(uuid) ON DELETE CASCADE
-)
+);
 
 CREATE TABLE IF NOT EXISTS  question (
     uuid TEXT PRIMARY KEY,
@@ -50,4 +50,4 @@ CREATE TABLE IF NOT EXISTS  question (
     options TEXT NOT NULL,
     correct_indices TEXT NOT NULL,
     FOREIGN KEY (quizzUuid) REFERENCES quizz(uuid) ON DELETE CASCADE
-)
+);
