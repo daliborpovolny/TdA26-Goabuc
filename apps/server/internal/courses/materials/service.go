@@ -306,6 +306,8 @@ func (s *Service) CreateFileMaterial(req *CreateFileMaterialRequest, materialId 
 		Name:        dbMat.Name,
 		Description: dbMat.Description,
 		FileUrl:     dbMat.Url,
+		MimeType:    dbMat.MimeType.String,
+		SizeBytes:   int(dbMat.ByteSize.Int64),
 	}, nil
 }
 
@@ -426,6 +428,8 @@ func (s *Service) UpdateFileMaterial(req *UpdateFileMaterialRequest, fileHeader 
 		Name:        dbMat.Name,
 		Description: dbMat.Description,
 		FileUrl:     dbMat.Url,
+		MimeType:    dbMat.MimeType.String,
+		SizeBytes:   int(dbMat.ByteSize.Int64),
 	}, nil
 }
 
