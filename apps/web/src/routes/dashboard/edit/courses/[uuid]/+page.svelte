@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 
 	import DataLoader from '$lib/components/DataLoader.svelte';
-	import type { Course, Material } from '$lib/types';
+	import type { Course } from '$lib/types';
 
 	import CreateMaterial from './CreateMaterial.svelte';
 	import EditMaterial from './EditMaterial.svelte';
@@ -23,20 +23,32 @@
 
 <DataLoader promise={coursePromise}>
 	{#snippet children(course: Course)}
-		<section>
-			<EditCourse {course} onchange={reload} />
-		</section>
+	<div class="mx-auto max-w-2xl space-y-8 p-6">
+	<section>
+				<EditCourse {course} onchange={reload} />
+			</section>
 
-		<hr />
+			<hr />
 
-		<section>
-			<h3>Materials</h3>
+			<section>
+				<h1 class="text-3xl">Materials</h1>
+				<br>
 
-			<CreateMaterial courseUuid={courseId} onchange={reload} />
+				<CreateMaterial courseUuid={courseId} onchange={reload} />
+				<br>
 
-			{#each course.materials as material}
-				<EditMaterial {material} courseUuid={courseId} onchange={reload} />
-			{/each}
-		</section>
+
+				{#if course.materials.length > 0}
+					
+					<h1 class="mb-3 text-2xl font-semibold text-gray-800">Edit Materials</h1>
+
+					{#each course.materials as material}
+						<EditMaterial {material} courseUuid={courseId} onchange={reload} />
+						<br>
+					{/each}
+				{/if}
+
+				</section>
+		</div>
 	{/snippet}
 </DataLoader>
