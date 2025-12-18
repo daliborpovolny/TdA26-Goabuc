@@ -6,12 +6,14 @@
 	async function updateCourse(e: Event) {
 		e.preventDefault();
 
-		const formData = new FormData(e.target as HTMLFormElement);
-		await fetch(`/api/courses/${course.uuid}`, {
-			method: 'PATCH',
-			body: JSON.stringify(Object.fromEntries(formData))
-		});
+		let formData = new FormData(e.target as HTMLFormElement);
+		let formJson = JSON.stringify(Object.fromEntries(formData));
 
+		await fetch(`/api/courses/${course.uuid}`, {
+			method: 'PUT',
+			headers: { 'Content-type': 'application/json' },
+			body: formJson
+		});
 		onchange();
 	}
 </script>

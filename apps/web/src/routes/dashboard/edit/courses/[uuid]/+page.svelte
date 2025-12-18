@@ -23,8 +23,8 @@
 
 <DataLoader promise={coursePromise}>
 	{#snippet children(course: Course)}
-	<div class="mx-auto max-w-2xl space-y-8 p-6">
-	<section>
+		<div class="mx-auto max-w-2xl space-y-8 p-6">
+			<section>
 				<EditCourse {course} onchange={reload} />
 			</section>
 
@@ -32,23 +32,20 @@
 
 			<section>
 				<h1 class="text-3xl">Materials</h1>
-				<br>
+				<br />
 
 				<CreateMaterial courseUuid={courseId} onchange={reload} />
-				<br>
-
+				<br />
 
 				{#if course.materials.length > 0}
-					
 					<h1 class="mb-3 text-2xl font-semibold text-gray-800">Edit Materials</h1>
 
 					{#each course.materials as material}
 						<EditMaterial {material} courseUuid={courseId} onchange={reload} />
-						<br>
+						<br />
 					{/each}
 				{/if}
-
-				</section>
+			</section>
 		</div>
 	{/snippet}
 </DataLoader>

@@ -1,12 +1,31 @@
 <script lang="ts">
-	import type { Course } from '$lib/types';
-
 	let { courseUuid, onchange }: { courseUuid: string; onchange: () => void } = $props();
 
 	let materialType: 'file' | '' | 'url' = $state('');
 
-	async function submit(e: Event) {
+	async function createUrlMaterial(e: Event) {
 		e.preventDefault();
+
+		let formData = new FormData(e.target as HTMLFormElement);
+		let formJson = JSON.stringify(Object.fromEntries(formData));
+
+		await fetch(`/api/courses/${courseUuid}/materials`, {
+			method: 'POST',
+			headers: { 'Content-type': 'application/json' },
+			body: formJson
+		});
+		onchange();
+	}
+
+	async function createFileMaterial(e: Event) {
+		e.preventDefault();
+
+		let formData = new FormData(e.target as HTMLFormElement);
+		await fetch(`/api/courses/${courseUuid}/materials`, {
+			method: 'POST',
+			body: formData
+		});
+		onchange();
 	}
 </script>
 
@@ -40,7 +59,7 @@
 			class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4"
 			method="POST"
 			enctype="multipart/form-data"
-			onsubmit={submit}
+			onsubmit={createFileMaterial}
 		>
 			<!-- required by API -->
 			<input type="hidden" name="type" value="file" />
@@ -75,7 +94,7 @@
 	{:else if materialType === 'url'}
 		<form
 			method="POST"
-			onsubmit={submit}
+			onsubmit={createUrlMaterial}
 			class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4"
 		>
 			<input type="hidden" name="type" value="url" />
