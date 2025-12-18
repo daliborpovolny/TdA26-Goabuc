@@ -157,8 +157,6 @@ type UpdateFileMaterialRequest struct {
 	CourseId   string `param:"courseId"`
 	MaterialId string `param:"materialId"`
 
-	MatType string `form:"type"`
-
 	Name        *string `form:"name"`
 	Description *string `form:"description"`
 }
@@ -167,10 +165,6 @@ func (h *Handler) updateFileMaterial(r *handlers.RequestCtx) error {
 	var req UpdateFileMaterialRequest
 	if err := r.Echo.Bind(&req); err != nil {
 		return r.Error(http.StatusBadRequest, err.Error())
-	}
-
-	if req.MatType != "file" {
-		return r.Error(http.StatusBadRequest, "only file material can be updated through form")
 	}
 
 	file, err := r.Echo.FormFile("file")
@@ -198,8 +192,6 @@ type UpdateUrlMaterialRequest struct {
 	CourseId   string `param:"courseId"`
 	MaterialId string `param:"materialId"`
 
-	MatType string `json:"type"`
-
 	Name        *string `json:"name"`
 	Url         *string `json:"url"`
 	Description *string `json:"description"`
@@ -209,10 +201,6 @@ func (h *Handler) updateUrlMaterial(r *handlers.RequestCtx) error {
 	var req UpdateUrlMaterialRequest
 	if err := r.Echo.Bind(&req); err != nil {
 		return r.Error(http.StatusBadRequest, err.Error())
-	}
-
-	if req.MatType != "url" {
-		return r.Error(http.StatusBadRequest, "only url material can be updated through form")
 	}
 
 	mat, err := h.service.UpdateUrlMaterial(&req, r.Ctx)
