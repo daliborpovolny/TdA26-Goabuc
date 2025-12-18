@@ -56,5 +56,5 @@ CREATE TABLE IF NOT EXISTS file_material_metadata (
     size INTEGER NOT NULL,
     mime TEXT NOT NULL,
     material_uuid TEXT PRIMARTY KEY,
-    FOREIGN KEY (material_uuid) REFERENCES material(uuid)
+    FOREIGN KEY (material_uuid) REFERENCES material(uuid) ON DELETE CASCADE
 );
