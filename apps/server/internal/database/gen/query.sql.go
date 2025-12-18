@@ -349,7 +349,7 @@ func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
 }
 
 const listAllMaterialsOfCourse = `-- name: ListAllMaterialsOfCourse :many
-SELECT uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at FROM material WHERE material.course_uuid = ?
+SELECT uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at FROM material WHERE material.course_uuid = ? ORDER BY created_at DESC
 `
 
 func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid string) ([]Material, error) {
@@ -393,7 +393,7 @@ INSERT INTO admin (user_id) VALUES (?)
 `
 
 // * Admin
-func (q *Queries) MakeUserAdmin(ctx context.Context, userID interface{}) error {
+func (q *Queries) MakeUserAdmin(ctx context.Context, userID int64) error {
 	_, err := q.db.ExecContext(ctx, makeUserAdmin, userID)
 	return err
 }

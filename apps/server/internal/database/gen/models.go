@@ -9,7 +9,7 @@ import (
 )
 
 type Admin struct {
-	UserID interface{} `json:"user_id"`
+	UserID int64 `json:"user_id"`
 }
 
 type Course struct {

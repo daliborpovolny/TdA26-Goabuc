@@ -74,7 +74,7 @@ DELETE FROM material WHERE material.uuid = ?;
 SELECT * FROM material WHERE material.uuid = ?;
 
 -- name: ListAllMaterialsOfCourse :many
-SELECT * FROM material WHERE material.course_uuid = ?;
+SELECT * FROM material WHERE material.course_uuid = ? ORDER BY created_at DESC;
 
 -- name: UpdateMaterialPartial :one
 UPDATE material
