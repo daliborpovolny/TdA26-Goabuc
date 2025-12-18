@@ -12,6 +12,12 @@ type Course struct {
 	UpdatedAt   int64  `json:"updated_at"`
 }
 
+type FileMaterialMetadatum struct {
+	Size         int64       `json:"size"`
+	Mime         string      `json:"mime"`
+	MaterialUuid interface{} `json:"material_uuid"`
+}
+
 type Material struct {
 	Uuid        string `json:"uuid"`
 	Name        string `json:"name"`

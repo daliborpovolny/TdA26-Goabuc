@@ -127,7 +127,7 @@ func (h *Handler) CreateMaterial(c echo.Context) error {
 			return r.Error(http.StatusBadRequest, "must include a file")
 		}
 
-		dbMat, err := h.service.CreateFileMaterial(params, r.Ctx)
+		dbMat, fileInfo, err := h.service.CreateFileMaterial(params, r.Ctx)
 		if err != nil {
 			return h.handleCreateFileMaterialErrors(err, r)
 		}
@@ -138,6 +138,8 @@ func (h *Handler) CreateMaterial(c echo.Context) error {
 			Name:        dbMat.Name,
 			Description: dbMat.Description,
 			FileUrl:     dbMat.Url,
+			MimeType:    fileInfo.mime,
+			SizeBytes:   int(fileInfo.size),
 		})
 
 	} else if strings.Contains(contentType[0], "application/json") {
@@ -215,7 +217,7 @@ func (h *Handler) UpdateMaterial(c echo.Context) error {
 		host := req.Host
 
 		fmt.Println("collected all")
-		dbMat, err := h.service.UpdateFileMaterial(&UpdateFileMaterialParms{
+		dbMat, fileInfo, err := h.service.UpdateFileMaterial(&UpdateFileMaterialParms{
 			uuid:        c.Param("materialId"),
 			courseId:    c.Param("courseId"),
 			fileHeader:  fileHeader,
@@ -235,6 +237,8 @@ func (h *Handler) UpdateMaterial(c echo.Context) error {
 			Name:        dbMat.Name,
 			Description: dbMat.Description,
 			FileUrl:     dbMat.Url,
+			MimeType:    fileInfo.mime,
+			SizeBytes:   int(fileInfo.size),
 		})
 
 	} else if strings.Contains(contentType[0], "application/json") {

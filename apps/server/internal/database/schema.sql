@@ -51,3 +51,10 @@ CREATE TABLE IF NOT EXISTS  question (
     correct_indices TEXT NOT NULL,
     FOREIGN KEY (quizzUuid) REFERENCES quizz(uuid) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS file_material_metadata (
+    size INTEGER NOT NULL,
+    mime TEXT NOT NULL,
+    material_uuid TEXT PRIMARTY KEY,
+    FOREIGN KEY (material_uuid) REFERENCES material(uuid)
+);

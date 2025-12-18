@@ -119,9 +119,12 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 	for _, material := range dbMaterials {
 
 		expectedUrlStartForLocalFile := scheme + "://" + host + "/api/static/uploads"
-		fmt.Println("expected: ", expectedUrlStartForLocalFile)
-		fmt.Println("actual: ", material.Url)
 		if strings.HasPrefix(material.Url, expectedUrlStartForLocalFile) {
+
+			fileInfo, err := s.q.GetFileMaterialMetadata(ctx, material.Uuid)
+			if err != nil {
+				return nil, err
+			}
 
 			formattedMaterials = append(formattedMaterials, FileMaterial{
 				Uuid:        material.Uuid,
@@ -129,8 +132,8 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 				Name:        material.Name,
 				Description: material.Description,
 				FileUrl:     material.Url,
-				MimeType:    "mime",
-				SizeBytes:   0,
+				MimeType:    fileInfo.Mime,
+				SizeBytes:   int(fileInfo.Size),
 			})
 		} else {
 
@@ -149,11 +152,11 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 	return formattedMaterials, nil
 }
 
-func (s *Service) checkFileSize(fileHeader *multipart.FileHeader) bool {
+func (s *Service) checkFileSize(fileHeader *multipart.FileHeader) (bool, int64) {
 	if fileHeader.Size > MAX_SIZE {
-		return false
+		return false, 0
 	}
-	return true
+	return true, fileHeader.Size
 }
 
 func (s *Service) checkFileType(src multipart.File) (bool, string, error) {
@@ -168,7 +171,6 @@ func (s *Service) checkFileType(src multipart.File) (bool, string, error) {
 	if len(moreParts) > 1 {
 		mimeType = moreParts[0]
 	}
-	fmt.Println(mimeType)
 
 	if _, err := src.Seek(0, io.SeekStart); err != nil {
 		return false, "", FailedToRewindCursorAfterFileTypeCheck
@@ -178,7 +180,7 @@ func (s *Service) checkFileType(src multipart.File) (bool, string, error) {
 		return false, "", nil
 	}
 
-	return true, MIME_TO_EXT[mimeType], nil
+	return true, mimeType, nil
 }
 
 func (s *Service) saveFileToStatic(
@@ -268,52 +270,66 @@ type CreateFileMaterialParams struct {
 	host   string
 }
 
-func (s *Service) checkAndSaveFile(params *CreateFileMaterialParams) (string, error) {
-	if !s.checkFileSize(params.fileHeader) {
-		return "", TooBigMaterialFile
+type SavedFileInfo struct {
+	url  string
+	size int64
+	mime string
+}
+
+func (s *Service) checkAndSaveFile(params *CreateFileMaterialParams) (SavedFileInfo, error) {
+	ok, size := s.checkFileSize(params.fileHeader)
+	if !ok {
+		return SavedFileInfo{}, TooBigMaterialFile
 	}
 
 	src, err := params.fileHeader.Open()
 	if err != nil {
 		fmt.Println(err)
-		return "", FailedToOpenMaterialFile
+		return SavedFileInfo{}, FailedToOpenMaterialFile
 	}
 	defer src.Close()
 
-	ok, ext, err := s.checkFileType(src)
+	ok, mimeType, err := s.checkFileType(src)
 	if err != nil {
-		return "", FailedToRewindCursorAfterFileTypeCheck
+		return SavedFileInfo{}, FailedToRewindCursorAfterFileTypeCheck
 	}
 	if !ok {
-		return "", ForbiddenFileType
+		return SavedFileInfo{}, ForbiddenFileType
 	}
 
-	url, err := s.saveFileToStatic(params, src, ext)
+	url, err := s.saveFileToStatic(params, src, MIME_TO_EXT[mimeType])
 	if err != nil {
-		return "", err
+		return SavedFileInfo{}, err
 	}
-	return url, nil
+
+	return SavedFileInfo{url, size, mimeType}, nil
 }
 
-func (s *Service) CreateFileMaterial(params *CreateFileMaterialParams, ctx context.Context) (*database.Material, error) {
+func (s *Service) CreateFileMaterial(params *CreateFileMaterialParams, ctx context.Context) (*database.Material, SavedFileInfo, error) {
 
-	url, err := s.checkAndSaveFile(params)
+	saveFileInfo, err := s.checkAndSaveFile(params)
 	if err != nil {
-		return nil, err
+		return nil, SavedFileInfo{}, err
 	}
 
 	dbMaterial, err := s.q.CreateMaterial(ctx, database.CreateMaterialParams{
 		Uuid:        params.uuid,
 		Name:        params.name,
 		Description: params.description,
-		Url:         url,
+		Url:         saveFileInfo.url,
 		Courseuuid:  params.courseId,
 	})
 	if err != nil {
-		return nil, err
+		return nil, SavedFileInfo{}, err
 	}
 
-	return &dbMaterial, nil
+	_, err = s.q.CreateFileMaterialMetadata(ctx, database.CreateFileMaterialMetadataParams{
+		MaterialUuid: dbMaterial.Uuid,
+		Size:         saveFileInfo.size,
+		Mime:         saveFileInfo.mime,
+	})
+
+	return &dbMaterial, saveFileInfo, nil
 }
 
 type CreateUrlMaterialParams struct {
@@ -376,11 +392,11 @@ type UpdateFileMaterialParms struct {
 	host   string
 }
 
-func (s *Service) UpdateFileMaterial(params *UpdateFileMaterialParms, ctx context.Context) (*database.Material, error) {
+func (s *Service) UpdateFileMaterial(params *UpdateFileMaterialParms, ctx context.Context) (*database.Material, SavedFileInfo, error) {
 
 	if params.fileHeader != nil {
 
-		url, err := s.checkAndSaveFile(&CreateFileMaterialParams{
+		saveFileInfo, err := s.checkAndSaveFile(&CreateFileMaterialParams{
 			fileHeader:  params.fileHeader,
 			uuid:        params.uuid,
 			courseId:    params.courseId,
@@ -390,10 +406,19 @@ func (s *Service) UpdateFileMaterial(params *UpdateFileMaterialParms, ctx contex
 			host:        params.host,
 		})
 		if err != nil {
-			return nil, err
+			return nil, SavedFileInfo{}, err
 		}
 
-		params.url = &url
+		_, err = s.q.UpdateFileMaterialMetadata(ctx, database.UpdateFileMaterialMetadataParams{
+			MaterialUuid: params.uuid,
+			Size:         saveFileInfo.size,
+			Mime:         saveFileInfo.mime,
+		})
+		if err != nil {
+			return nil, SavedFileInfo{}, err
+		}
+
+		params.url = &saveFileInfo.url
 	}
 
 	material, err := s.q.UpdateMaterialPartial(ctx, database.UpdateMaterialPartialParams{
@@ -402,11 +427,13 @@ func (s *Service) UpdateFileMaterial(params *UpdateFileMaterialParms, ctx contex
 		Url:         utils.ToSqlNullString(params.url),
 		Description: utils.ToSqlNullString(params.description),
 	})
-
 	if err != nil {
-		return nil, err
+		return nil, SavedFileInfo{}, err
 	}
-	return &material, nil
+
+	dbInfo, err := s.q.GetFileMaterialMetadata(ctx, params.uuid)
+
+	return &material, SavedFileInfo{material.Url, dbInfo.Size, dbInfo.Mime}, nil
 }
 
 func (s *Service) UpdateUrlMaterial(name *string, description *string, url *string, uuid string, ctx context.Context) (*database.Material, error) {

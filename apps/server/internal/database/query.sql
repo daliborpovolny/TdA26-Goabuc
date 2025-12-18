@@ -78,3 +78,12 @@ SET
   description = COALESCE(sqlc.narg(description), description),
   url   = COALESCE(sqlc.narg(url), url)
 WHERE uuid = sqlc.arg(uuid) RETURNING *;
+
+-- name: CreateFileMaterialMetadata :one
+INSERT INTO file_material_metadata (material_uuid, size, mime) VALUES (?, ?, ?) RETURNING *;
+
+-- name: GetFileMaterialMetadata :one
+SELECT * FROM file_material_metadata WHERE material_uuid = ?;
+
+-- name: UpdateFileMaterialMetadata :one
+UPDATE file_material_metadata SET size = ?, mime = ? WHERE material_uuid = ? RETURNING *;

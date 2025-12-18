@@ -58,6 +58,23 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 	return i, err
 }
 
+const createFileMaterialMetadata = `-- name: CreateFileMaterialMetadata :one
+INSERT INTO file_material_metadata (material_uuid, size, mime) VALUES (?, ?, ?) RETURNING size, mime, material_uuid
+`
+
+type CreateFileMaterialMetadataParams struct {
+	MaterialUuid interface{} `json:"material_uuid"`
+	Size         int64       `json:"size"`
+	Mime         string      `json:"mime"`
+}
+
+func (q *Queries) CreateFileMaterialMetadata(ctx context.Context, arg CreateFileMaterialMetadataParams) (FileMaterialMetadatum, error) {
+	row := q.db.QueryRowContext(ctx, createFileMaterialMetadata, arg.MaterialUuid, arg.Size, arg.Mime)
+	var i FileMaterialMetadatum
+	err := row.Scan(&i.Size, &i.Mime, &i.MaterialUuid)
+	return i, err
+}
+
 const createMaterial = `-- name: CreateMaterial :one
 
 INSERT INTO material (
@@ -189,6 +206,17 @@ func (q *Queries) GetCourse(ctx context.Context, uuid string) (Course, error) {
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
+	return i, err
+}
+
+const getFileMaterialMetadata = `-- name: GetFileMaterialMetadata :one
+SELECT size, mime, material_uuid FROM file_material_metadata WHERE material_uuid = ?
+`
+
+func (q *Queries) GetFileMaterialMetadata(ctx context.Context, materialUuid interface{}) (FileMaterialMetadatum, error) {
+	row := q.db.QueryRowContext(ctx, getFileMaterialMetadata, materialUuid)
+	var i FileMaterialMetadatum
+	err := row.Scan(&i.Size, &i.Mime, &i.MaterialUuid)
 	return i, err
 }
 
@@ -383,6 +411,23 @@ func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) (Cou
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
+	return i, err
+}
+
+const updateFileMaterialMetadata = `-- name: UpdateFileMaterialMetadata :one
+UPDATE file_material_metadata SET size = ?, mime = ? WHERE material_uuid = ? RETURNING size, mime, material_uuid
+`
+
+type UpdateFileMaterialMetadataParams struct {
+	Size         int64       `json:"size"`
+	Mime         string      `json:"mime"`
+	MaterialUuid interface{} `json:"material_uuid"`
+}
+
+func (q *Queries) UpdateFileMaterialMetadata(ctx context.Context, arg UpdateFileMaterialMetadataParams) (FileMaterialMetadatum, error) {
+	row := q.db.QueryRowContext(ctx, updateFileMaterialMetadata, arg.Size, arg.Mime, arg.MaterialUuid)
+	var i FileMaterialMetadatum
+	err := row.Scan(&i.Size, &i.Mime, &i.MaterialUuid)
 	return i, err
 }
 
