@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
 
@@ -70,7 +71,7 @@ func (h *Handler) collectFileMaterialParams(c echo.Context) (*CreateFileMaterial
 
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
-		return nil, errNoFile
+		fileHeader = nil
 	}
 
 	req := c.Request()
@@ -99,25 +100,34 @@ func (h *Handler) handleCreateFileMaterialErrors(err error, r *handlers.RequestC
 	if err == ForbiddenFileType {
 		return r.Error(http.StatusBadRequest, "Forbidden file type")
 	}
-	fmt.Println(err)
-	return r.Error(http.StatusInternalServerError, "Creating file material failed")
+	return r.ServerError(err)
 }
 
 func (h *Handler) CreateMaterial(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
-	formMaterialType := c.FormValue("type")
+	contentType := c.Request().Header["Content-Type"]
 
-	if formMaterialType == "file" {
+	if strings.Contains(contentType[0], "multipart/form-data") {
+
+		if c.FormValue("type") != "file" {
+			return r.Error(http.StatusBadRequest, "only file material can be uploaded through a form")
+		}
 
 		params, err := h.collectFileMaterialParams(c)
 		if err != nil {
 			return err
 		}
+
+		if params.fileHeader == nil {
+			return r.Error(http.StatusBadRequest, "must include a file")
+		}
+
 		dbMat, err := h.service.CreateFileMaterial(params, r.Ctx)
 		if err != nil {
 			return h.handleCreateFileMaterialErrors(err, r)
 		}
+
 		return c.JSON(http.StatusCreated, FileMaterial{
 			Uuid:        dbMat.Uuid,
 			Type:        "file",
@@ -126,17 +136,13 @@ func (h *Handler) CreateMaterial(c echo.Context) error {
 			FileUrl:     dbMat.Url,
 		})
 
-	} else if formMaterialType != "" {
-		return r.Error(http.StatusBadRequest, "Only file materials can be uploaded through a form")
-	}
+	} else if strings.Contains(contentType[0], "application/json") {
 
-	var req CreateUrlMaterialRequest
-	if err := c.Bind(&req); err != nil {
-		fmt.Println(err)
-		return r.Error(http.StatusBadRequest, "invalid create url material request")
-	}
-
-	if req.MatType == "url" {
+		var req CreateUrlMaterialRequest
+		if err := c.Bind(&req); err != nil {
+			fmt.Println(err)
+			return r.Error(http.StatusBadRequest, "invalid create url material request")
+		}
 
 		courseId := c.Param("courseId")
 
@@ -152,8 +158,7 @@ func (h *Handler) CreateMaterial(c echo.Context) error {
 			url:         req.Url,
 		}, r.Ctx)
 		if err != nil {
-			fmt.Println(err)
-			return r.Error(http.StatusInternalServerError, "Failed to create url material")
+			return r.ServerError(err)
 		}
 
 		return c.JSON(http.StatusOK, UrlMaterial{
@@ -166,7 +171,7 @@ func (h *Handler) CreateMaterial(c echo.Context) error {
 		})
 
 	} else {
-		return r.Error(http.StatusBadRequest, "Only url materials can be uploaded through json")
+		return r.Error(http.StatusBadRequest, "bad request")
 	}
 }
 

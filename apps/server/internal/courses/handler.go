@@ -110,9 +110,9 @@ type UpdateCourseResponse struct {
 func (h *CourseHandler) UpdateCourse(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
-	couresId := c.Param("courseId")
-	if couresId == "" {
-		return r.Error(http.StatusBadRequest, "invalid request")
+	courseId := c.Param("courseId")
+	if courseId == "" {
+		return r.Error(http.StatusBadRequest, "invalid request, missing course id")
 	}
 
 	var req UpdateCourseRequest
@@ -126,7 +126,7 @@ func (h *CourseHandler) UpdateCourse(c echo.Context) error {
 		Name:        req.Name,
 		Description: req.Description,
 		UpdatedAt:   unixTime,
-		Uuid:        couresId,
+		Uuid:        courseId,
 	}
 
 	course, err := h.service.UpdateCourse(updateParams, r.Ctx)
@@ -138,7 +138,7 @@ func (h *CourseHandler) UpdateCourse(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, UpdateCourseResponse{
-		Uuid:        couresId,
+		Uuid:        courseId,
 		Name:        course.Name,
 		Description: course.Description,
 		CreatedAt:   utils.UnixToIso(course.CreatedAt),
