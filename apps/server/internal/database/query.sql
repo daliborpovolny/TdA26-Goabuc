@@ -70,3 +70,11 @@ SELECT uuid, name, description, url, courseUuid FROM material WHERE material.uui
 
 -- name: ListAllMaterialsOfCourse :many
 SELECT uuid, name, description, url, courseUuid FROM material WHERE material.courseUuid = ?;
+
+-- name: UpdateMaterialPartial :one
+UPDATE material
+SET
+  name        = COALESCE(sqlc.narg(name), name),
+  description = COALESCE(sqlc.narg(description), description),
+  url   = COALESCE(sqlc.narg(url), url)
+WHERE uuid = sqlc.arg(uuid) RETURNING *;

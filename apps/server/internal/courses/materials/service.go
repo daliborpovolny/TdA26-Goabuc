@@ -7,8 +7,10 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"path/filepath"
 	"strings"
 	database "tourbackend/internal/database/gen"
+	"tourbackend/internal/utils"
 
 	"github.com/gabriel-vasile/mimetype"
 )
@@ -116,9 +118,9 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 	formattedMaterials := make([]Material, 0, len(dbMaterials))
 	for _, material := range dbMaterials {
 
-		fmt.Println(material)
-
 		expectedUrlStartForLocalFile := scheme + "://" + host + "/api/static/uploads"
+		fmt.Println("expected: ", expectedUrlStartForLocalFile)
+		fmt.Println("actual: ", material.Url)
 		if strings.HasPrefix(material.Url, expectedUrlStartForLocalFile) {
 
 			formattedMaterials = append(formattedMaterials, FileMaterial{
@@ -212,6 +214,30 @@ func (s *Service) saveFileToStatic(
 		if !errors.Is(err, os.ErrExist) {
 			fmt.Println("failed to create materials folder, wrong path", err)
 			return "", err
+		}
+	}
+
+	// delete former materials if any - this could be done only on updates but whatever!
+	prefix := params.uuid
+	entries, err := os.ReadDir(pathToMaterialsFolder)
+	if err != nil {
+		return "", err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		name := entry.Name()
+		fmt.Println(name)
+
+		if strings.HasPrefix(name, prefix) {
+
+			err := os.Remove(filepath.Join(pathToMaterialsFolder, name))
+			if err != nil {
+				return "", err
+			}
 		}
 	}
 
@@ -336,32 +362,60 @@ func (s *Service) DeleteMaterial(materialId string, ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) UpdateFileMaterial(params *CreateFileMaterialParams, ctx context.Context) (*database.Material, error) {
+type UpdateFileMaterialParms struct {
+	uuid     string
+	courseId string
 
-	url, err := s.checkAndSaveFile(params)
-	if err != nil {
-		return nil, err
+	fileHeader *multipart.FileHeader
+	url        *string
+
+	name        *string
+	description *string
+
+	scheme string
+	host   string
+}
+
+func (s *Service) UpdateFileMaterial(params *UpdateFileMaterialParms, ctx context.Context) (*database.Material, error) {
+
+	if params.fileHeader != nil {
+
+		url, err := s.checkAndSaveFile(&CreateFileMaterialParams{
+			fileHeader:  params.fileHeader,
+			uuid:        params.uuid,
+			courseId:    params.courseId,
+			name:        "",
+			description: "",
+			scheme:      params.scheme,
+			host:        params.host,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		params.url = &url
 	}
 
-	material, err := s.q.UpdateMaterial(ctx, database.UpdateMaterialParams{
-		Name:        params.name,
+	material, err := s.q.UpdateMaterialPartial(ctx, database.UpdateMaterialPartialParams{
+		Name:        utils.ToSqlNullString(params.name),
 		Uuid:        params.uuid,
-		Url:         url,
-		Description: params.description,
+		Url:         utils.ToSqlNullString(params.url),
+		Description: utils.ToSqlNullString(params.description),
 	})
+
 	if err != nil {
 		return nil, err
 	}
 	return &material, nil
 }
 
-func (s *Service) UpdateUrlMaterial(params *CreateUrlMaterialParams, ctx context.Context) (*database.Material, error) {
+func (s *Service) UpdateUrlMaterial(name *string, description *string, url *string, uuid string, ctx context.Context) (*database.Material, error) {
 
-	material, err := s.q.UpdateMaterial(ctx, database.UpdateMaterialParams{
-		Name:        params.name,
-		Uuid:        params.uuid,
-		Url:         params.url,
-		Description: params.description,
+	material, err := s.q.UpdateMaterialPartial(ctx, database.UpdateMaterialPartialParams{
+		Name:        utils.ToSqlNullString(name),
+		Uuid:        uuid,
+		Url:         utils.ToSqlNullString(url),
+		Description: utils.ToSqlNullString(description),
 	})
 	if err != nil {
 		return nil, err

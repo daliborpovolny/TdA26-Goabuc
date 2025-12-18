@@ -414,3 +414,37 @@ func (q *Queries) UpdateMaterial(ctx context.Context, arg UpdateMaterialParams) 
 	)
 	return i, err
 }
+
+const updateMaterialPartial = `-- name: UpdateMaterialPartial :one
+UPDATE material
+SET
+  name        = COALESCE(?1, name),
+  description = COALESCE(?2, description),
+  url   = COALESCE(?3, url)
+WHERE uuid = ?4 RETURNING uuid, name, description, url, courseuuid
+`
+
+type UpdateMaterialPartialParams struct {
+	Name        sql.NullString `json:"name"`
+	Description sql.NullString `json:"description"`
+	Url         sql.NullString `json:"url"`
+	Uuid        string         `json:"uuid"`
+}
+
+func (q *Queries) UpdateMaterialPartial(ctx context.Context, arg UpdateMaterialPartialParams) (Material, error) {
+	row := q.db.QueryRowContext(ctx, updateMaterialPartial,
+		arg.Name,
+		arg.Description,
+		arg.Url,
+		arg.Uuid,
+	)
+	var i Material
+	err := row.Scan(
+		&i.Uuid,
+		&i.Name,
+		&i.Description,
+		&i.Url,
+		&i.Courseuuid,
+	)
+	return i, err
+}

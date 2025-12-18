@@ -159,6 +159,7 @@ check(session.put(
 ))
 session.headers.update({"Content-Type": "application/json"})
 
+quit()
 
 
 log("DELETE MATERIAL")
@@ -174,6 +175,259 @@ check(session.delete(
 
 log("DELETE COURSE")
 check(session.delete(f"{BASE_URL}/courses/{course_id}"))
+
+import time
+import mimetypes
+from pathlib import Path
+
+log("PHASE 2 – MATERIALS")
+
+# --------------------------
+# CREATE TEST COURSE
+# ---------------------------
+
+course = check(session.post(
+    f"{BASE_URL}/courses",
+    json={
+        "name": "Test Course for Phase 2",
+        "description": "Testing course materials"
+    }
+))
+course_id = course["uuid"]
+
+
+# ---------------------------
+# LIST MATERIALS (EMPTY)
+# ---------------------------
+
+log("LIST MATERIALS (EMPTY)")
+materials = check(session.get(
+    f"{BASE_URL}/courses/{course_id}/materials"
+))
+assert materials == []
+
+
+# ---------------------------
+# ADD URL MATERIAL
+# ---------------------------
+
+log("ADD URL MATERIAL")
+url_material = check(session.post(
+    f"{BASE_URL}/courses/{course_id}/materials",
+    json={
+        "type": "url",
+        "name": "Official Documentation",
+        "description": "Link to docs",
+        "url": "https://example.com/docs"
+    }
+))
+url_material_id = url_material["uuid"]
+
+
+# ---------------------------
+# ADD FILE MATERIAL (PDF)
+# ---------------------------
+
+log("ADD FILE MATERIAL – PDF")
+pdf_path = Path("test.pdf")
+pdf_path.write_text("%PDF-1.4\n%Test\n%%EOF")
+
+with open(pdf_path, "rb") as f:
+    file_material = check(session.post(
+        f"{BASE_URL}/courses/{course_id}/materials",
+        files={"file": ("test.pdf", f, "application/pdf")},
+        data={
+            "type": "file",
+            "name": "Course Syllabus",
+            "description": "PDF syllabus"
+        }
+    ))
+
+file_material_id = file_material["uuid"]
+
+
+# ---------------------------
+# ADD FILE MATERIAL (IMAGE)
+# ---------------------------
+
+log("ADD FILE MATERIAL – IMAGE")
+img_path = Path("test.png")
+img_path.write_bytes(bytes([137, 80, 78, 71, 13, 10, 26, 10]))
+
+with open(img_path, "rb") as f:
+    check(session.post(
+        f"{BASE_URL}/courses/{course_id}/materials",
+        files={"file": ("test.png", f, "image/png")},
+        data={
+            "type": "file",
+            "name": "Diagram",
+            "description": "PNG diagram"
+        }
+    ))
+
+
+# ---------------------------
+# REJECT LARGE FILE (>30MB)
+# ---------------------------
+
+log("REJECT LARGE FILE")
+big_path = Path("big.bin")
+big_path.write_bytes(b"\x00" * (31 * 1024 * 1024))
+
+with open(big_path, "rb") as f:
+    resp = session.post(
+        f"{BASE_URL}/courses/{course_id}/materials",
+        files={"file": ("big.bin", f, "application/octet-stream")},
+        data={
+            "type": "file",
+            "name": "Too Large",
+            "description": "Should fail"
+        }
+    )
+    assert resp.status_code == 400
+
+
+# ---------------------------
+# REJECT UNSUPPORTED TYPE
+# ---------------------------
+
+log("REJECT UNSUPPORTED FILE TYPE")
+with open("malware.exe", "wb") as f:
+    f.write(b"MZ")
+
+with open("malware.exe", "rb") as f:
+    resp = session.post(
+        f"{BASE_URL}/courses/{course_id}/materials",
+        files={"file": ("malware.exe", f, "application/x-msdownload")},
+        data={
+            "type": "file",
+            "name": "Bad File",
+            "description": "Should fail"
+        }
+    )
+    assert resp.status_code == 400
+
+
+# ---------------------------
+# LIST MATERIALS (COUNT + ORDER)
+# ---------------------------
+
+log("LIST MATERIALS (ORDER)")
+check(session.post(
+    f"{BASE_URL}/courses/{course_id}/materials",
+    json={
+        "type": "url",
+        "name": "First",
+        "description": "First",
+        "url": "https://example.com/1"
+    }
+))
+time.sleep(1)
+
+check(session.post(
+    f"{BASE_URL}/courses/{course_id}/materials",
+    json={
+        "type": "url",
+        "name": "Second",
+        "description": "Second",
+        "url": "https://example.com/2"
+    }
+))
+time.sleep(1)
+
+check(session.post(
+    f"{BASE_URL}/courses/{course_id}/materials",
+    json={
+        "type": "url",
+        "name": "Third",
+        "description": "Third",
+        "url": "https://example.com/3"
+    }
+))
+
+materials = check(session.get(
+    f"{BASE_URL}/courses/{course_id}/materials"
+))
+
+names = [m["name"] for m in materials]
+assert names.index("Third") < names.index("Second") < names.index("First")
+
+
+# ---------------------------
+# COURSE DETAIL INCLUDES MATERIALS
+# ---------------------------
+
+log("COURSE DETAIL INCLUDES MATERIALS")
+course_detail = check(session.get(
+    f"{BASE_URL}/courses/{course_id}"
+))
+assert isinstance(course_detail["materials"], list)
+assert len(course_detail["materials"]) >= 3
+
+
+# ---------------------------
+# UPDATE URL MATERIAL
+# ---------------------------
+
+log("UPDATE URL MATERIAL")
+check(session.put(
+    f"{BASE_URL}/courses/{course_id}/materials/{url_material_id}",
+    json={
+        "name": "Updated Docs",
+        "description": "Updated",
+        "url": "https://example.com/new"
+    }
+))
+
+
+# ---------------------------
+# UPDATE FILE MATERIAL METADATA
+# ---------------------------
+
+log("UPDATE FILE MATERIAL METADATA")
+check(session.put(
+    f"{BASE_URL}/courses/{course_id}/materials/{file_material_id}",
+    json={
+        "name": "Updated Syllabus",
+        "description": "Updated description"
+    }
+))
+
+
+# ---------------------------
+# REPLACE FILE
+# ---------------------------
+
+log("REPLACE FILE")
+with open(pdf_path, "rb") as f:
+    check(session.put(
+        f"{BASE_URL}/courses/{course_id}/materials/{file_material_id}",
+        files={"file": ("updated.pdf", f, "application/pdf")},
+        data={"name": "Replaced Syllabus"}
+    ))
+
+
+# ---------------------------
+# DELETE MATERIALS
+# ---------------------------
+
+log("DELETE MATERIALS")
+session.delete(
+    f"{BASE_URL}/courses/{course_id}/materials/{url_material_id}"
+)
+session.delete(
+    f"{BASE_URL}/courses/{course_id}/materials/{file_material_id}"
+)
+
+
+# ---------------------------
+# CLEANUP COURSE
+# ---------------------------
+
+log("DELETE COURSE")
+session.delete(f"{BASE_URL}/courses/{course_id}")
+
+
 
 
 

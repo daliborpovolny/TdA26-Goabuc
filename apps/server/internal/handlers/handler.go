@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	db "tourbackend/internal/database/gen"
@@ -58,6 +59,8 @@ func (r *RequestCtx) ServerError(err error) error {
 		"internal server error",
 		"error", err,
 	)
+
+	fmt.Println("Unexpected error", err)
 
 	return r.Echo.JSON(http.StatusInternalServerError, map[string]string{"message": "Internal server error"})
 }
