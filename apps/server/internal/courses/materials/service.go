@@ -11,7 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	database "tourbackend/internal/database/gen"
+
+	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/utils"
 
 	"github.com/gabriel-vasile/mimetype"
@@ -85,11 +86,11 @@ func (f UrlMaterial) GetType() string {
 }
 
 type Service struct {
-	q          *database.Queries
+	q          *db.Queries
 	staticPath string
 }
 
-func NewService(queries *database.Queries, staticPath string) *Service {
+func NewService(queries *db.Queries, staticPath string) *Service {
 	return &Service{queries, staticPath}
 }
 
@@ -317,7 +318,7 @@ func (s *Service) CreateFileMaterial(req *CreateFileMaterialRequest, materialId 
 
 	now := time.Now().Unix()
 
-	dbMat, err := s.q.CreateMaterial(ctx, database.CreateMaterialParams{
+	dbMat, err := s.q.CreateMaterial(ctx, db.CreateMaterialParams{
 		Uuid:        materialId,
 		CourseUuid:  req.CourseId,
 		Name:        req.Name,
@@ -357,7 +358,7 @@ func (s *Service) CreateUrlMaterial(req CreateUrlMaterialRequest, materialId str
 
 	now := time.Now().Unix()
 
-	dbMat, err := s.q.CreateMaterial(ctx, database.CreateMaterialParams{
+	dbMat, err := s.q.CreateMaterial(ctx, db.CreateMaterialParams{
 		Uuid:        materialId,
 		CourseUuid:  req.CourseId,
 		Name:        req.Name,
@@ -444,7 +445,7 @@ func (s *Service) UpdateFileMaterial(req *UpdateFileMaterialRequest, fileHeader 
 
 	now := time.Now().Unix()
 
-	dbMat, err := s.q.UpdateMaterialPartial(ctx, database.UpdateMaterialPartialParams{
+	dbMat, err := s.q.UpdateMaterialPartial(ctx, db.UpdateMaterialPartialParams{
 		Uuid:        req.MaterialId,
 		Name:        utils.ToSqlNullString(req.Name),
 		Description: utils.ToSqlNullString(req.Description),
@@ -479,7 +480,7 @@ func (s *Service) UpdateUrlMaterial(req *UpdateUrlMaterialRequest, ctx context.C
 
 	now := time.Now().Unix()
 
-	dbMat, err := s.q.UpdateMaterialPartial(ctx, database.UpdateMaterialPartialParams{
+	dbMat, err := s.q.UpdateMaterialPartial(ctx, db.UpdateMaterialPartialParams{
 		Uuid:        req.MaterialId,
 		Name:        utils.ToSqlNullString(req.Name),
 		Description: utils.ToSqlNullString(req.Description),

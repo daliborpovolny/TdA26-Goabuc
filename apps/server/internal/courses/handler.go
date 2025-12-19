@@ -81,10 +81,10 @@ func (h *CourseHandler) GetCourse(c echo.Context) error {
 	req := c.Request()
 	courseDetail, err := h.service.GetCourse(courseId, req.Host, c.Scheme(), r.Ctx)
 	if err != nil {
-		if err == FailedToFetchCourse {
+		if err == ErrFailedToFetchCourse {
 			return r.Error(http.StatusInternalServerError, "Failed to fetch from the database")
 		}
-		if err == CourseNotFound {
+		if err == ErrCourseNotFound {
 			return r.Error(http.StatusNotFound, "Unknown courseId")
 		}
 		return r.Error(http.StatusInternalServerError, "Failed to get course")
@@ -131,7 +131,7 @@ func (h *CourseHandler) UpdateCourse(c echo.Context) error {
 
 	course, err := h.service.UpdateCourse(updateParams, r.Ctx)
 	if err != nil {
-		if err == CourseNotFound {
+		if err == ErrCourseNotFound {
 			return r.Error(http.StatusNotFound, "The requested resource was not found.")
 		}
 		return r.Error(http.StatusInternalServerError, "Failed to update the course.")
@@ -156,7 +156,7 @@ func (h *CourseHandler) DeleteCourse(c echo.Context) error {
 
 	err := h.service.DeleteCourse(courseId, r.Ctx)
 	if err != nil {
-		if err == FailedToFetchCourse {
+		if err == ErrFailedToFetchCourse {
 			return r.Error(http.StatusNotFound, "The requested resource was not found.")
 		}
 		return r.Error(http.StatusInternalServerError, "Failed to delete the course.")

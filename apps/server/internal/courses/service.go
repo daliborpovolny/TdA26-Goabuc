@@ -42,9 +42,9 @@ func (s *Service) GetCourse(courseId string, host string, scheme string, ctx con
 	course, err := s.q.GetCourse(ctx, courseId)
 	if err != nil {
 		if utils.IsNoRowsError(err) {
-			return nil, CourseNotFound
+			return nil, ErrCourseNotFound
 		}
-		return nil, FailedToFetchCourse
+		return nil, ErrFailedToFetchCourse
 	}
 
 	mats, err := s.materialsService.ListMaterials(courseId, host, scheme, ctx)
@@ -65,7 +65,7 @@ func (s *Service) UpdateCourse(params db.UpdateCourseParams, ctx context.Context
 	updated, err := s.q.UpdateCourse(ctx, params)
 	if err != nil {
 		if utils.IsNoRowsError(err) {
-			return nil, CourseNotFound
+			return nil, ErrCourseNotFound
 		}
 		return nil, errors.New("Failed to update the course")
 	}
@@ -86,7 +86,7 @@ func (s *Service) DeleteCourse(courseId string, ctx context.Context) error {
 	}
 
 	if n == 0 {
-		return CourseNotFound
+		return ErrCourseNotFound
 	}
 
 	return nil
