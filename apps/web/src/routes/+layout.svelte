@@ -30,10 +30,11 @@
 			<a href="/courses">Courses</a>
 
 			{#if auth.user}
+				<a href="/dashboard">Dashboard</a>
+				<a href="/profile">Profile</a>
 				<button class="rounded-md px-3 py-2 hover:bg-stone-200" onclick={() => auth.logout()}
 					>Logout</button
 				>
-				<a href="/dashboard">Dashboard</a>
 			{:else}
 				<a href="/login">Login</a>
 				<a href="/register">Register</a>
