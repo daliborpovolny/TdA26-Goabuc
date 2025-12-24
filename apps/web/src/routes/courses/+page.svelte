@@ -1,5 +1,8 @@
 <script lang="ts">
-	let coursesPromise: Promise<any[]> = loadCourses();
+	import DataLoader from "$lib/components/DataLoader.svelte";
+	import type { Course } from "$lib/types";
+
+	let coursesPromise: Promise<Course[]> = loadCourses();
 
 	async function loadCourses() {
 		return fetch('/api/courses', {
@@ -16,25 +19,25 @@
 				}
 				return res.json();
 			})
-			.then((data) => {
-				return data;
-			});
 	}
 </script>
 
-<h1 class="ml-2">Courses</h1>
-<br />
+<br>
 
-{#await coursesPromise}
-	<p>Loading</p>
-{:then data}
-	<ul class="ml-4">
-		{#each data as course}
-			<a href="/courses/{course.uuid}"> {course.name} </a>
-			<p>{course.description}</p>
-			<br />
-		{/each}
-	</ul>
-{:catch error}
-	<p class="text-red-500 capitalize">{error.message}</p>
-{/await}
+<div class="ml-5">
+	<h1 class="text-2xl">Courses</h1>
+	<br />
+
+	<DataLoader promise={coursesPromise}>
+		{#snippet children(courses: Course[])}
+		<ul>
+			{#each courses as course}
+				<a class="font-medium" href="/courses/{course.uuid}"> {course.name} </a>
+				<p>{course.description}</p>
+				<br />
+			{/each}
+		</ul>
+
+		{/snippet}
+	</DataLoader>
+</div>
