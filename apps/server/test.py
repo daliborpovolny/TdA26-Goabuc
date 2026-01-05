@@ -159,7 +159,6 @@ check(session.put(
 ))
 session.headers.update({"Content-Type": "application/json"})
 
-quit()
 
 
 log("DELETE MATERIAL")
@@ -175,6 +174,7 @@ check(session.delete(
 
 log("DELETE COURSE")
 check(session.delete(f"{BASE_URL}/courses/{course_id}"))
+
 
 import time
 import mimetypes
@@ -229,8 +229,9 @@ url_material_id = url_material["uuid"]
 # ---------------------------
 
 log("ADD FILE MATERIAL – PDF")
+session.headers.pop("Content-Type", None)
+
 pdf_path = Path("test.pdf")
-pdf_path.write_text("%PDF-1.4\n%Test\n%%EOF")
 
 with open(pdf_path, "rb") as f:
     file_material = check(session.post(
@@ -252,7 +253,6 @@ file_material_id = file_material["uuid"]
 
 log("ADD FILE MATERIAL – IMAGE")
 img_path = Path("test.png")
-img_path.write_bytes(bytes([137, 80, 78, 71, 13, 10, 26, 10]))
 
 with open(img_path, "rb") as f:
     check(session.post(
@@ -307,6 +307,7 @@ with open("malware.exe", "rb") as f:
     )
     assert resp.status_code == 400
 
+session.headers.update({"Content-Type": "application/json"})
 
 # ---------------------------
 # LIST MATERIALS (COUNT + ORDER)
@@ -384,6 +385,9 @@ check(session.put(
 # UPDATE FILE MATERIAL METADATA
 # ---------------------------
 
+session.headers.pop("Content-Type", None)
+
+
 log("UPDATE FILE MATERIAL METADATA")
 check(session.put(
     f"{BASE_URL}/courses/{course_id}/materials/{file_material_id}",
@@ -406,6 +410,8 @@ with open(pdf_path, "rb") as f:
         data={"name": "Replaced Syllabus"}
     ))
 
+session.headers.update({"Content-Type": "application/json"})
+
 
 # ---------------------------
 # DELETE MATERIALS
@@ -418,6 +424,79 @@ session.delete(
 session.delete(
     f"{BASE_URL}/courses/{course_id}/materials/{file_material_id}"
 )
+
+
+
+# ---------------------------
+# ACCEPT ALL SUPPORTED FILE FORMATS
+# ---------------------------
+
+log("ACCEPT ALL SUPPORTED FILE FORMATS")
+session.headers.pop("Content-Type", None)
+
+supported_formats = [
+    {
+        "ext": "txt",
+        "mime": "text/plain",
+        "content": b"Text content",
+    },
+    {
+        "ext": "jpg",
+        "mime": "image/jpeg",
+        "content": bytes([0xFF, 0xD8, 0xFF]),
+    },
+    {
+        "ext": "jpeg",
+        "mime": "image/jpeg",
+        "content": bytes([0xFF, 0xD8, 0xFF]),
+    },
+    {
+        "ext": "gif",
+        "mime": "image/gif",
+        "content": b"GIF89a",
+    },
+    {
+        "ext": "mp3",
+        "mime": "audio/mpeg",
+        "content": b"ID3",
+    },
+    {
+        "ext": "mp4",
+        "mime": "video/mp4",
+        "content": bytes([0x00, 0x00, 0x00, 0x18]),
+    },
+    {
+        "ext": "docx",
+        "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "content": b"PK",
+    },
+]
+
+for fmt in supported_formats:
+    filename = f"test.{fmt['ext']}"
+
+    with open(filename, "wb") as f:
+        f.write(fmt["content"])
+
+    with open(filename, "rb") as f:
+        resp = session.post(
+            f"{BASE_URL}/courses/{course_id}/materials",
+            files={
+                "file": (filename, f, fmt["mime"]),
+            },
+            data={
+                "type": "file",
+                "name": f"Test {fmt['ext'].upper()} File",
+                "description": f"Testing {fmt['ext']} format",
+            },
+        )
+
+    print(f"→ {filename}: {resp.status_code}")
+    data = check(resp)
+
+    assert data["type"] == "file"
+    assert data["mimeType"] == fmt["mime"]
+
 
 
 # ---------------------------
