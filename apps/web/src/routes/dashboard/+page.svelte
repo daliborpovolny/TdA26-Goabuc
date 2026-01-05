@@ -30,11 +30,11 @@
 	<title>Dashboard</title>
 
 	<br />
-	<h1>Manage Courses</h1>
+	<h1 class="text-2xl font-bold">Manage Courses</h1>
 	<br />
 
-	<div>
-		<a href="/dashboard/edit/courses">Create new course</a>
+	<div class="text-semibold">
+		<a href="/dashboard/edit/courses" class="px-3 py-2 rounded-md bg-[#2592B8] hover:bg-[#6DD4B1] text-[#FFF]">Create new course</a>
 	</div>
 
 	<br />

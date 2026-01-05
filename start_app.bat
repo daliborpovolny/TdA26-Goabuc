@@ -18,4 +18,12 @@ if exist .\apps\web (
 
 cd "%loc%"
 
+echo Running caddy...
+if exist .\apps\caddy (
+    cd .\apps\caddy
+    start cmd /k caddy run
+)
+
+cd "%loc%"
+
 exit /b

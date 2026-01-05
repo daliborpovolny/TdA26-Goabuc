@@ -9,7 +9,7 @@
 	{#snippet children(user: User)}
 		<div class="ml-4">
 			<br />
-			<h1 class="text-2xl">This is you!</h1>
+			<h1 class="text-2xl font-bold">This is you!</h1>
 			<br />
 			<p>First name: {user.firstName}</p>
 			<br />

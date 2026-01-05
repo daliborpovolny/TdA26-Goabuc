@@ -23,7 +23,7 @@
 	}
 </script>
 
-<div>
+<div class="ml-4">
 	<h1 class="text-2xl">Create new course</h1>
 
 	<form on:submit={createCourse}>

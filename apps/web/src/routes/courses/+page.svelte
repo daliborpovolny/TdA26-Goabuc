@@ -24,7 +24,7 @@
 <br />
 
 <div class="ml-5">
-	<h1 class="text-2xl">Courses</h1>
+	<h1 class="text-2xl font-bold">Courses</h1>
 	<br />
 
 	<DataLoader promise={coursesPromise}>

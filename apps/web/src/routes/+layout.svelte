@@ -20,7 +20,7 @@
 {#if !auth.initialized}
 	<div class="splash-screen">Loading App...</div>
 {:else}
-	<div class="mx-3">
+	<div class="font-semibold text-xl">
 		<Navbar />
 	</div>
 
