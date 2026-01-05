@@ -87,3 +87,58 @@ SET
     mime_type   = COALESCE(sqlc.narg(mime_type), mime_type),
     updated_at  = sqlc.arg(updated_at)
 WHERE uuid = sqlc.arg(uuid) RETURNING *;
+
+--* Quizz
+
+-- name: CreateQuizz :one
+INSERT INTO quizz (
+    uuid, course_uuid, title, attempts_count, created_at, updated_at
+) VALUES (
+    ?, ?, ?, ?, ?, ?
+) RETURNING *;
+
+-- name: UpdateQuizz :one
+UPDATE quizz
+SET
+    title =             COALESCE(sqlc.narg(title), title),
+    attempts_count =    COALESCE(sqlc.narg(attempts_count), attempts_count),
+    updated_at =        COALESCE(sqlc.narg(updated_at), updated_at)
+WHERE uuid = ?
+RETURNING *;
+
+-- name: DeleteQuizz :execresult
+DELETE FROM quizz WHERE uuid = ?;
+
+-- name: ListQuizzes :many
+SELECT * FROM quizz;
+
+--* Question
+
+-- name: CreateQuestion :one
+INSERT INTO question (
+    uuid, quizz_uuid, order, type, question_text, options, correct_indices
+) SELECT 
+    sqlc.arg(uuid),
+    sqlc.arg(quiz_uuid),
+    COALESCE(MAX("order"), 0) + 1,    
+    sqlc.arg(type),
+    sqlc.arg(question_text),
+    sqlc.arg(options),
+    sqlc.arg(correct_indices)
+FROM question
+WHERE quizz_uuid = sqlc.arg(quiz_uuid)
+RETURNING *;
+
+-- name: ListQuestions :many
+SELECT * FROM question;
+
+-- name: UpdateQuestion :one
+UPDATE question
+SET
+    question_text = COALESCE(sqlc.narg(question_text), question_text),
+    options = COALESCE(sqlc.narg(options), options),
+    correct_indices = COALESCE(sqlc.narg(correct_indices), correct_indices)
+RETURNING *;
+
+-- name: RemoveQuestion :execresult
+DELETE FROM question WHERE uuid = ?;

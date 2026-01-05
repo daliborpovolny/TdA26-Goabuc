@@ -37,6 +37,7 @@ type Material struct {
 type Question struct {
 	Uuid           string `json:"uuid"`
 	QuizzUuid      string `json:"quizz_uuid"`
+	Order          int64  `json:"order"`
 	Type           string `json:"type"`
 	QuestionText   string `json:"question_text"`
 	Options        string `json:"options"`

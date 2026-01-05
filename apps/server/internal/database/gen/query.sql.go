@@ -113,6 +113,95 @@ func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) 
 	return i, err
 }
 
+const createQuestion = `-- name: CreateQuestion :one
+
+INSERT INTO question (
+    uuid, quizz_uuid, order, type, question_text, options, correct_indices
+) SELECT 
+    ?1,
+    ?2,
+    COALESCE(MAX("order"), 0) + 1,    
+    ?3,
+    ?4,
+    ?5,
+    ?6
+FROM question
+WHERE quizz_uuid = ?2
+RETURNING uuid, quizz_uuid, "order", type, question_text, options, correct_indices
+`
+
+type CreateQuestionParams struct {
+	Uuid           string `json:"uuid"`
+	QuizUuid       string `json:"quiz_uuid"`
+	Type           string `json:"type"`
+	QuestionText   string `json:"question_text"`
+	Options        string `json:"options"`
+	CorrectIndices string `json:"correct_indices"`
+}
+
+// * Question
+func (q *Queries) CreateQuestion(ctx context.Context, arg CreateQuestionParams) (Question, error) {
+	row := q.db.QueryRowContext(ctx, createQuestion,
+		arg.Uuid,
+		arg.QuizUuid,
+		arg.Type,
+		arg.QuestionText,
+		arg.Options,
+		arg.CorrectIndices,
+	)
+	var i Question
+	err := row.Scan(
+		&i.Uuid,
+		&i.QuizzUuid,
+		&i.Order,
+		&i.Type,
+		&i.QuestionText,
+		&i.Options,
+		&i.CorrectIndices,
+	)
+	return i, err
+}
+
+const createQuizz = `-- name: CreateQuizz :one
+
+INSERT INTO quizz (
+    uuid, course_uuid, title, attempts_count, created_at, updated_at
+) VALUES (
+    ?, ?, ?, ?, ?, ?
+) RETURNING uuid, course_uuid, title, attempts_count, created_at, updated_at
+`
+
+type CreateQuizzParams struct {
+	Uuid          string `json:"uuid"`
+	CourseUuid    string `json:"course_uuid"`
+	Title         string `json:"title"`
+	AttemptsCount int64  `json:"attempts_count"`
+	CreatedAt     int64  `json:"created_at"`
+	UpdatedAt     int64  `json:"updated_at"`
+}
+
+// * Quizz
+func (q *Queries) CreateQuizz(ctx context.Context, arg CreateQuizzParams) (Quizz, error) {
+	row := q.db.QueryRowContext(ctx, createQuizz,
+		arg.Uuid,
+		arg.CourseUuid,
+		arg.Title,
+		arg.AttemptsCount,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	var i Quizz
+	err := row.Scan(
+		&i.Uuid,
+		&i.CourseUuid,
+		&i.Title,
+		&i.AttemptsCount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const createSession = `-- name: CreateSession :one
 
 INSERT INTO session (
@@ -191,6 +280,14 @@ DELETE FROM material WHERE material.uuid = ?
 
 func (q *Queries) DeleteMaterial(ctx context.Context, uuid string) (sql.Result, error) {
 	return q.db.ExecContext(ctx, deleteMaterial, uuid)
+}
+
+const deleteQuizz = `-- name: DeleteQuizz :execresult
+DELETE FROM quizz WHERE uuid = ?
+`
+
+func (q *Queries) DeleteQuizz(ctx context.Context, uuid string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteQuizz, uuid)
 }
 
 const getCourse = `-- name: GetCourse :one
@@ -387,6 +484,75 @@ func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid strin
 	return items, nil
 }
 
+const listQuestions = `-- name: ListQuestions :many
+SELECT uuid, quizz_uuid, "order", type, question_text, options, correct_indices FROM question
+`
+
+func (q *Queries) ListQuestions(ctx context.Context) ([]Question, error) {
+	rows, err := q.db.QueryContext(ctx, listQuestions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Question
+	for rows.Next() {
+		var i Question
+		if err := rows.Scan(
+			&i.Uuid,
+			&i.QuizzUuid,
+			&i.Order,
+			&i.Type,
+			&i.QuestionText,
+			&i.Options,
+			&i.CorrectIndices,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listQuizzes = `-- name: ListQuizzes :many
+SELECT uuid, course_uuid, title, attempts_count, created_at, updated_at FROM quizz
+`
+
+func (q *Queries) ListQuizzes(ctx context.Context) ([]Quizz, error) {
+	rows, err := q.db.QueryContext(ctx, listQuizzes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Quizz
+	for rows.Next() {
+		var i Quizz
+		if err := rows.Scan(
+			&i.Uuid,
+			&i.CourseUuid,
+			&i.Title,
+			&i.AttemptsCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const makeUserAdmin = `-- name: MakeUserAdmin :exec
 
 INSERT INTO admin (user_id) VALUES (?)
@@ -396,6 +562,14 @@ INSERT INTO admin (user_id) VALUES (?)
 func (q *Queries) MakeUserAdmin(ctx context.Context, userID int64) error {
 	_, err := q.db.ExecContext(ctx, makeUserAdmin, userID)
 	return err
+}
+
+const removeQuestion = `-- name: RemoveQuestion :execresult
+DELETE FROM question WHERE uuid = ?
+`
+
+func (q *Queries) RemoveQuestion(ctx context.Context, uuid string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, removeQuestion, uuid)
 }
 
 const updateCourse = `-- name: UpdateCourse :one
@@ -508,6 +682,72 @@ func (q *Queries) UpdateMaterialPartial(ctx context.Context, arg UpdateMaterialP
 		&i.FaviconUrl,
 		&i.MimeType,
 		&i.ByteSize,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateQuestion = `-- name: UpdateQuestion :one
+UPDATE question
+SET
+    question_text = COALESCE(?1, question_text),
+    options = COALESCE(?2, options),
+    correct_indices = COALESCE(?3, correct_indices)
+RETURNING uuid, quizz_uuid, "order", type, question_text, options, correct_indices
+`
+
+type UpdateQuestionParams struct {
+	QuestionText   sql.NullString `json:"question_text"`
+	Options        sql.NullString `json:"options"`
+	CorrectIndices sql.NullString `json:"correct_indices"`
+}
+
+func (q *Queries) UpdateQuestion(ctx context.Context, arg UpdateQuestionParams) (Question, error) {
+	row := q.db.QueryRowContext(ctx, updateQuestion, arg.QuestionText, arg.Options, arg.CorrectIndices)
+	var i Question
+	err := row.Scan(
+		&i.Uuid,
+		&i.QuizzUuid,
+		&i.Order,
+		&i.Type,
+		&i.QuestionText,
+		&i.Options,
+		&i.CorrectIndices,
+	)
+	return i, err
+}
+
+const updateQuizz = `-- name: UpdateQuizz :one
+UPDATE quizz
+SET
+    title =             COALESCE(?2, title),
+    attempts_count =    COALESCE(?3, attempts_count),
+    updated_at =        COALESCE(?4, updated_at)
+WHERE uuid = ?
+RETURNING uuid, course_uuid, title, attempts_count, created_at, updated_at
+`
+
+type UpdateQuizzParams struct {
+	Title         sql.NullString `json:"title"`
+	AttemptsCount sql.NullInt64  `json:"attempts_count"`
+	UpdatedAt     sql.NullInt64  `json:"updated_at"`
+	Uuid          string         `json:"uuid"`
+}
+
+func (q *Queries) UpdateQuizz(ctx context.Context, arg UpdateQuizzParams) (Quizz, error) {
+	row := q.db.QueryRowContext(ctx, updateQuizz,
+		arg.Title,
+		arg.AttemptsCount,
+		arg.UpdatedAt,
+		arg.Uuid,
+	)
+	var i Quizz
+	err := row.Scan(
+		&i.Uuid,
+		&i.CourseUuid,
+		&i.Title,
+		&i.AttemptsCount,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
