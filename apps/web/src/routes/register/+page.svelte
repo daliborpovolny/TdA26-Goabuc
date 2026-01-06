@@ -1,3 +1,5 @@
+<title>Register</title>
+
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { auth } from '$lib/auth.svelte';
@@ -36,7 +38,6 @@
 	}
 </script>
 
-<title>Register</title>
 
 <form
 	class="mx-auto mt-10 max-w-md space-y-4 rounded-xl bg-white p-6 shadow-lg"

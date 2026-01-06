@@ -30,9 +30,10 @@
 <br />
 <DataLoader promise={coursesPromise}>
 	{#snippet children(course: Course)}
-		<div class="ml-5">
+		<title>{course.name}</title>
+		<div class="ml-5 text-4xl">
 			<div>
-				<h1 class="text-2xl">{course.name}</h1>
+				<h1 class="text-6xl">{course.name}</h1>
 				<br />
 				<p>{course.description}</p>
 			</div>

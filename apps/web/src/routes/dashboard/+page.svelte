@@ -1,3 +1,5 @@
+<title>Dashboard</title>
+
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { auth } from '$lib/auth.svelte.ts';
@@ -26,11 +28,10 @@
 	}
 </script>
 
-<div class="ml-4">
-	<title>Dashboard</title>
+<div class="ml-4 text-6xl">
 
 	<br />
-	<h1 class="text-2xl font-bold">Manage Courses</h1>
+	<h1 class="text-6xl font-bold">Manage Courses</h1>
 	<br />
 
 	<div class="text-semibold">

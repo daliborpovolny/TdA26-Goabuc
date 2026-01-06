@@ -1,3 +1,5 @@
+<title>Courses</title>
+
 <script lang="ts">
 	import DataLoader from '$lib/components/DataLoader.svelte';
 	import type { Course } from '$lib/types';
@@ -23,8 +25,8 @@
 
 <br />
 
-<div class="ml-5">
-	<h1 class="text-2xl font-bold">Courses</h1>
+<div class="ml-5 text-4xl">
+	<h1 class="text-6xl font-bold">Courses</h1>
 	<br />
 
 	<DataLoader promise={coursesPromise}>

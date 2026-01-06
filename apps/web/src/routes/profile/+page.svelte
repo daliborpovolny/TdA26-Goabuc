@@ -1,3 +1,5 @@
+<title>Profile</title>
+
 <script lang="ts">
 	import DataLoader from '$lib/components/DataLoader.svelte';
 	import type { User } from '$lib/auth.svelte';
