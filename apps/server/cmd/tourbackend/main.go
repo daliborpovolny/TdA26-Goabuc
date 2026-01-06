@@ -12,6 +12,7 @@ import (
 	"tourbackend/internal/auth"
 	"tourbackend/internal/courses"
 	"tourbackend/internal/courses/materials"
+	"tourbackend/internal/courses/quizzes"
 	db "tourbackend/internal/database"
 	"tourbackend/internal/middlewares"
 
@@ -80,6 +81,8 @@ func main() {
 
 	//* Courses and it's deps (materials and quizzes - TODO)
 	matsService := materials.NewService(queries, STATIC_PATH)
+	quizzesService := quizzes.NewService(queries, STATIC_PATH)
+
 	courseService := courses.NewService(queries, matsService)
 
 	coursesHandler := courses.NewCourseHandler(queries, IS_DEPLOYED, courseService)
@@ -100,6 +103,19 @@ func main() {
 
 	materials.PUT("/:materialId", materialsHandler.UpdateMaterial)
 	materials.DELETE("/:materialId", materialsHandler.DeleteMaterial)
+
+	//* Course Quizes
+	quizzesHandler := quizzes.NewHandler(STATIC_PATH, quizzesService, queries, IS_DEPLOYED)
+
+	quizzes := e.Group("/courses/:courseId/quizes")
+	quizzes.GET("", quizzesHandler.ListQuizzes)
+	quizzes.POST("", quizzesHandler.CreateQuizz)
+
+	quizzes.GET("/:quizId", quizzesHandler.GetQuizz)
+	quizzes.PUT("/:quizId", quizzesHandler.UpdateQuizz)
+	quizzes.DELETE("/:quizId", quizzesHandler.DeleteQuizz)
+
+	quizzes.POST("/:quizId/submit", quizzesHandler.SubmitQuizAnswers)
 
 	//* Static
 	e.Static("/static", STATIC_PATH)
