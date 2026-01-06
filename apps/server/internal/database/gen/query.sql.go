@@ -330,7 +330,7 @@ func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error
 	return i, err
 }
 
-const getQuiz = `-- name: GetQuiz :one
+const getQuiz = `-- name: GetQuiz :many
 SELECT
     qz.uuid AS quiz_uuid,
     qz.course_uuid AS course_uuid,
@@ -367,24 +367,40 @@ type GetQuizRow struct {
 	QuestionCorrectIndices sql.NullString `json:"question_correct_indices"`
 }
 
-func (q *Queries) GetQuiz(ctx context.Context, uuid string) (GetQuizRow, error) {
-	row := q.db.QueryRowContext(ctx, getQuiz, uuid)
-	var i GetQuizRow
-	err := row.Scan(
-		&i.QuizUuid,
-		&i.CourseUuid,
-		&i.QuizTitle,
-		&i.QuizAttemptsCount,
-		&i.QuizCreatedAt,
-		&i.QuizUpdatedAt,
-		&i.QuestionUuid,
-		&i.QuestionOrder,
-		&i.QuestionType,
-		&i.QuestionText,
-		&i.QuestionOptions,
-		&i.QuestionCorrectIndices,
-	)
-	return i, err
+func (q *Queries) GetQuiz(ctx context.Context, uuid string) ([]GetQuizRow, error) {
+	rows, err := q.db.QueryContext(ctx, getQuiz, uuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetQuizRow
+	for rows.Next() {
+		var i GetQuizRow
+		if err := rows.Scan(
+			&i.QuizUuid,
+			&i.CourseUuid,
+			&i.QuizTitle,
+			&i.QuizAttemptsCount,
+			&i.QuizCreatedAt,
+			&i.QuizUpdatedAt,
+			&i.QuestionUuid,
+			&i.QuestionOrder,
+			&i.QuestionType,
+			&i.QuestionText,
+			&i.QuestionOptions,
+			&i.QuestionCorrectIndices,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getUser = `-- name: GetUser :one

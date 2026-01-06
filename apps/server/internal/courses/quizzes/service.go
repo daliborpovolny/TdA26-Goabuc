@@ -152,25 +152,95 @@ func (s *Service) UpdateQuiz() (*Quiz, error) {
 	return nil, nil
 }
 
-// func (s *Service) parse
+func (s *Service) convertGetQuizRowsToQuiz(rows []db.GetQuizRow) (*Quiz, error) {
+
+	// it is checked beforehand that there is at least one row
+	r := rows[0]
+
+	quiz := &Quiz{
+		Uuid:          r.QuizUuid,
+		Title:         r.QuizTitle,
+		AttemptsCount: int(r.QuizAttemptsCount),
+		Questions:     make([]Question, 0, len(rows)),
+	}
+
+	for _, qr := range rows {
+
+		options := strings.Split(qr.QuestionOptions.String, "|")
+
+		correctStringIndices := strings.Split(qr.QuestionCorrectIndices.String, "|")
+		correctIndices := make([]int, 0, len(correctStringIndices))
+		for _, stringIndex := range correctStringIndices {
+			index, err := strconv.Atoi(stringIndex)
+			if err != nil {
+				return nil, err
+			}
+			correctIndices = append(correctIndices, index)
+		}
+		qs := Question{
+			Uuid:     qr.QuestionUuid.String,
+			QueType:  qr.QuestionType.String,
+			Question: qr.QuestionText.String,
+			Options:  options,
+		}
+
+		switch qs.QueType {
+		case "singleChoice":
+			qs.CorrectIndex = &correctIndices[0]
+		case "multipleChoice":
+			qs.CorrectIndices = correctIndices
+		default:
+			return nil, ErrBadQuestionType
+		}
+
+		quiz.Questions = append(quiz.Questions, qs)
+	}
+
+	return quiz, nil
+}
 
 func (s *Service) GetQuiz(quizId string, ctx context.Context) (*Quiz, error) {
 
-	rawQuiz, err := s.q.GetQuiz(ctx, quizId)
+	rows, err := s.q.GetQuiz(ctx, quizId)
 	if err != nil {
 		return nil, err
 	}
+	if len(rows) == 0 {
+		return nil, ErrQuizNotFound
+	}
 
+	quiz, err := s.convertGetQuizRowsToQuiz(rows)
+	if err != nil {
+		return nil, err
+	}
+	return quiz, nil
 }
 
 func (s *Service) ListQuizes() ([]Quiz, error) {
+
+	// rows, err := s.q.ListQuizzes()
 	return nil, nil
 }
 
-func (s *Service) DeleteQuiz() error {
+func (s *Service) DeleteQuiz(quizId string, ctx context.Context) error {
+
+	res, err := s.q.DeleteQuizz(ctx, quizId)
+	if err != nil {
+		return err
+	}
+
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return ErrQuizNotFound
+	}
+
 	return nil
 }
 
-func (s *Service) DeleteQuestion() error {
-	return nil
-}
+// func (s *Service) DeleteQuestion() error {
+// 	return nil
+// }

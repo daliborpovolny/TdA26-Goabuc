@@ -109,7 +109,7 @@ RETURNING *;
 -- name: DeleteQuizz :execresult
 DELETE FROM quizz WHERE uuid = ?;
 
--- name: GetQuiz :one
+-- name: GetQuiz :many
 SELECT
     qz.uuid AS quiz_uuid,
     qz.course_uuid AS course_uuid,
