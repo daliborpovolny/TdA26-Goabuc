@@ -28,10 +28,10 @@
 	}
 </script>
 
-<div class="ml-4 text-6xl">
+<div class="ml-4 text-3xl">
 
 	<br />
-	<h1 class="text-6xl font-bold">Manage Courses</h1>
+	<h1 class="text-5xl font-bold">Manage Courses</h1>
 	<br />
 
 	<div class="text-semibold">
