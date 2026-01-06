@@ -241,6 +241,6 @@ func (s *Service) DeleteQuiz(quizId string, ctx context.Context) error {
 	return nil
 }
 
-// func (s *Service) DeleteQuestion() error {
-// 	return nil
-// }
+func (s *Service) SubmitQuizAnswers() error {
+	return nil
+}

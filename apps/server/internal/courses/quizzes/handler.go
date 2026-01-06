@@ -59,3 +59,7 @@ func (h *Handler) UpdateQuizz(c echo.Context) error {
 func (h *Handler) DeleteQuizz(c echo.Context) error {
 	return nil
 }
+
+func (h *Handler) SubmitQuizAnswers(c echo.Context) error {
+	return nil
+}
