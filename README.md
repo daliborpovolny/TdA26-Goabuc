@@ -38,5 +38,4 @@ After each change you'll have to rebuild the images and rerun the containers
         - `docker run --rm -p 3001:3001 --name tourfrontend tourfrontend`
 
 ## Deploy to Tour de Cloud
-git push automatically deploys to the cloud with a github action - once the fee is paid
-as the fee hasn't been payed yet this is untested
+git push automatically deploys to the cloud with a github action
