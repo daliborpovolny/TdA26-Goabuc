@@ -330,6 +330,63 @@ func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error
 	return i, err
 }
 
+const getQuiz = `-- name: GetQuiz :one
+SELECT
+    qz.uuid AS quiz_uuid,
+    qz.course_uuid AS course_uuid,
+    qz.title AS quiz_title,
+    qz.attempts_count AS quiz_attempts_count,
+    qz.created_at AS quiz_created_at,
+    qz.updated_at AS quiz_updated_at,
+
+    qs.uuid AS question_uuid,
+    qs.order AS question_order,
+    qs.type AS question_type,
+    qs.question_text AS question_text,
+    qs.options AS question_options,
+    qs.correct_indices AS question_correct_indices
+FROM quizz qz
+LEFT JOIN question qs
+    ON qs.quizz_uuid = q.uuid
+WHERE quizz.uuid = ?
+ORDER BY qs.order
+`
+
+type GetQuizRow struct {
+	QuizUuid               string         `json:"quiz_uuid"`
+	CourseUuid             string         `json:"course_uuid"`
+	QuizTitle              string         `json:"quiz_title"`
+	QuizAttemptsCount      int64          `json:"quiz_attempts_count"`
+	QuizCreatedAt          int64          `json:"quiz_created_at"`
+	QuizUpdatedAt          int64          `json:"quiz_updated_at"`
+	QuestionUuid           sql.NullString `json:"question_uuid"`
+	QuestionOrder          sql.NullInt64  `json:"question_order"`
+	QuestionType           sql.NullString `json:"question_type"`
+	QuestionText           sql.NullString `json:"question_text"`
+	QuestionOptions        sql.NullString `json:"question_options"`
+	QuestionCorrectIndices sql.NullString `json:"question_correct_indices"`
+}
+
+func (q *Queries) GetQuiz(ctx context.Context, uuid string) (GetQuizRow, error) {
+	row := q.db.QueryRowContext(ctx, getQuiz, uuid)
+	var i GetQuizRow
+	err := row.Scan(
+		&i.QuizUuid,
+		&i.CourseUuid,
+		&i.QuizTitle,
+		&i.QuizAttemptsCount,
+		&i.QuizCreatedAt,
+		&i.QuizUpdatedAt,
+		&i.QuestionUuid,
+		&i.QuestionOrder,
+		&i.QuestionType,
+		&i.QuestionText,
+		&i.QuestionOptions,
+		&i.QuestionCorrectIndices,
+	)
+	return i, err
+}
+
 const getUser = `-- name: GetUser :one
 
 SELECT id, first_name, last_name, hash, email FROM user WHERE user.id = ?
@@ -520,25 +577,63 @@ func (q *Queries) ListQuestions(ctx context.Context) ([]Question, error) {
 }
 
 const listQuizzes = `-- name: ListQuizzes :many
-SELECT uuid, course_uuid, title, attempts_count, created_at, updated_at FROM quizz
+SELECT
+    qz.uuid AS quiz_uuid,
+    qz.course_uuid AS course_uuid,
+    qz.title AS quiz_title,
+    qz.attempts_count AS quiz_attempts_count,
+    qz.created_at AS quiz_created_at,
+    qz.updated_at AS quiz_updated_at,
+
+    qs.uuid AS question_uuid,
+    qs.order AS question_order,
+    qs.type AS question_type,
+    qs.question_text AS question_text,
+    qs.options AS question_options,
+    qs.correct_indices AS question_correct_indices
+FROM quizz qz
+LEFT JOIN question qs
+    ON qs.quizz_uuid = q.uuid
+ORDER BY qs.order
 `
 
-func (q *Queries) ListQuizzes(ctx context.Context) ([]Quizz, error) {
+type ListQuizzesRow struct {
+	QuizUuid               string         `json:"quiz_uuid"`
+	CourseUuid             string         `json:"course_uuid"`
+	QuizTitle              string         `json:"quiz_title"`
+	QuizAttemptsCount      int64          `json:"quiz_attempts_count"`
+	QuizCreatedAt          int64          `json:"quiz_created_at"`
+	QuizUpdatedAt          int64          `json:"quiz_updated_at"`
+	QuestionUuid           sql.NullString `json:"question_uuid"`
+	QuestionOrder          sql.NullInt64  `json:"question_order"`
+	QuestionType           sql.NullString `json:"question_type"`
+	QuestionText           sql.NullString `json:"question_text"`
+	QuestionOptions        sql.NullString `json:"question_options"`
+	QuestionCorrectIndices sql.NullString `json:"question_correct_indices"`
+}
+
+func (q *Queries) ListQuizzes(ctx context.Context) ([]ListQuizzesRow, error) {
 	rows, err := q.db.QueryContext(ctx, listQuizzes)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Quizz
+	var items []ListQuizzesRow
 	for rows.Next() {
-		var i Quizz
+		var i ListQuizzesRow
 		if err := rows.Scan(
-			&i.Uuid,
+			&i.QuizUuid,
 			&i.CourseUuid,
-			&i.Title,
-			&i.AttemptsCount,
-			&i.CreatedAt,
-			&i.UpdatedAt,
+			&i.QuizTitle,
+			&i.QuizAttemptsCount,
+			&i.QuizCreatedAt,
+			&i.QuizUpdatedAt,
+			&i.QuestionUuid,
+			&i.QuestionOrder,
+			&i.QuestionType,
+			&i.QuestionText,
+			&i.QuestionOptions,
+			&i.QuestionCorrectIndices,
 		); err != nil {
 			return nil, err
 		}

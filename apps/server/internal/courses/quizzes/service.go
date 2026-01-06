@@ -2,7 +2,9 @@ package quizzes
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	"strconv"
+	"strings"
 	"time"
 	db "tourbackend/internal/database/gen"
 
@@ -15,7 +17,6 @@ type Service struct {
 }
 
 func NewService(queries *db.Queries, staticPath string) *Service {
-	fmt.Println("quizes serevice!")
 	return &Service{queries, staticPath}
 }
 
@@ -81,13 +82,69 @@ func (s *Service) CreateQuiz(quiz Quiz, courseId string, ctx context.Context) (*
 			QuizUuid: quiz.Uuid,
 			Type:     question.QueType,
 		})
+		if err != nil {
+			return nil, err
+		}
+
+		dbQuestions = append(dbQuestions, dbQuestion)
 	}
 
-	return s.dbQuizToQuiz(dbQuiz)
+	return s.dbQuizToQuiz(dbQuiz, dbQuestions)
 
 }
 
-func (s *Service) dbQuizToQuiz(dbQuiz db.Quizz, questions []db.Question) *Quiz {
+func (s *Service) dbQuizToQuiz(dbQuiz db.Quizz, questions []db.Question) (*Quiz, error) {
+	quiz := &Quiz{
+		Uuid:          dbQuiz.Uuid,
+		Title:         dbQuiz.Title,
+		AttemptsCount: int(dbQuiz.AttemptsCount),
+	}
+	quiz.Questions = make([]Question, 0, len(questions))
+
+	for _, dbQue := range questions {
+		question, err := s.dbQuestionToQuestion(dbQue)
+		if err != nil {
+			return nil, err
+		}
+
+		quiz.Questions = append(quiz.Questions, question)
+	}
+
+	return quiz, nil
+}
+
+func (s *Service) dbQuestionToQuestion(dbQue db.Question) (Question, error) {
+
+	options := strings.Split(dbQue.Options, "|")
+
+	correctStringIndices := strings.Split(dbQue.CorrectIndices, "|")
+	correctIndices := make([]int, 0, len(correctStringIndices))
+	for _, stringIndex := range correctStringIndices {
+		index, err := strconv.Atoi(stringIndex)
+		if err != nil {
+			return Question{}, err
+		}
+		correctIndices = append(correctIndices, index)
+	}
+
+	question := Question{
+		Uuid:    dbQue.Uuid,
+		QueType: dbQue.Type,
+
+		Question: dbQue.QuestionText,
+		Options:  options,
+	}
+
+	switch dbQue.Type {
+	case "singleChoice":
+		question.CorrectIndex = &correctIndices[0]
+	case "multipleChoice":
+		question.CorrectIndices = correctIndices
+	default:
+		return Question{}, errors.New("unknown question type")
+	}
+
+	return question, nil
 
 }
 
@@ -95,8 +152,15 @@ func (s *Service) UpdateQuiz() (*Quiz, error) {
 	return nil, nil
 }
 
-func (s *Service) GetQuiz() (*Quiz, error) {
-	return nil, nil
+// func (s *Service) parse
+
+func (s *Service) GetQuiz(quizId string, ctx context.Context) (*Quiz, error) {
+
+	rawQuiz, err := s.q.GetQuiz(ctx, quizId)
+	if err != nil {
+		return nil, err
+	}
+
 }
 
 func (s *Service) ListQuizes() ([]Quiz, error) {

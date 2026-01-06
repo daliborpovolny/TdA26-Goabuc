@@ -109,9 +109,46 @@ RETURNING *;
 -- name: DeleteQuizz :execresult
 DELETE FROM quizz WHERE uuid = ?;
 
--- name: ListQuizzes :many
-SELECT * FROM quizz;
+-- name: GetQuiz :one
+SELECT
+    qz.uuid AS quiz_uuid,
+    qz.course_uuid AS course_uuid,
+    qz.title AS quiz_title,
+    qz.attempts_count AS quiz_attempts_count,
+    qz.created_at AS quiz_created_at,
+    qz.updated_at AS quiz_updated_at,
 
+    qs.uuid AS question_uuid,
+    qs.order AS question_order,
+    qs.type AS question_type,
+    qs.question_text AS question_text,
+    qs.options AS question_options,
+    qs.correct_indices AS question_correct_indices
+FROM quizz qz
+LEFT JOIN question qs
+    ON qs.quizz_uuid = q.uuid
+WHERE quizz.uuid = ?
+ORDER BY qs.order;
+
+-- name: ListQuizzes :many
+SELECT
+    qz.uuid AS quiz_uuid,
+    qz.course_uuid AS course_uuid,
+    qz.title AS quiz_title,
+    qz.attempts_count AS quiz_attempts_count,
+    qz.created_at AS quiz_created_at,
+    qz.updated_at AS quiz_updated_at,
+
+    qs.uuid AS question_uuid,
+    qs.order AS question_order,
+    qs.type AS question_type,
+    qs.question_text AS question_text,
+    qs.options AS question_options,
+    qs.correct_indices AS question_correct_indices
+FROM quizz qz
+LEFT JOIN question qs
+    ON qs.quizz_uuid = q.uuid
+ORDER BY qs.order;
 --* Question
 
 -- name: CreateQuestion :one
