@@ -33,7 +33,7 @@ func (h *Handler) ListQuizzes(c echo.Context) error {
 	return c.JSON(http.StatusOK, quizzes)
 }
 
-func (h *Handler) CreateQuizz(c echo.Context) error {
+func (h *Handler) CreateQuiz(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
 	courseId := r.Echo.Param("courseId")
@@ -45,6 +45,10 @@ func (h *Handler) CreateQuizz(c echo.Context) error {
 
 	if quiz.Uuid == "" {
 		quiz.Uuid = uuid.NewString()
+	}
+
+	if len(quiz.Questions) < 1 {
+		return r.Error(http.StatusBadRequest, "quiz must have at least one question")
 	}
 
 	for i := range quiz.Questions {
@@ -65,7 +69,7 @@ func (h *Handler) CreateQuizz(c echo.Context) error {
 	return r.Echo.JSON(http.StatusCreated, dbQuiz)
 }
 
-func (h *Handler) GetQuizz(c echo.Context) error {
+func (h *Handler) GetQuiz(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
 	quizId := r.Echo.Param("quizId")
@@ -80,28 +84,33 @@ func (h *Handler) GetQuizz(c echo.Context) error {
 	return c.JSON(http.StatusOK, quiz)
 }
 
-func (h *Handler) UpdateQuizz(c echo.Context) error {
-	// r := h.NewReqCtx(c)
+func (h *Handler) UpdateQuiz(c echo.Context) error {
+	r := h.NewReqCtx(c)
 
-	// courseId := r.Echo.Param("courseId")
+	quizId := r.Echo.Param("quizId")
 
-	// quiz, err := h.service.UpdateQuiz(, r.Ctx)
-	// if err != nil {
-	// 	if err == ErrQuizNotFound {
-	// 		return r.Error(http.StatusOK, "unknown quiz id")
-	// 	}
-	// 	if err == ErrBadQuestionType {
-	// 		return r.Error(http.StatusBadRequest, "invalid question type")
-	// 	}
-	// 	return r.ServerError(err)
-	// }
+	var quiz Quiz
+	if err := c.Bind(&quiz); err != nil {
+		return r.Error(http.StatusBadRequest, "bad request")
+	}
 
-	// return c.JSON(http.StatusCreated, quiz)
-	return nil
+	quiz.Uuid = quizId
 
+	updatedQuiz, err := h.service.UpdateQuiz(&quiz, r.Ctx)
+	if err != nil {
+		if err == ErrQuizNotFound {
+			return r.Error(http.StatusOK, "unknown quiz id")
+		}
+		if err == ErrBadQuestionType {
+			return r.Error(http.StatusBadRequest, "invalid question type")
+		}
+		return r.ServerError(err)
+	}
+
+	return c.JSON(http.StatusCreated, updatedQuiz)
 }
 
-func (h *Handler) DeleteQuizz(c echo.Context) error {
+func (h *Handler) DeleteQuiz(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
 	quizId := r.Echo.Param("quizId")

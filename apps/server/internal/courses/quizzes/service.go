@@ -2,11 +2,14 @@ package quizzes
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
 	db "tourbackend/internal/database/gen"
+	"tourbackend/internal/utils"
 
 	"github.com/google/uuid"
 )
@@ -170,7 +173,55 @@ func (s *Service) dbQuestionToQuestion(dbQue db.Question) (Question, error) {
 
 func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 
-	return nil, nil
+	fmt.Println("passed1", quiz)
+	dbQuiz, err := s.q.UpdateQuizz(ctx, db.UpdateQuizzParams{
+		Title:         utils.ToSqlNullString(&quiz.Title),
+		AttemptsCount: sql.NullInt64{Int64: 0, Valid: false},
+		UpdatedAt:     sql.NullInt64{Int64: time.Now().Unix(), Valid: true},
+		Uuid:          quiz.Uuid,
+	})
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("passed")
+
+	_, err = s.q.DeleteQuestionsOfQuiz(ctx, quiz.Uuid)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("passed")
+
+	dbQuestions := make([]db.Question, 0, len(quiz.Questions))
+	for _, question := range quiz.Questions {
+
+		var stringIndices []string
+		switch question.QueType {
+		case "singleChoice":
+			stringIndices = []string{strconv.Itoa(*question.CorrectIndex)}
+		case "multipleChoice":
+			stringIndices = make([]string, 0, len(question.CorrectIndices))
+			for _, index := range question.CorrectIndices {
+				stringIndices = append(stringIndices, strconv.Itoa(index))
+			}
+		}
+
+		dbQuestion, err := s.q.CreateQuestion(ctx, db.CreateQuestionParams{
+			Uuid:           uuid.NewString(),
+			QuizUuid:       quiz.Uuid,
+			Type:           question.QueType,
+			QuestionText:   question.Question,
+			Options:        strings.Join(question.Options, "|"),
+			CorrectIndices: strings.Join(stringIndices, "|"),
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		dbQuestions = append(dbQuestions, dbQuestion)
+	}
+	fmt.Println("passed")
+
+	return s.dbQuizToQuiz(dbQuiz, dbQuestions)
 }
 
 func (s *Service) convertGetQuizRowsToQuiz(rows []db.GetQuizRow) (*Quiz, error) {

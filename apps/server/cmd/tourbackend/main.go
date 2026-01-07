@@ -109,11 +109,11 @@ func main() {
 
 	quizzes := e.Group("/courses/:courseId/quizzes")
 	quizzes.GET("", quizzesHandler.ListQuizzes)
-	quizzes.POST("", quizzesHandler.CreateQuizz)
+	quizzes.POST("", quizzesHandler.CreateQuiz)
 
-	quizzes.GET("/:quizId", quizzesHandler.GetQuizz)
-	quizzes.PUT("/:quizId", quizzesHandler.UpdateQuizz)
-	quizzes.DELETE("/:quizId", quizzesHandler.DeleteQuizz)
+	quizzes.GET("/:quizId", quizzesHandler.GetQuiz)
+	quizzes.PUT("/:quizId", quizzesHandler.UpdateQuiz)
+	quizzes.DELETE("/:quizId", quizzesHandler.DeleteQuiz)
 
 	quizzes.POST("/:quizId/submit", quizzesHandler.SubmitQuizAnswers)
 

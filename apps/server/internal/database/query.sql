@@ -103,7 +103,7 @@ SET
     title =             COALESCE(sqlc.narg(title), title),
     attempts_count =    COALESCE(sqlc.narg(attempts_count), attempts_count),
     updated_at =        COALESCE(sqlc.narg(updated_at), updated_at)
-WHERE uuid = ?
+WHERE uuid = sqlc.arg(uuid)
 RETURNING *;
 
 -- name: DeleteQuizz :execresult
@@ -179,3 +179,6 @@ RETURNING *;
 
 -- name: RemoveQuestion :execresult
 DELETE FROM question WHERE uuid = ?;
+
+-- name: DeleteQuestionsOfQuiz :execresult
+DELETE FROM question WHERE quizz_uuid = ?;

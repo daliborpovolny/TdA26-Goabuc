@@ -282,6 +282,14 @@ func (q *Queries) DeleteMaterial(ctx context.Context, uuid string) (sql.Result, 
 	return q.db.ExecContext(ctx, deleteMaterial, uuid)
 }
 
+const deleteQuestionsOfQuiz = `-- name: DeleteQuestionsOfQuiz :execresult
+DELETE FROM question WHERE quizz_uuid = ?
+`
+
+func (q *Queries) DeleteQuestionsOfQuiz(ctx context.Context, quizzUuid string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteQuestionsOfQuiz, quizzUuid)
+}
+
 const deleteQuizz = `-- name: DeleteQuizz :execresult
 DELETE FROM quizz WHERE uuid = ?
 `
@@ -832,10 +840,10 @@ func (q *Queries) UpdateQuestion(ctx context.Context, arg UpdateQuestionParams) 
 const updateQuizz = `-- name: UpdateQuizz :one
 UPDATE quizz
 SET
-    title =             COALESCE(?2, title),
-    attempts_count =    COALESCE(?3, attempts_count),
-    updated_at =        COALESCE(?4, updated_at)
-WHERE uuid = ?
+    title =             COALESCE(?1, title),
+    attempts_count =    COALESCE(?2, attempts_count),
+    updated_at =        COALESCE(?3, updated_at)
+WHERE uuid = ?4
 RETURNING uuid, course_uuid, title, attempts_count, created_at, updated_at
 `
 
