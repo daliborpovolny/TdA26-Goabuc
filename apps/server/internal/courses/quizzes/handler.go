@@ -121,7 +121,7 @@ func (h *Handler) DeleteQuiz(c echo.Context) error {
 		}
 		return r.ServerError(err)
 	}
-	return c.NoContent(http.StatusOK)
+	return c.NoContent(http.StatusNoContent)
 }
 
 func (h *Handler) SubmitQuizAnswers(c echo.Context) error {
