@@ -83,7 +83,7 @@ func main() {
 	matsService := materials.NewService(queries, STATIC_PATH)
 	quizzesService := quizzes.NewService(queries, STATIC_PATH)
 
-	courseService := courses.NewService(queries, matsService)
+	courseService := courses.NewService(queries, matsService, quizzesService)
 
 	coursesHandler := courses.NewCourseHandler(queries, IS_DEPLOYED, courseService)
 
@@ -107,7 +107,7 @@ func main() {
 	//* Course Quizes
 	quizzesHandler := quizzes.NewHandler(STATIC_PATH, quizzesService, queries, IS_DEPLOYED)
 
-	quizzes := e.Group("/courses/:courseId/quizes")
+	quizzes := e.Group("/courses/:courseId/quizzes")
 	quizzes.GET("", quizzesHandler.ListQuizzes)
 	quizzes.POST("", quizzesHandler.CreateQuizz)
 

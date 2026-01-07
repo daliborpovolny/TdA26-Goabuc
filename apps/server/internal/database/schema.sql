@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS question (
     uuid TEXT PRIMARY KEY,
     quizz_uuid TEXT NOT NULL,
 
-    order INTEGER NOT NULL,
+    question_order INTEGER NOT NULL,
 
     type TEXT NOT NULL,
     question_text TEXT NOT NULL,

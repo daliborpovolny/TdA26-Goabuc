@@ -3,8 +3,10 @@ package courses
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	materials "tourbackend/internal/courses/materials"
+	"tourbackend/internal/courses/quizzes"
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/utils"
 )
@@ -12,12 +14,14 @@ import (
 type Service struct {
 	q                *db.Queries
 	materialsService *materials.Service
+	quizzesService   *quizzes.Service
 }
 
-func NewService(queries *db.Queries, materialsService *materials.Service) *Service {
+func NewService(queries *db.Queries, materialsService *materials.Service, quizzesService *quizzes.Service) *Service {
 	return &Service{
 		queries,
 		materialsService,
+		quizzesService,
 	}
 }
 
@@ -34,7 +38,7 @@ type GetCourseResponse struct {
 	Name        string               `json:"name"`
 	Description string               `json:"description"`
 	Materials   []materials.Material `json:"materials"`
-	Quizzes     []string             `json:"quizzes"`
+	Quizzes     []quizzes.Quiz       `json:"quizzes"`
 }
 
 func (s *Service) GetCourse(courseId string, host string, scheme string, ctx context.Context) (*GetCourseResponse, error) {
@@ -48,13 +52,22 @@ func (s *Service) GetCourse(courseId string, host string, scheme string, ctx con
 	}
 
 	mats, err := s.materialsService.ListMaterials(courseId, host, scheme, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	quizzes, err := s.quizzesService.ListQuizes(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
 
 	courseDetail := GetCourseResponse{
 		Uuid:        course.Uuid,
 		Name:        course.Name,
 		Description: course.Description,
 		Materials:   mats,
-		Quizzes:     []string{},
+		Quizzes:     quizzes,
 	}
 
 	return &courseDetail, nil

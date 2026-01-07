@@ -43,6 +43,11 @@ type Question struct {
 
 func (s *Service) validateQuestions(questions []Question) bool {
 	for _, q := range questions {
+
+		if uuid.Validate(q.Uuid) != nil || q.Uuid == "" {
+			return false
+		}
+
 		switch q.QueType {
 		case "singleChoice":
 			if q.CorrectIndex == nil {
@@ -77,10 +82,25 @@ func (s *Service) CreateQuiz(quiz Quiz, courseId string, ctx context.Context) (*
 
 	dbQuestions := make([]db.Question, 0, len(quiz.Questions))
 	for _, question := range quiz.Questions {
+
+		var stringIndices []string
+		switch question.QueType {
+		case "singleChoice":
+			stringIndices = []string{strconv.Itoa(*question.CorrectIndex)}
+		case "multipleChoice":
+			stringIndices = make([]string, 0, len(question.CorrectIndices))
+			for _, index := range question.CorrectIndices {
+				stringIndices = append(stringIndices, strconv.Itoa(index))
+			}
+		}
+
 		dbQuestion, err := s.q.CreateQuestion(ctx, db.CreateQuestionParams{
-			Uuid:     uuid.NewString(),
-			QuizUuid: quiz.Uuid,
-			Type:     question.QueType,
+			Uuid:           uuid.NewString(),
+			QuizUuid:       quiz.Uuid,
+			Type:           question.QueType,
+			QuestionText:   question.Question,
+			Options:        strings.Join(question.Options, "|"),
+			CorrectIndices: strings.Join(stringIndices, "|"),
 		})
 		if err != nil {
 			return nil, err
@@ -148,13 +168,16 @@ func (s *Service) dbQuestionToQuestion(dbQue db.Question) (Question, error) {
 
 }
 
-func (s *Service) UpdateQuiz() (*Quiz, error) {
+func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
+
 	return nil, nil
 }
 
 func (s *Service) convertGetQuizRowsToQuiz(rows []db.GetQuizRow) (*Quiz, error) {
+	if len(rows) < 1 {
+		return nil, ErrQuizNotFound
+	}
 
-	// it is checked beforehand that there is at least one row
 	r := rows[0]
 
 	quiz := &Quiz{
@@ -216,10 +239,71 @@ func (s *Service) GetQuiz(quizId string, ctx context.Context) (*Quiz, error) {
 	return quiz, nil
 }
 
-func (s *Service) ListQuizes() ([]Quiz, error) {
+func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizzesRow) ([]Quiz, error) {
+	if len(rows) < 1 {
+		return []Quiz{}, nil
+	}
 
-	// rows, err := s.q.ListQuizzes()
-	return nil, nil
+	quizzes := make([]Quiz, 0, 5)
+	var currentQuizUuid string
+	currentQuizIndex := -1
+
+	for _, qr := range rows {
+		if currentQuizUuid != qr.QuizUuid {
+			currentQuizIndex += 1
+			quizzes = append(quizzes, Quiz{
+				Uuid:          qr.QuizUuid,
+				Title:         qr.QuizTitle,
+				AttemptsCount: int(qr.QuizAttemptsCount),
+				Questions:     make([]Question, 0, len(rows)),
+			})
+		}
+
+		options := strings.Split(qr.QuestionOptions.String, "|")
+
+		correctStringIndices := strings.Split(qr.QuestionCorrectIndices.String, "|")
+		correctIndices := make([]int, 0, len(correctStringIndices))
+		for _, stringIndex := range correctStringIndices {
+			index, err := strconv.Atoi(stringIndex)
+			if err != nil {
+				return nil, err
+			}
+			correctIndices = append(correctIndices, index)
+		}
+		qs := Question{
+			Uuid:     qr.QuestionUuid.String,
+			QueType:  qr.QuestionType.String,
+			Question: qr.QuestionText.String,
+			Options:  options,
+		}
+
+		switch qs.QueType {
+		case "singleChoice":
+			qs.CorrectIndex = &correctIndices[0]
+		case "multipleChoice":
+			qs.CorrectIndices = correctIndices
+		default:
+			return nil, ErrBadQuestionType
+		}
+
+		quizzes[currentQuizIndex].Questions = append(quizzes[currentQuizIndex].Questions, qs)
+	}
+	return quizzes, nil
+}
+
+func (s *Service) ListQuizes(ctx context.Context) ([]Quiz, error) {
+
+	rows, err := s.q.ListQuizzes(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	quizzes, err := s.convertListQuizRowsToQuizzes(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return quizzes, nil
 }
 
 func (s *Service) DeleteQuiz(quizId string, ctx context.Context) error {

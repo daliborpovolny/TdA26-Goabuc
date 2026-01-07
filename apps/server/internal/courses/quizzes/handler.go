@@ -5,6 +5,7 @@ import (
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -23,7 +24,13 @@ func NewHandler(pathToStatic string, service *Service, queries *db.Queries, isDe
 }
 
 func (h *Handler) ListQuizzes(c echo.Context) error {
-	return nil
+	r := h.NewReqCtx(c)
+
+	quizzes, err := h.service.ListQuizes(r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+	return c.JSON(http.StatusOK, quizzes)
 }
 
 func (h *Handler) CreateQuizz(c echo.Context) error {
@@ -34,6 +41,16 @@ func (h *Handler) CreateQuizz(c echo.Context) error {
 	var quiz Quiz
 	if err := c.Bind(&quiz); err != nil {
 		return r.Error(http.StatusBadRequest, "bad request")
+	}
+
+	if quiz.Uuid == "" {
+		quiz.Uuid = uuid.NewString()
+	}
+
+	for i := range quiz.Questions {
+		if quiz.Questions[i].Uuid == "" {
+			quiz.Questions[i].Uuid = uuid.NewString()
+		}
 	}
 
 	ok := h.service.validateQuestions(quiz.Questions)
@@ -49,15 +66,53 @@ func (h *Handler) CreateQuizz(c echo.Context) error {
 }
 
 func (h *Handler) GetQuizz(c echo.Context) error {
-	return nil
+	r := h.NewReqCtx(c)
+
+	quizId := r.Echo.Param("quizId")
+
+	quiz, err := h.service.q.GetQuiz(r.Ctx, quizId)
+	if err != nil {
+		if err == ErrQuizNotFound {
+			return r.Error(http.StatusBadRequest, "unknown quiz id")
+		}
+		return r.ServerError(err)
+	}
+	return c.JSON(http.StatusOK, quiz)
 }
 
 func (h *Handler) UpdateQuizz(c echo.Context) error {
+	// r := h.NewReqCtx(c)
+
+	// courseId := r.Echo.Param("courseId")
+
+	// quiz, err := h.service.UpdateQuiz(, r.Ctx)
+	// if err != nil {
+	// 	if err == ErrQuizNotFound {
+	// 		return r.Error(http.StatusOK, "unknown quiz id")
+	// 	}
+	// 	if err == ErrBadQuestionType {
+	// 		return r.Error(http.StatusBadRequest, "invalid question type")
+	// 	}
+	// 	return r.ServerError(err)
+	// }
+
+	// return c.JSON(http.StatusCreated, quiz)
 	return nil
+
 }
 
 func (h *Handler) DeleteQuizz(c echo.Context) error {
-	return nil
+	r := h.NewReqCtx(c)
+
+	quizId := r.Echo.Param("quizId")
+	err := h.service.DeleteQuiz(quizId, r.Ctx)
+	if err != nil {
+		if err == ErrQuizNotFound {
+			return r.Error(http.StatusNotFound, "quiz not found")
+		}
+		return r.ServerError(err)
+	}
+	return c.NoContent(http.StatusOK)
 }
 
 func (h *Handler) SubmitQuizAnswers(c echo.Context) error {

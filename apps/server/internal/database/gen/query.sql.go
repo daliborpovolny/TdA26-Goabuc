@@ -116,18 +116,18 @@ func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) 
 const createQuestion = `-- name: CreateQuestion :one
 
 INSERT INTO question (
-    uuid, quizz_uuid, order, type, question_text, options, correct_indices
+    uuid, quizz_uuid, question_order, type, question_text, options, correct_indices
 ) SELECT 
     ?1,
     ?2,
-    COALESCE(MAX("order"), 0) + 1,    
+    COALESCE(MAX("question_order"), 0) + 1,    
     ?3,
     ?4,
     ?5,
     ?6
 FROM question
 WHERE quizz_uuid = ?2
-RETURNING uuid, quizz_uuid, "order", type, question_text, options, correct_indices
+RETURNING uuid, quizz_uuid, question_order, type, question_text, options, correct_indices
 `
 
 type CreateQuestionParams struct {
@@ -153,7 +153,7 @@ func (q *Queries) CreateQuestion(ctx context.Context, arg CreateQuestionParams) 
 	err := row.Scan(
 		&i.Uuid,
 		&i.QuizzUuid,
-		&i.Order,
+		&i.QuestionOrder,
 		&i.Type,
 		&i.QuestionText,
 		&i.Options,
@@ -340,16 +340,16 @@ SELECT
     qz.updated_at AS quiz_updated_at,
 
     qs.uuid AS question_uuid,
-    qs.order AS question_order,
+    qs.question_order AS question_order,
     qs.type AS question_type,
     qs.question_text AS question_text,
     qs.options AS question_options,
     qs.correct_indices AS question_correct_indices
 FROM quizz qz
 LEFT JOIN question qs
-    ON qs.quizz_uuid = q.uuid
+    ON qs.quizz_uuid = qz.uuid
 WHERE quizz.uuid = ?
-ORDER BY qs.order
+ORDER BY qs.question_order
 `
 
 type GetQuizRow struct {
@@ -558,7 +558,7 @@ func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid strin
 }
 
 const listQuestions = `-- name: ListQuestions :many
-SELECT uuid, quizz_uuid, "order", type, question_text, options, correct_indices FROM question
+SELECT uuid, quizz_uuid, question_order, type, question_text, options, correct_indices FROM question
 `
 
 func (q *Queries) ListQuestions(ctx context.Context) ([]Question, error) {
@@ -573,7 +573,7 @@ func (q *Queries) ListQuestions(ctx context.Context) ([]Question, error) {
 		if err := rows.Scan(
 			&i.Uuid,
 			&i.QuizzUuid,
-			&i.Order,
+			&i.QuestionOrder,
 			&i.Type,
 			&i.QuestionText,
 			&i.Options,
@@ -602,15 +602,15 @@ SELECT
     qz.updated_at AS quiz_updated_at,
 
     qs.uuid AS question_uuid,
-    qs.order AS question_order,
+    qs.question_order AS question_order,
     qs.type AS question_type,
     qs.question_text AS question_text,
     qs.options AS question_options,
     qs.correct_indices AS question_correct_indices
 FROM quizz qz
 LEFT JOIN question qs
-    ON qs.quizz_uuid = q.uuid
-ORDER BY qs.order
+    ON qs.quizz_uuid = qz.uuid
+ORDER BY qs.question_order
 `
 
 type ListQuizzesRow struct {
@@ -805,7 +805,7 @@ SET
     question_text = COALESCE(?1, question_text),
     options = COALESCE(?2, options),
     correct_indices = COALESCE(?3, correct_indices)
-RETURNING uuid, quizz_uuid, "order", type, question_text, options, correct_indices
+RETURNING uuid, quizz_uuid, question_order, type, question_text, options, correct_indices
 `
 
 type UpdateQuestionParams struct {
@@ -820,7 +820,7 @@ func (q *Queries) UpdateQuestion(ctx context.Context, arg UpdateQuestionParams) 
 	err := row.Scan(
 		&i.Uuid,
 		&i.QuizzUuid,
-		&i.Order,
+		&i.QuestionOrder,
 		&i.Type,
 		&i.QuestionText,
 		&i.Options,

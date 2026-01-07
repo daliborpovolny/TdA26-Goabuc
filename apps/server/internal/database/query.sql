@@ -119,16 +119,16 @@ SELECT
     qz.updated_at AS quiz_updated_at,
 
     qs.uuid AS question_uuid,
-    qs.order AS question_order,
+    qs.question_order AS question_order,
     qs.type AS question_type,
     qs.question_text AS question_text,
     qs.options AS question_options,
     qs.correct_indices AS question_correct_indices
 FROM quizz qz
 LEFT JOIN question qs
-    ON qs.quizz_uuid = q.uuid
+    ON qs.quizz_uuid = qz.uuid
 WHERE quizz.uuid = ?
-ORDER BY qs.order;
+ORDER BY qs.question_order;
 
 -- name: ListQuizzes :many
 SELECT
@@ -140,24 +140,24 @@ SELECT
     qz.updated_at AS quiz_updated_at,
 
     qs.uuid AS question_uuid,
-    qs.order AS question_order,
+    qs.question_order AS question_order,
     qs.type AS question_type,
     qs.question_text AS question_text,
     qs.options AS question_options,
     qs.correct_indices AS question_correct_indices
 FROM quizz qz
 LEFT JOIN question qs
-    ON qs.quizz_uuid = q.uuid
-ORDER BY qs.order;
+    ON qs.quizz_uuid = qz.uuid
+ORDER BY qs.question_order;
 --* Question
 
 -- name: CreateQuestion :one
 INSERT INTO question (
-    uuid, quizz_uuid, order, type, question_text, options, correct_indices
+    uuid, quizz_uuid, question_order, type, question_text, options, correct_indices
 ) SELECT 
     sqlc.arg(uuid),
     sqlc.arg(quiz_uuid),
-    COALESCE(MAX("order"), 0) + 1,    
+    COALESCE(MAX("question_order"), 0) + 1,    
     sqlc.arg(type),
     sqlc.arg(question_text),
     sqlc.arg(options),
