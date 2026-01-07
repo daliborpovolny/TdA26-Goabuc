@@ -127,7 +127,7 @@ SELECT
 FROM quizz qz
 LEFT JOIN question qs
     ON qs.quizz_uuid = qz.uuid
-WHERE quizz.uuid = ?
+WHERE qz.uuid = ?
 ORDER BY qs.question_order;
 
 -- name: ListQuizzes :many

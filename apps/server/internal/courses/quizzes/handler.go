@@ -74,7 +74,7 @@ func (h *Handler) GetQuiz(c echo.Context) error {
 
 	quizId := r.Echo.Param("quizId")
 
-	quiz, err := h.service.q.GetQuiz(r.Ctx, quizId)
+	quiz, err := h.service.GetQuiz(quizId, r.Ctx)
 	if err != nil {
 		if err == ErrQuizNotFound {
 			return r.Error(http.StatusBadRequest, "unknown quiz id")
