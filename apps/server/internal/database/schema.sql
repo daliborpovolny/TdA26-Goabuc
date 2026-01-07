@@ -83,3 +83,19 @@ CREATE TABLE IF NOT EXISTS question (
     
     FOREIGN KEY (quizz_uuid) REFERENCES quizz(uuid) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS answer (
+    quiz_uuid TEXT NOT NULL,
+    comment TEXT,
+
+    score INTEGER NOT NULL,
+    max_score INTEGER NOT NULL,
+
+    user_id INTEGER,
+    attempt_number INTEGER NOT NULL,
+
+    submitted_at INTEGER NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+    FOREIGN KEY (quiz_uuid) REFERENCES question(uuid) ON DELETE CASCADE
+);

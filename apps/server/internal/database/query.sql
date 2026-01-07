@@ -166,9 +166,6 @@ FROM question
 WHERE quizz_uuid = sqlc.arg(quiz_uuid)
 RETURNING *;
 
--- name: ListQuestions :many
-SELECT * FROM question;
-
 -- name: UpdateQuestion :one
 UPDATE question
 SET
@@ -177,8 +174,37 @@ SET
     correct_indices = COALESCE(sqlc.narg(correct_indices), correct_indices)
 RETURNING *;
 
+-- name: GetQuestionsOfQuiz :many
+SELECT * FROM question WHERE quizz_uuid = ?;
+
 -- name: RemoveQuestion :execresult
 DELETE FROM question WHERE uuid = ?;
 
 -- name: DeleteQuestionsOfQuiz :execresult
 DELETE FROM question WHERE quizz_uuid = ?;
+
+--* Answers
+
+-- name: InsertAnswer :one
+INSERT INTO answer (
+    quiz_uuid, comment, score, max_score, user_id, attempt_number, submitted_at
+) VALUES (
+    sqlc.arg(quiz_uuid),
+    sqlc.narg(comment),
+    
+    sqlc.arg(score),
+    sqlc.arg(max_score),
+
+    sqlc.narg(user_id),
+    CASE
+        WHEN sqlc.narg(user_id) IS NULL THEN 0
+        ELSE (
+            SELECT COALESCE(MAX(answer.attempt_number), 0) + 1
+            FROM answer
+                WHERE answer.quiz_uuid = sqlc.arg(quiz_uuid) 
+                    AND answer.user_id = sqlc.narg(user_id)
+        )
+    END,
+
+    sqlc.arg(submitted_at)
+) RETURNING *;

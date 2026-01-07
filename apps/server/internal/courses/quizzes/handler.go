@@ -124,6 +124,45 @@ func (h *Handler) DeleteQuiz(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+type Answer struct {
+	Uuid    string `json:"uuid"`
+	Comment string `json:"comment"`
+
+	// singleChoice
+	SelectedIndex *int `json:"selectedIndex,omitempty"`
+
+	// multipleChoice
+	SelectedIndices []int `json:"selectedIndices,omitempty"`
+}
+
+type SubmitQuizAnswersRequest struct {
+	Comment string   `json:"comment"`
+	Answers []Answer `json:"answers"`
+	UserID  *int     `json:"userId"`
+}
+
+type SubmittedAnswersOutcome struct {
+	QuizUuid           string `json:"quizUuid"`
+	Score              int    `json:"score"`
+	MaxScore           int    `json:"maxScore"`
+	CorrectPerQuestion []bool `json:"correctPerQuestion"`
+	SubmittedAt        string `json:"submittedAt"`
+}
+
 func (h *Handler) SubmitQuizAnswers(c echo.Context) error {
-	return nil
+	r := h.NewReqCtx(c)
+
+	quizId := r.Echo.Param("quizId")
+
+	var answers SubmitQuizAnswersRequest
+	if err := c.Bind(&answers); err != nil {
+		return r.Error(http.StatusBadRequest, "bad request")
+	}
+
+	outcome, err := h.service.SubmitQuizAnswers(quizId, answers, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+
+	return c.JSON(http.StatusOK, outcome)
 }

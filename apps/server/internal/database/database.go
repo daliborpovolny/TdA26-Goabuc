@@ -101,4 +101,10 @@ func Seed(queries *gen.Queries) {
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	})
+
+	// queries.CreateQuizz(ctx, gen.CreateQuizzParams{
+	// 	Uuid: uuid.NewString(),
+	// 	CourseUuid: course1.Uuid,
+	// 	Title: "How to Potter the Pot",
+	// })
 }

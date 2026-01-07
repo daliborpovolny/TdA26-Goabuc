@@ -12,6 +12,17 @@ type Admin struct {
 	UserID int64 `json:"user_id"`
 }
 
+type Answer struct {
+	QuizUuid      string         `json:"quiz_uuid"`
+	Comment       sql.NullString `json:"comment"`
+	Score         int64          `json:"score"`
+	MaxScore      int64          `json:"max_score"`
+	UserID        sql.NullInt64  `json:"user_id"`
+	AttemptNumber int64          `json:"attempt_number"`
+	SubmittedAt   int64          `json:"submitted_at"`
+	Foreign       interface{}    `json:"foreign"`
+}
+
 type Course struct {
 	Uuid        string `json:"uuid"`
 	Name        string `json:"name"`

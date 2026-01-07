@@ -338,6 +338,41 @@ func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error
 	return i, err
 }
 
+const getQuestionsOfQuiz = `-- name: GetQuestionsOfQuiz :many
+SELECT uuid, quizz_uuid, question_order, type, question_text, options, correct_indices FROM question WHERE quizz_uuid = ?
+`
+
+func (q *Queries) GetQuestionsOfQuiz(ctx context.Context, quizzUuid string) ([]Question, error) {
+	rows, err := q.db.QueryContext(ctx, getQuestionsOfQuiz, quizzUuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Question
+	for rows.Next() {
+		var i Question
+		if err := rows.Scan(
+			&i.Uuid,
+			&i.QuizzUuid,
+			&i.QuestionOrder,
+			&i.Type,
+			&i.QuestionText,
+			&i.Options,
+			&i.CorrectIndices,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getQuiz = `-- name: GetQuiz :many
 SELECT
     qz.uuid AS quiz_uuid,
@@ -484,6 +519,65 @@ func (q *Queries) GetUserBySessionToken(ctx context.Context, token string) (GetU
 	return i, err
 }
 
+const insertAnswer = `-- name: InsertAnswer :one
+
+INSERT INTO answer (
+    quiz_uuid, comment, score, max_score, user_id, attempt_number, submitted_at
+) VALUES (
+    ?1,
+    ?2,
+    
+    ?3,
+    ?4,
+
+    ?5,
+    CASE
+        WHEN ?5 IS NULL THEN 0
+        ELSE (
+            SELECT COALESCE(MAX(answer.attempt_number), 0) + 1
+            FROM answer
+                WHERE answer.quiz_uuid = ?1 
+                    AND answer.user_id = ?5
+        )
+    END,
+
+    ?6
+) RETURNING quiz_uuid, comment, score, max_score, user_id, attempt_number, submitted_at, "foreign"
+`
+
+type InsertAnswerParams struct {
+	QuizUuid    string         `json:"quiz_uuid"`
+	Comment     sql.NullString `json:"comment"`
+	Score       int64          `json:"score"`
+	MaxScore    int64          `json:"max_score"`
+	UserID      sql.NullInt64  `json:"user_id"`
+	SubmittedAt int64          `json:"submitted_at"`
+}
+
+// * Answers
+func (q *Queries) InsertAnswer(ctx context.Context, arg InsertAnswerParams) (Answer, error) {
+	row := q.db.QueryRowContext(ctx, insertAnswer,
+		arg.QuizUuid,
+		arg.Comment,
+		arg.Score,
+		arg.MaxScore,
+		arg.UserID,
+		arg.SubmittedAt,
+	)
+	var i Answer
+	err := row.Scan(
+		&i.QuizUuid,
+		&i.Comment,
+		&i.Score,
+		&i.MaxScore,
+		&i.UserID,
+		&i.AttemptNumber,
+		&i.SubmittedAt,
+		&i.Foreign,
+	)
+	return i, err
+}
+
 const invalidateSession = `-- name: InvalidateSession :exec
 DELETE FROM session WHERE token = ?
 `
@@ -551,41 +645,6 @@ func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid strin
 			&i.ByteSize,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listQuestions = `-- name: ListQuestions :many
-SELECT uuid, quizz_uuid, question_order, type, question_text, options, correct_indices FROM question
-`
-
-func (q *Queries) ListQuestions(ctx context.Context) ([]Question, error) {
-	rows, err := q.db.QueryContext(ctx, listQuestions)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Question
-	for rows.Next() {
-		var i Question
-		if err := rows.Scan(
-			&i.Uuid,
-			&i.QuizzUuid,
-			&i.QuestionOrder,
-			&i.Type,
-			&i.QuestionText,
-			&i.Options,
-			&i.CorrectIndices,
 		); err != nil {
 			return nil, err
 		}

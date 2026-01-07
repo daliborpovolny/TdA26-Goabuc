@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -371,6 +373,85 @@ func (s *Service) DeleteQuiz(quizId string, ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) SubmitQuizAnswers() error {
-	return nil
+func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequest, ctx context.Context) (*SubmittedAnswersOutcome, error) {
+
+	now := time.Now().Unix()
+
+	outcome := SubmittedAnswersOutcome{
+		QuizUuid:    quizId,
+		SubmittedAt: utils.UnixToIso(now),
+	}
+
+	questions, err := s.q.GetQuestionsOfQuiz(ctx, quizId)
+	if err != nil {
+		return nil, err
+	}
+
+	outcome.MaxScore = len(questions)
+
+	for id, question := range questions {
+		correctAnswers := make([]int, 0, len(question.CorrectIndices))
+
+		for _, stringIndex := range strings.Split(question.CorrectIndices, "|") {
+			intIndex, err := strconv.Atoi(stringIndex)
+			if err != nil {
+				fmt.Println("invalid question in db! WHO IS RESPONSIBLE?", question)
+				return nil, err
+			}
+			correctAnswers = append(correctAnswers, intIndex)
+		}
+
+		// this assumption that either SelectedIndices if not nil or SelectedIndex is not nil is wanky
+		selectedAnswers := answers.Answers[id].SelectedIndices
+		if selectedAnswers == nil {
+			if answers.Answers[id].SelectedIndex == nil {
+				return nil, errors.New("answer must either have selectedIndex or selectedIndices")
+			}
+			selectedAnswers = []int{*answers.Answers[id].SelectedIndex}
+		}
+
+		sort.Ints(correctAnswers)
+		sort.Ints(selectedAnswers)
+
+		// fmt.Println("correct: ", correctAnswers)
+		// fmt.Println("selected: ", selectedAnswers)
+
+		if len(selectedAnswers) != len(correctAnswers) {
+			outcome.CorrectPerQuestion = append(outcome.CorrectPerQuestion, false)
+			continue
+		}
+
+		correct := true
+		for answerIndex := range len(selectedAnswers) {
+			if correctAnswers[answerIndex] != selectedAnswers[answerIndex] {
+				outcome.CorrectPerQuestion = append(outcome.CorrectPerQuestion, false)
+				break
+			}
+		}
+
+		if correct {
+			outcome.Score += 1
+			outcome.CorrectPerQuestion = append(outcome.CorrectPerQuestion, true)
+		}
+	}
+
+	var userID = sql.NullInt64{}
+	if answers.UserID != nil {
+		userID.Int64 = int64(*answers.UserID)
+		userID.Valid = true
+	}
+
+	_, err = s.q.InsertAnswer(ctx, db.InsertAnswerParams{
+		QuizUuid: quizId,
+		Comment:  sql.NullString{String: answers.Comment, Valid: answers.Comment != ""},
+		Score:    int64(outcome.Score),
+		MaxScore: int64(outcome.MaxScore),
+		UserID:   userID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &outcome, nil
+
 }
