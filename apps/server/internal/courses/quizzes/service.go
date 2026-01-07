@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -173,7 +172,6 @@ func (s *Service) dbQuestionToQuestion(dbQue db.Question) (Question, error) {
 
 func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 
-	fmt.Println("passed1", quiz)
 	dbQuiz, err := s.q.UpdateQuizz(ctx, db.UpdateQuizzParams{
 		Title:         utils.ToSqlNullString(&quiz.Title),
 		AttemptsCount: sql.NullInt64{Int64: 0, Valid: false},
@@ -183,13 +181,11 @@ func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("passed")
 
 	_, err = s.q.DeleteQuestionsOfQuiz(ctx, quiz.Uuid)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("passed")
 
 	dbQuestions := make([]db.Question, 0, len(quiz.Questions))
 	for _, question := range quiz.Questions {
@@ -219,7 +215,6 @@ func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 
 		dbQuestions = append(dbQuestions, dbQuestion)
 	}
-	fmt.Println("passed")
 
 	return s.dbQuizToQuiz(dbQuiz, dbQuestions)
 }
