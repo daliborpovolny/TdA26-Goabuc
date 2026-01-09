@@ -14,6 +14,8 @@
 			headers: { 'Content-type': 'application/json' },
 			body: formJson
 		});
+
+		materialType = ''
 		onchange();
 	}
 
@@ -25,12 +27,13 @@
 			method: 'POST',
 			body: formData
 		});
+
+		materialType = ''
 		onchange();
 	}
 </script>
 
 <div>
-	<h1 class="mb-3 text-2xl font-semibold text-gray-800">Add Materials</h1>
 	<div class="flex gap-4">
 		<button
 			onclick={() => (materialType = materialType === 'url' || materialType == '' ? 'file' : '')}
