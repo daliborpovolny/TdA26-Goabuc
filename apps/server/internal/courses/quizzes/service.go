@@ -211,6 +211,7 @@ func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 			Options:        strings.Join(question.Options, "|"),
 			CorrectIndices: strings.Join(stringIndices, "|"),
 		})
+		fmt.Println(dbQuestion)
 		if err != nil {
 			return nil, err
 		}
@@ -236,6 +237,9 @@ func (s *Service) convertGetQuizRowsToQuiz(rows []db.GetQuizRow) (*Quiz, error) 
 	}
 
 	for _, qr := range rows {
+		if qr.QuestionUuid.String == "" {
+			continue
+		}
 
 		options := strings.Split(qr.QuestionOptions.String, "|")
 
@@ -297,6 +301,10 @@ func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizzesRow) ([]Quiz
 	currentQuizIndex := -1
 
 	for _, qr := range rows {
+		if qr.QuestionUuid.String == "" {
+			continue
+		}
+
 		if currentQuizUuid != qr.QuizUuid {
 			currentQuizIndex += 1
 			currentQuizUuid = qr.QuizUuid
