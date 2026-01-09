@@ -1,10 +1,12 @@
 package quizzes
 
 import (
+	"cmp"
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -29,6 +31,7 @@ type Quiz struct {
 	Title         string     `json:"title"`
 	AttemptsCount int        `json:"attemptsCount"`
 	Questions     []Question `json:"questions"`
+	CreatedAt     string     `json:"createdAt"`
 }
 
 type Question struct {
@@ -45,30 +48,35 @@ type Question struct {
 	CorrectIndices []int `json:"correctIndices,omitempty"`
 }
 
-func (s *Service) validateQuestions(questions []Question) bool {
-	for _, q := range questions {
+func (s *Service) validateQuestions(questions []Question) error {
+	for i, q := range questions {
 
 		if uuid.Validate(q.Uuid) != nil || q.Uuid == "" {
-			return false
+			return errors.New("bad uuid format on question number: " + strconv.Itoa(i+1))
 		}
 
 		switch q.QueType {
 		case "singleChoice":
 			if q.CorrectIndex == nil {
-				return false
+				return errors.New("no correct index on question number: " + strconv.Itoa(i+1))
 			}
 		case "multipleChoice":
 			if len(q.CorrectIndices) == 0 {
-				return false
+				return errors.New("no correct index on question number: " + strconv.Itoa(i+1))
 			}
 		default:
-			return false
+			return errors.New("invalid question type, must be either singleChoice or multipleChoice")
 		}
 	}
-	return true
+	return nil
 }
 
 func (s *Service) CreateQuiz(quiz Quiz, courseId string, ctx context.Context) (*Quiz, error) {
+
+	err := s.validateQuestions(quiz.Questions)
+	if err != nil {
+		return nil, err
+	}
 
 	now := time.Now().Unix()
 
@@ -122,6 +130,7 @@ func (s *Service) dbQuizToQuiz(dbQuiz db.Quizz, questions []db.Question) (*Quiz,
 		Uuid:          dbQuiz.Uuid,
 		Title:         dbQuiz.Title,
 		AttemptsCount: int(dbQuiz.AttemptsCount),
+		CreatedAt:     utils.UnixToIso(dbQuiz.CreatedAt),
 	}
 	quiz.Questions = make([]Question, 0, len(questions))
 
@@ -173,6 +182,11 @@ func (s *Service) dbQuestionToQuestion(dbQue db.Question) (Question, error) {
 }
 
 func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
+
+	err := s.validateQuestions(quiz.Questions)
+	if err != nil {
+		return nil, err
+	}
 
 	dbQuiz, err := s.q.UpdateQuizz(ctx, db.UpdateQuizzParams{
 		Title:         utils.ToSqlNullString(&quiz.Title),
@@ -361,6 +375,11 @@ func (s *Service) ListQuizes(ctx context.Context) ([]Quiz, error) {
 		return nil, err
 	}
 
+	slices.SortFunc(quizzes,
+		func(a, b Quiz) int {
+			return cmp.Compare(a.CreatedAt, b.CreatedAt)
+		})
+
 	return quizzes, nil
 }
 
@@ -368,11 +387,13 @@ func (s *Service) DeleteQuiz(quizId string, ctx context.Context) error {
 
 	res, err := s.q.DeleteQuizz(ctx, quizId)
 	if err != nil {
+		fmt.Println("error deleting", err)
 		return err
 	}
 
 	n, err := res.RowsAffected()
 	if err != nil {
+		fmt.Println("error rows affected", err)
 		return err
 	}
 

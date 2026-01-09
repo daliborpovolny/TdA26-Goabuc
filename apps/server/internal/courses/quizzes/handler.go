@@ -43,23 +43,18 @@ func (h *Handler) CreateQuiz(c echo.Context) error {
 		return r.Error(http.StatusBadRequest, "bad request")
 	}
 
-	if quiz.Uuid == "" {
-		quiz.Uuid = uuid.NewString()
-	}
+	quiz.Uuid = uuid.NewString()
 
 	if len(quiz.Questions) < 1 {
 		return r.Error(http.StatusBadRequest, "quiz must have at least one question")
 	}
 
 	for i := range quiz.Questions {
-		if quiz.Questions[i].Uuid == "" {
-			quiz.Questions[i].Uuid = uuid.NewString()
-		}
-	}
+		// if quiz.Questions[i].Uuid == "" {
+		// 	quiz.Questions[i].Uuid = uuid.NewString()
+		// }
+		quiz.Questions[i].Uuid = uuid.NewString()
 
-	ok := h.service.validateQuestions(quiz.Questions)
-	if !ok {
-		return r.Error(http.StatusBadRequest, "invalid question")
 	}
 
 	dbQuiz, err := h.service.CreateQuiz(quiz, courseId, r.Ctx)
@@ -92,6 +87,14 @@ func (h *Handler) UpdateQuiz(c echo.Context) error {
 	var quiz Quiz
 	if err := c.Bind(&quiz); err != nil {
 		return r.Error(http.StatusBadRequest, "bad request")
+	}
+
+	if len(quiz.Questions) < 1 {
+		return r.Error(http.StatusBadRequest, "quiz must have at least one question")
+	}
+
+	for i := range quiz.Questions {
+		quiz.Questions[i].Uuid = uuid.NewString()
 	}
 
 	quiz.Uuid = quizId
