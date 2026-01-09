@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { auth } from '$lib/auth.svelte';
 	import NavbarLink from './NavbarLink.svelte';
-	import tda_logo from '../../static/resources/Think-different-Academy_LOGO_bily.svg';
 </script>
 
 <nav class="flex gap-4 bg-[#0257A5] p-4 flex items-center text-3xl">
-	<img src={tda_logo} alt="Logo TdA" width="100" class="m-[calc(100px/3)]"/>
+	<img src="resources/Think-different-Academy_LOGO_bily.svg" alt="Logo TdA" width="100" class="m-[calc(100px/3)]"/>
 	
 	<NavbarLink name="Home" url="/" />
 	<NavbarLink name="Courses" url="/courses" />
