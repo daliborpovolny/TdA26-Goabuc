@@ -677,7 +677,7 @@ SELECT
 FROM quizz qz
 LEFT JOIN question qs
     ON qs.quizz_uuid = qz.uuid
-ORDER BY qs.question_order
+ORDER BY qz.uuid ASC, qs.question_order ASC
 `
 
 type ListQuizzesRow struct {
@@ -742,12 +742,12 @@ func (q *Queries) MakeUserAdmin(ctx context.Context, userID int64) error {
 	return err
 }
 
-const removeQuestion = `-- name: RemoveQuestion :execresult
-DELETE FROM question WHERE uuid = ?
+const removeQuestionsOfQuiz = `-- name: RemoveQuestionsOfQuiz :execresult
+DELETE FROM question WHERE quizz_uuid = ?
 `
 
-func (q *Queries) RemoveQuestion(ctx context.Context, uuid string) (sql.Result, error) {
-	return q.db.ExecContext(ctx, removeQuestion, uuid)
+func (q *Queries) RemoveQuestionsOfQuiz(ctx context.Context, quizzUuid string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, removeQuestionsOfQuiz, quizzUuid)
 }
 
 const updateCourse = `-- name: UpdateCourse :one

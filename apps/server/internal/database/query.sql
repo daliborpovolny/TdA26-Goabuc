@@ -148,7 +148,7 @@ SELECT
 FROM quizz qz
 LEFT JOIN question qs
     ON qs.quizz_uuid = qz.uuid
-ORDER BY qs.question_order;
+ORDER BY qz.uuid ASC, qs.question_order ASC;
 --* Question
 
 -- name: CreateQuestion :one
@@ -176,9 +176,6 @@ RETURNING *;
 
 -- name: GetQuestionsOfQuiz :many
 SELECT * FROM question WHERE quizz_uuid = ?;
-
--- name: RemoveQuestion :execresult
-DELETE FROM question WHERE uuid = ?;
 
 -- name: DeleteQuestionsOfQuiz :execresult
 DELETE FROM question WHERE quizz_uuid = ?;

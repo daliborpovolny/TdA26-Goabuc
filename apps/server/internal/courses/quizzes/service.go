@@ -299,6 +299,8 @@ func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizzesRow) ([]Quiz
 	for _, qr := range rows {
 		if currentQuizUuid != qr.QuizUuid {
 			currentQuizIndex += 1
+			currentQuizUuid = qr.QuizUuid
+
 			quizzes = append(quizzes, Quiz{
 				Uuid:          qr.QuizUuid,
 				Title:         qr.QuizTitle,
