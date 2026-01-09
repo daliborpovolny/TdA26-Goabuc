@@ -15,7 +15,7 @@
 			body: formJson
 		});
 
-		materialType = ''
+		materialType = '';
 		onchange();
 	}
 
@@ -28,7 +28,7 @@
 			body: formData
 		});
 
-		materialType = ''
+		materialType = '';
 		onchange();
 	}
 </script>

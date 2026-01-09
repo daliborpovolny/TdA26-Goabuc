@@ -1,5 +1,3 @@
-<title>Dashboard</title>
-
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { auth } from '$lib/auth.svelte.ts';
@@ -28,14 +26,18 @@
 	}
 </script>
 
-<div class="ml-4 text-3xl">
+<title>Dashboard</title>
 
+<div class="ml-4 text-3xl">
 	<br />
 	<h1 class="text-5xl font-bold">Manage Courses</h1>
 	<br />
 
 	<div class="text-semibold">
-		<a href="/dashboard/edit/courses" class="px-3 py-2 rounded-md bg-[#2592B8] hover:bg-[#6DD4B1] text-[#FFF]">Create new course</a>
+		<a
+			href="/dashboard/edit/courses"
+			class="rounded-md bg-[#2592B8] px-3 py-2 text-[#FFF] hover:bg-[#6DD4B1]">Create new course</a
+		>
 	</div>
 
 	<br />

@@ -34,7 +34,7 @@ export interface BaseQuestion {
 	type: 'singleChoice' | 'multipleChoice';
 	question: string;
 	options: string[];
-} 
+}
 
 export interface SingleChoiceQuestion extends BaseQuestion {
 	type: 'singleChoice';
@@ -46,13 +46,13 @@ export interface MultipleChoiceQuestion extends BaseQuestion {
 	correctIndices: number[];
 }
 
-export type Question = SingleChoiceQuestion | MultipleChoiceQuestion
+export type Question = SingleChoiceQuestion | MultipleChoiceQuestion;
 
 export interface Quiz {
 	uuid: string;
 	title: string;
-	attemptsCount :number;
-	questions: Question[]
+	attemptsCount: number;
+	questions: Question[];
 }
 
 export interface Answer {
@@ -63,5 +63,5 @@ export interface Answer {
 }
 
 export interface QuizSubmitRequest {
-	answers: Answer[]
+	answers: Answer[];
 }

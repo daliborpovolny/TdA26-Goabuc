@@ -1,5 +1,3 @@
-<title>Courses</title>
-
 <script lang="ts">
 	import DataLoader from '$lib/components/DataLoader.svelte';
 	import type { Course } from '$lib/types';
@@ -22,6 +20,8 @@
 		});
 	}
 </script>
+
+<title>Courses</title>
 
 <br />
 

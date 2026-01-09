@@ -83,7 +83,6 @@
 </DataLoader> -->
 
 <script lang="ts">
-
 	import { page } from '$app/state';
 
 	// import DataLoader from '$lib/components/DataLoader.svelte';
@@ -96,39 +95,37 @@
 
 	let courseId: string = page.params.uuid!;
 
-	let showCreateQuiz: boolean = $state(false)
+	let showCreateQuiz: boolean = $state(false);
 
-let course = $state<Course | null>(null);
-let loading = $state(true);
-let error = $state<string | null>(null);
+	let course = $state<Course | null>(null);
+	let loading = $state(true);
+	let error = $state<string | null>(null);
 
-async function loadCourse() {
-	if (course === null) {
-		loading = true;
+	async function loadCourse() {
+		if (course === null) {
+			loading = true;
+		}
+		error = null;
+
+		try {
+			const res = await fetch(`/api/courses/${courseId}`);
+			if (!res.ok) throw new Error('Failed to load course');
+			course = await res.json();
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Unknown error';
+		} finally {
+			loading = false;
+		}
 	}
-	error = null;
 
-	try {
-		const res = await fetch(`/api/courses/${courseId}`);
-		if (!res.ok) throw new Error('Failed to load course');
-		course = await res.json();
-	} catch (e) {
-		error = e instanceof Error ? e.message : 'Unknown error';
-	} finally {
-		loading = false;
+	// initial load
+	loadCourse();
+
+	function onCreateQuizSubmit() {
+		loadCourse();
+		showCreateQuiz = false;
 	}
-}
-
-// initial load
-loadCourse();
-
-function onCreateQuizSubmit () {
-	loadCourse()
-	showCreateQuiz = false
-}
-
 </script>
-
 
 {#if loading}
 	<div class="loading">Loading data...</div>
@@ -166,8 +163,8 @@ function onCreateQuizSubmit () {
 
 			<button
 				type="button"
-				class="rounded-md border border-stone-400 bg-stone-100 px-4 py-2 text-gray-800 hover:bg-stone-200"				
-			onclick={() => (showCreateQuiz = !showCreateQuiz)}
+				class="rounded-md border border-stone-400 bg-stone-100 px-4 py-2 text-gray-800 hover:bg-stone-200"
+				onclick={() => (showCreateQuiz = !showCreateQuiz)}
 			>
 				New Quiz
 			</button>
@@ -175,17 +172,14 @@ function onCreateQuizSubmit () {
 				<br />
 				<EditQuiz edit={false} courseId={course.uuid} onchange={onCreateQuizSubmit} />
 			{/if}
-			<br><br>
-
+			<br /><br />
 
 			{#each course.quizzes as quiz (quiz.uuid)}
-
 				<EditQuiz edit={true} {quiz} courseId={course.uuid} onchange={loadCourse} />
 				<br />
 			{/each}
 
-			<br>
-
+			<br />
 		</section>
 	</div>
 {/if}

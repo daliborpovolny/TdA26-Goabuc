@@ -1,11 +1,11 @@
-<title>Profile</title>
-
 <script lang="ts">
 	import DataLoader from '$lib/components/DataLoader.svelte';
 	import type { User } from '$lib/auth.svelte';
 
 	let dataPromise = fetch('/api/me').then((r) => r.json());
 </script>
+
+<title>Profile</title>
 
 <DataLoader promise={dataPromise}>
 	{#snippet children(user: User)}

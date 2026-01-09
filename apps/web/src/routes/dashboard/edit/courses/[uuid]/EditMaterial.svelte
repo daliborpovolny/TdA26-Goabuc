@@ -11,7 +11,7 @@
 		onchange: () => void;
 	} = $props();
 
-	let collapsed = $state(true)
+	let collapsed = $state(true);
 
 	async function remove(e: Event) {
 		e.preventDefault();
@@ -49,17 +49,13 @@
 </script>
 
 <div class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4">
-
-	<button type="button" class="text-2xl" onclick={() => (collapsed = !collapsed)} >{material.name}</button>
+	<button type="button" class="text-2xl" onclick={() => (collapsed = !collapsed)}
+		>{material.name}</button
+	>
 
 	{#if !collapsed}
-		
 		{#if material.type === 'file'}
-			<form
-				method="POST"
-				enctype="multipart/form-data"
-				onsubmit={saveFileMaterial}
-			>
+			<form method="POST" enctype="multipart/form-data" onsubmit={saveFileMaterial}>
 				<input type="hidden" name="type" value="file" />
 
 				<div class="flex flex-col">
@@ -97,7 +93,10 @@
 					Save
 				</button>
 
-				<button onclick={remove} class="rounded-md bg-red-800 px-4 py-2 text-white hover:bg-red-700">
+				<button
+					onclick={remove}
+					class="rounded-md bg-red-800 px-4 py-2 text-white hover:bg-red-700"
+				>
 					Remove
 				</button>
 			</form>
@@ -143,7 +142,10 @@
 					Save
 				</button>
 
-				<button onclick={remove} class="rounded-md bg-red-800 px-4 py-2 text-white hover:bg-red-700">
+				<button
+					onclick={remove}
+					class="rounded-md bg-red-800 px-4 py-2 text-white hover:bg-red-700"
+				>
 					Remove
 				</button>
 			</form>

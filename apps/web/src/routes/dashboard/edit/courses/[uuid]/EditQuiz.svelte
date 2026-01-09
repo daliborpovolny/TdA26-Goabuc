@@ -1,9 +1,5 @@
 <script lang="ts">
-	
-	import type {
-		Quiz,
-		Question
-	} from "$lib/types";
+	import type { Quiz, Question } from '$lib/types';
 
 	function uuid() {
 		return crypto.randomUUID();
@@ -16,7 +12,7 @@
 		onchange?: (quiz: Quiz) => void;
 	}>();
 
-	$inspect(props.quiz)
+	$inspect(props.quiz);
 
 	const quiz = $state<Quiz>(
 		props.quiz ?? {
@@ -27,9 +23,9 @@
 		}
 	);
 
-	let collapsed = $state(true)
+	let collapsed = $state(true);
 
-	let savedTitle = $state(quiz.title)
+	let savedTitle = $state(quiz.title);
 
 	async function updateQuiz(e: Event) {
 		e.preventDefault();
@@ -43,8 +39,8 @@
 
 		let stringifiedQuiz = JSON.stringify(quiz);
 
-		let putRoute = `/api/courses/${props.courseId}/quizzes/${quiz.uuid}`
-		let postRoute = `/api/courses/${props.courseId}/quizzes`
+		let putRoute = `/api/courses/${props.courseId}/quizzes/${quiz.uuid}`;
+		let postRoute = `/api/courses/${props.courseId}/quizzes`;
 
 		let res = await fetch(props.edit ? putRoute : postRoute, {
 			method: props.edit ? 'PUT' : 'POST',
@@ -53,7 +49,7 @@
 		});
 
 		if (res.status == 201) {
-			savedTitle = quiz.title
+			savedTitle = quiz.title;
 		}
 
 		props.onchange?.(quiz);
@@ -64,7 +60,7 @@
 
 		if (type === 'singleChoice') {
 			q = {
-				uuid: "",
+				uuid: '',
 				type: 'singleChoice',
 				question: '',
 				options: [''],
@@ -72,7 +68,7 @@
 			};
 		} else {
 			q = {
-				uuid: "",
+				uuid: '',
 				type: 'multipleChoice',
 				question: '',
 				options: [''],
@@ -82,7 +78,6 @@
 
 		quiz.questions.push(q);
 	}
-
 
 	function removeQuestion(index: number) {
 		quiz.questions.splice(index, 1);
@@ -101,14 +96,13 @@
 
 		if (q.type === 'multipleChoice') {
 			q.correctIndices = q.correctIndices
-				.filter(i => i !== index)
-				.map(i => (i > index ? i - 1 : i));
+				.filter((i) => i !== index)
+				.map((i) => (i > index ? i - 1 : i));
 		}
-
 	}
 
-	async function  deleteQuiz(e: Event) {
-		e.preventDefault()
+	async function deleteQuiz(e: Event) {
+		e.preventDefault();
 
 		if (!confirm('Are you sure?')) return;
 
@@ -116,150 +110,144 @@
 			method: 'DELETE'
 		});
 
-		props.onchange?.()
+		props.onchange?.();
 	}
-
 </script>
 
 <div class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4">
-{#if props.edit}
-	
-	<button type="button" class="text-2xl" onclick={() => (collapsed = !collapsed)} >{savedTitle}</button>
-	<br />
-{/if}
+	{#if props.edit}
+		<button type="button" class="text-2xl" onclick={() => (collapsed = !collapsed)}
+			>{savedTitle}</button
+		>
+		<br />
+	{/if}
 
-{#if !collapsed || !props.edit}
-<form  onsubmit={updateQuiz}>
-	<div>
-		<label class="block text-sm font-medium text-gray-700 mb-1" for="title">
-			Quiz title
-		</label>
-		<input
-			type="text"
-			required
-			bind:value={quiz.title}
-			name="title"
-			class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-		/>
-	</div>
-
-	{#each quiz.questions as q, qi}
-		<div class="rounded-lg border border-gray-200 p-4 space-y-4 bg-white shadow-sm">
-			<div class="flex justify-between items-center">
-				<h3 class="font-semibold text-lg">
-					Question {qi + 1} - {q.type === 'singleChoice' ? 'Single choice' : 'Multiple choice'}
-				</h3>
-				<button
-					type="button"
-					onclick={() => removeQuestion(qi)}
-					class="text-sm text-red-600 hover:text-red-800"
-				>
-					Remove
-				</button>
+	{#if !collapsed || !props.edit}
+		<form onsubmit={updateQuiz}>
+			<div>
+				<label class="mb-1 block text-sm font-medium text-gray-700" for="title"> Quiz title </label>
+				<input
+					type="text"
+					required
+					bind:value={quiz.title}
+					name="title"
+					class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+				/>
 			</div>
 
-			<input
-				type="text"
-				placeholder="Question text"
-				required
-				bind:value={q.question}
-				class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-			/>
+			{#each quiz.questions as q, qi}
+				<div class="space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+					<div class="flex items-center justify-between">
+						<h3 class="text-lg font-semibold">
+							Question {qi + 1} - {q.type === 'singleChoice' ? 'Single choice' : 'Multiple choice'}
+						</h3>
+						<button
+							type="button"
+							onclick={() => removeQuestion(qi)}
+							class="text-sm text-red-600 hover:text-red-800"
+						>
+							Remove
+						</button>
+					</div>
 
-			<div class="space-y-2">
-				{#each q.options as _, oi}
-					<div class="flex items-center gap-2">
-						<input
-							type="text"
-							required
-							placeholder={`Option ${oi + 1}`}
-							bind:value={q.options[oi]}
-							class="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						/>
+					<input
+						type="text"
+						placeholder="Question text"
+						required
+						bind:value={q.question}
+						class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+					/>
 
-						{#if q.type === 'singleChoice'}
-							<input
-								type="radio"
-								name={`${qi}-single-choice-${oi}`}
-								checked={q.correctIndex === oi}
-								onchange={() => {
-									q.correctIndex = oi;
-								}}
-								class="h-4 w-4"
-							/>
-						{:else}
-							<input
-								type="checkbox"
-								checked={q.correctIndices.includes(oi)}
-								name={`${qi}-multiple-choice-${oi}`}
-								onchange={(e) => {
-									if (e.currentTarget.checked) {
-										q.correctIndices.push(oi);
-									} else {
-										q.correctIndices = q.correctIndices.filter(i => i !== oi);
-									}
-								}}
-								class="h-4 w-4"
-							/>
-						{/if}
+					<div class="space-y-2">
+						{#each q.options as _, oi}
+							<div class="flex items-center gap-2">
+								<input
+									type="text"
+									required
+									placeholder={`Option ${oi + 1}`}
+									bind:value={q.options[oi]}
+									class="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+								/>
+
+								{#if q.type === 'singleChoice'}
+									<input
+										type="radio"
+										name={`${qi}-single-choice-${oi}`}
+										checked={q.correctIndex === oi}
+										onchange={() => {
+											q.correctIndex = oi;
+										}}
+										class="h-4 w-4"
+									/>
+								{:else}
+									<input
+										type="checkbox"
+										checked={q.correctIndices.includes(oi)}
+										name={`${qi}-multiple-choice-${oi}`}
+										onchange={(e) => {
+											if (e.currentTarget.checked) {
+												q.correctIndices.push(oi);
+											} else {
+												q.correctIndices = q.correctIndices.filter((i) => i !== oi);
+											}
+										}}
+										class="h-4 w-4"
+									/>
+								{/if}
+
+								<button
+									type="button"
+									onclick={() => removeOption(q, oi)}
+									class="text-gray-400 hover:text-red-600"
+								>
+									✕
+								</button>
+							</div>
+						{/each}
 
 						<button
 							type="button"
-							onclick={() => removeOption(q, oi)}
-							class="text-gray-400 hover:text-red-600"
+							onclick={() => addOption(q)}
+							class="text-sm text-blue-600 hover:text-blue-800"
 						>
-							✕
+							+ Add option
 						</button>
 					</div>
-				{/each}
+				</div>
+			{/each}
+
+			<div class="flex gap-3 pt-4">
+				<button
+					type="button"
+					onclick={() => addQuestion('singleChoice')}
+					class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+				>
+					+ Single choice
+				</button>
 
 				<button
 					type="button"
-					onclick={() => addOption(q)}
-					class="text-sm text-blue-600 hover:text-blue-800"
+					onclick={() => addQuestion('multipleChoice')}
+					class="rounded-md bg-yellow-600 px-4 py-2 text-white hover:bg-yellow-700"
 				>
-					+ Add option
+					+ Multiple choice
+				</button>
+
+				<button
+					type="submit"
+					class="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+				>
+					Save
+				</button>
+
+				<button
+					type="button"
+					onclick={deleteQuiz}
+					class="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+				>
+					Delete
 				</button>
 			</div>
-		</div>
-	{/each}
-
-	<div class="flex gap-3 pt-4">
-		<button
-			type="button"
-			onclick={() => addQuestion('singleChoice')}
-			class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-		>
-			+ Single choice
-		</button>
-
-		<button
-			type="button"
-			onclick={() => addQuestion('multipleChoice')}
-			class="rounded-md bg-yellow-600 px-4 py-2 text-white hover:bg-yellow-700"
-		>
-			+ Multiple choice
-		</button>
-		
-		<button 
-			type="submit"
-			class="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
-		>
-		
-			Save
-		</button>
-
-		<button
-			type="button"
-			onclick={deleteQuiz}
-			class="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-		>
-
-		Delete
-	</button>
-
-	</div>
-
-</form>
-{/if}
+		</form>
+	{/if}
 </div>
