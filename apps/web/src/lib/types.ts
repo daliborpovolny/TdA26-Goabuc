@@ -62,6 +62,6 @@ export interface Answer {
 	comment?: string;
 }
 
-export interface QuizSubmitRequest {
+export interface QuizSubmit {
 	answers: Answer[];
 }

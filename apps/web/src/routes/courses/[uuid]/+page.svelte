@@ -3,6 +3,7 @@
 	import ViewMaterial from './ViewMaterial.svelte';
 	import DataLoader from '$lib/components/DataLoader.svelte';
 	import type { Course } from '$lib/types';
+	import TakeQuiz from './TakeQuiz.svelte';
 
 	let coursesPromise: Promise<any> = loadCourseDetail();
 
@@ -30,8 +31,9 @@
 <br />
 <DataLoader promise={coursesPromise}>
 	{#snippet children(course: Course)}
+		<div class="mx-auto max-w-2xl space-y-8 p-6">
 		<title>{course.name}</title>
-		<div class="ml-5 text-3xl">
+		<div class="ml-5">
 			<div>
 				<h1 class="text-5xl">{course.name}</h1>
 				<br />
@@ -41,7 +43,7 @@
 			<div>
 				{#if course.materials && course.materials.length > 0}
 					<br />
-					<h1 class="text-xl">Materials</h1>
+					<h1 class="text-3xl">Materials</h1>
 					<br />
 
 					{#each course.materials as material}
@@ -51,6 +53,22 @@
 					{/each}
 				{/if}
 			</div>
+
+			<div>
+				{#if course.quizzes && course.quizzes.length > 0}
+					<br>
+					<h1 class="text-3xl">Quizzes</h1>
+					<br>
+
+					{#each course.quizzes as quiz}
+						<TakeQuiz {quiz} courseId={course.uuid}/>
+						<br>
+						<br>
+					{/each}
+
+				{/if}
+			</div>
+		</div>
 		</div>
 	{/snippet}
 </DataLoader>
