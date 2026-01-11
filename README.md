@@ -11,7 +11,7 @@ note: this is not the only readme. There is another in apps/server.
 
 - #### Server (port :3000)
     - it is now possible to run the server directly from the directory you cloned it to (TdA26-Goabuc by default), using the .bat (Windows) or the .sh (Linux / Mac) file
-    - also note that the .bat file now works for both frontend, backend, and caddy simultaneously and opnens 3 new windows
+    - also note that the .bat file now works for both frontend, backend, and caddy simultaneously and opens 3 new windows
       
         - #### Windows
             - in cmd, run `start_app.bat` (this starts the backend, the frontend, and Caddy at the same time &rarr; you're done)
