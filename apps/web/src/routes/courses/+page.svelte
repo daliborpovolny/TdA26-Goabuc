@@ -25,20 +25,22 @@
 
 <br />
 
-<div class="ml-5 text-3xl text-center">
+<div class="ml-5 text-3xl">
+	<div class="bg-[#0070BB] w-fit px-5 pt-5 pb-3 rounded-xl">
 	<h1 class="text-5xl font-bold">Courses</h1>
 	<br />
 
 	<DataLoader promise={coursesPromise}>
 		{#snippet children(courses: Course[])}
-			<div>
 				{#each courses as course}
-					<div class="bg-[#91F5AD] p-5 m-2 w-fit rounded-xl">
-						<a class="font-medium underline" href="/courses/{course.uuid}"> {course.name} </a>
-						<p>{course.description}</p>
-					</div>
+					<a href="/courses/{course.uuid}">
+						<div class="bg-[#91F5AD] p-5 w-[100%] rounded-xl mb-2">
+							<h2 class="text-medium font-semibold mb-2 underline decoration-3">{course.name}</h2>
+							<p>{course.description}</p>
+						</div>
+					</a>
 				{/each}
-			</div>
-		{/snippet}
-	</DataLoader>
+				{/snippet}
+			</DataLoader>
+	</div>
 </div>
