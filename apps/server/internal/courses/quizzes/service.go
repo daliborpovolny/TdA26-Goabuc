@@ -418,6 +418,12 @@ func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequ
 		return nil, err
 	}
 
+	if len(answers.Answers) != len(questions) {
+		return nil, ErrBadNumberOfAnswers
+	}
+
+	fmt.Println(answers)
+
 	outcome.MaxScore = len(questions)
 
 	for id, question := range questions {

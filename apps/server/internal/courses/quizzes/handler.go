@@ -164,6 +164,10 @@ func (h *Handler) SubmitQuizAnswers(c echo.Context) error {
 
 	outcome, err := h.service.SubmitQuizAnswers(quizId, answers, r.Ctx)
 	if err != nil {
+		if err == ErrBadNumberOfAnswers {
+			return r.Error(http.StatusBadRequest, err.Error())
+		}
+
 		return r.ServerError(err)
 	}
 
