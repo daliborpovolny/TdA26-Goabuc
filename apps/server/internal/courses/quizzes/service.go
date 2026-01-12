@@ -422,11 +422,13 @@ func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequ
 		return nil, ErrBadNumberOfAnswers
 	}
 
-	fmt.Println(answers)
+	// fmt.Println(answers)
 
 	outcome.MaxScore = len(questions)
 
 	for id, question := range questions {
+		fmt.Println(id, question, "hello")
+
 		correctAnswers := make([]int, 0, len(question.CorrectIndices))
 
 		for _, stringIndex := range strings.Split(question.CorrectIndices, "|") {
@@ -462,6 +464,7 @@ func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequ
 		for answerIndex := range len(selectedAnswers) {
 			if correctAnswers[answerIndex] != selectedAnswers[answerIndex] {
 				outcome.CorrectPerQuestion = append(outcome.CorrectPerQuestion, false)
+				correct = false
 				break
 			}
 		}
