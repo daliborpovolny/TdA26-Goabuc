@@ -13,7 +13,7 @@ cd "%loc%"
 echo Running frontend...
 if exist .\apps\web (
     cd .\apps\web
-    start cmd /k npm run dev
+    start cmd /k npm run dev -- --host 0.0.0.0 --port 3001
 )
 
 cd "%loc%"

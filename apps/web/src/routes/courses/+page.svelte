@@ -25,7 +25,7 @@
 
 <br />
 
-<div class="ml-5 text-3xl">
+<div class="mx-5 text-3xl">
 	<div class="w-fit rounded-xl bg-[#0070BB] px-5 pt-5 pb-3">
 		<h1 class="text-5xl font-bold">Courses</h1>
 		<br />

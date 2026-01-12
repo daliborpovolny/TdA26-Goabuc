@@ -28,31 +28,34 @@
 
 <title>Dashboard</title>
 
-<div class="ml-4 text-3xl">
-	<br />
-	<h1 class="text-5xl font-bold">Manage Courses</h1>
-	<br />
+<br />
 
-	<div class="text-semibold">
-		<a
+<div class="ml-4 text-3xl">
+	<dir class="w-fit rounded-xl bg-[#0070BB] px-5 pt-5 pb-3">
+		<h1 class="text-5xl font-bold">Manage Courses</h1>
+		<br />
+		
+		<div class="text-semibold">
+			<a
 			href="/dashboard/edit/courses"
 			class="rounded-md bg-[#2592B8] px-3 py-2 text-[#FFF] hover:bg-[#6DD4B1]">Create new course</a
-		>
-	</div>
-
-	<br />
-
-	{#await coursesPromise}
-		<p>Loading</p>
-	{:then data}
-		<ul>
+			>
+		</div>
+		
+		<br />
+		
+		{#await coursesPromise}
+			<p>Loading...</p>
+		{:then data}
 			{#each data as course}
-				<a href="/dashboard/edit/courses/{course.uuid}"> {course.name} </a>
-				<br />
-				<br />
+				<a href="/dashboard/edit/courses/{course.uuid}">
+					<div class="mb-2 w-[100%] rounded-xl bg-[#91F5AD] p-5">
+						<h2 class="text-medium mb-2 font-semibold underline decoration-3">{course.name}</h2>
+					</div>
+				</a>
 			{/each}
-		</ul>
-	{:catch error}
-		<p></p>
-	{/await}
+		{:catch error}
+			<p></p>
+		{/await}
+	</dir>
 </div>
