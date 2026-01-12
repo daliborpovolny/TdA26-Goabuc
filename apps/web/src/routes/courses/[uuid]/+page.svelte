@@ -40,35 +40,34 @@
 				<p>{course.description}</p>
 			</div>
 
-			<div>
-				{#if course.materials && course.materials.length > 0}
-					<br />
-					<h1 class="text-3xl">Materials</h1>
-					<br />
-
-					{#each course.materials as material}
-						<ViewMaterial {material} />
+				<div>
+					{#if course.materials && course.materials.length > 0}
 						<br />
+						<h1 class="text-3xl">Materials</h1>
 						<br />
-					{/each}
-				{/if}
+
+						{#each course.materials as material}
+							<ViewMaterial {material} />
+							<br />
+							<br />
+						{/each}
+					{/if}
+				</div>
+
+				<div>
+					{#if course.quizzes && course.quizzes.length > 0}
+						<br />
+						<h1 class="text-3xl">Quizzes</h1>
+						<br />
+
+						{#each course.quizzes as quiz}
+							<TakeQuiz {quiz} courseId={course.uuid} />
+							<br />
+							<br />
+						{/each}
+					{/if}
+				</div>
 			</div>
-
-			<div>
-				{#if course.quizzes && course.quizzes.length > 0}
-					<br>
-					<h1 class="text-3xl">Quizzes</h1>
-					<br>
-
-					{#each course.quizzes as quiz}
-						<TakeQuiz {quiz} courseId={course.uuid}/>
-						<br>
-						<br>
-					{/each}
-
-				{/if}
-			</div>
-		</div>
 		</div>
 	{/snippet}
 </DataLoader>
