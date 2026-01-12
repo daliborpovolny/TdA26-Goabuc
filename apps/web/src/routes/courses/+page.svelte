@@ -33,7 +33,7 @@
 		{#snippet children(courses: Course[])}
 			<ul>
 				{#each courses as course}
-					<a class="font-medium" href="/courses/{course.uuid}"> {course.name} </a>
+					<a class="font-medium underline" href="/courses/{course.uuid}"> {course.name} </a>
 					<p>{course.description}</p>
 					<br />
 				{/each}

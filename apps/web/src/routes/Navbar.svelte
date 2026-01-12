@@ -5,7 +5,7 @@
 
 <nav class="flex items-center gap-4 bg-[#0257A5] p-4 text-3xl">
 	<img
-		src="../resources/Think-different-Academy_LOGO_bily.svg"
+		src="resources/Think-different-Academy_LOGO_bily.svg"
 		alt="Logo TdA"
 		width="100"
 		class="m-[calc(100px/3)]"
