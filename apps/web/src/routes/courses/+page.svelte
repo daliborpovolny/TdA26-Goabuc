@@ -33,9 +33,10 @@
 		{#snippet children(courses: Course[])}
 			<ul>
 				{#each courses as course}
-					<a class="font-medium underline" href="/courses/{course.uuid}"> {course.name} </a>
-					<p>{course.description}</p>
-					<br />
+					<div class="bg-[#0070BB] p-5 m-2 w-fit rounded-xl text-white">
+						<a class="font-medium underline" href="/courses/{course.uuid}"> {course.name} </a>
+						<p>{course.description}</p>
+					</div>
 				{/each}
 			</ul>
 		{/snippet}
