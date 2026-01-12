@@ -1,23 +1,31 @@
 <script lang="ts">
-	import type { Quiz, QuizSubmit } from '$lib/types';
+
+	import type { Quiz, QuizSubmit, QuizMarked } from '$lib/types';
 
 	let { quiz, courseId }: { quiz: Quiz; courseId: string } = $props();
 
 	let collapsed = $state(true);
 
+	let quizSubmit: QuizSubmit = {answers: []}
+
+	let quizMarked: QuizMarked | null = $state(null)
+
 	async function submitQuiz(e: Event) {
 		e.preventDefault();
 
-		let stringifiedQuiz = JSON.stringify(quiz);
+		let stringifiedQuizSubmit = JSON.stringify(quizSubmit);
 
 		let route = `/api/courses/${courseId}/quizzes/${quiz.uuid}/submit`;
 
 		let res = await fetch(route, {
 			method: 'POST',
 			headers: { 'Content-type': 'application/json' },
-			body: stringifiedQuiz
+			body: stringifiedQuizSubmit
 		});
-		console.log(res);
+
+		if (res.status == 200) {
+			quizMarked = await res.json()
+		}
 	}
 </script>
 
@@ -57,7 +65,11 @@
 										type="radio"
 										name={`${qi}-single-choice`}
 										onchange={() => {
-											q.correctIndex = oi;
+											quizSubmit.answers[qi] = {
+												uuid: "",
+												comment: "",
+												selectedIndex: oi
+											}
 										}}
 										class="h-4 w-4"
 									/>
@@ -67,10 +79,18 @@
 										checked={q.correctIndices.includes(oi)}
 										name={`${qi}-multiple-choice`}
 										onchange={(e) => {
+											if (quizSubmit.answers[qi] == null) {
+												quizSubmit.answers[qi] = {
+													uuid: "",
+													comment: "",
+													selectedIndices: []
+												}
+											}
+
 											if (e.currentTarget.checked) {
-												q.correctIndices.push(oi);
+												quizSubmit.answers[qi].selectedIndices?.push(oi);
 											} else {
-												q.correctIndices = q.correctIndices.filter((i) => i !== oi);
+												quizSubmit.answers[qi].selectedIndices?.filter((i) => i !== oi);
 											}
 										}}
 										class="h-4 w-4"
@@ -91,5 +111,14 @@
 				</button>
 			</div>
 		</form>
+
+		{#if quizMarked}
+		
+			<p>Attempt at {quizMarked.submittedAt} </p>
+			<p>Score: {quizMarked.score}/{quizMarked.maxScore}</p>
+			{#each quizMarked.correctPerQuestion as ar, ai}
+				<p>Question {ai}: {ar == true ? "correct" : "incorrect"}</p>
+			{/each}
+		{/if}
 	{/if}
 </div>

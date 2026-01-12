@@ -65,3 +65,11 @@ export interface Answer {
 export interface QuizSubmit {
 	answers: Answer[];
 }
+
+export interface QuizMarked {
+	quizUuid: string;
+	score: number;
+	maxScore: number;
+	correctPerQuestion: boolean[];
+	submittedAt: string;
+}
