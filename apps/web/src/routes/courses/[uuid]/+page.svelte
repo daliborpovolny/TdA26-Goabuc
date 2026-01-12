@@ -35,7 +35,7 @@
 			<title>{course.name}</title>
 			<div class="ml-5">
 				<div>
-					<h1 class="text-5xl font-bold decoration-5 underline">{course.name}</h1>
+					<h1 class="text-5xl font-bold underline decoration-5">{course.name}</h1>
 					<br />
 					<p class="text-2xl">{course.description}</p>
 				</div>

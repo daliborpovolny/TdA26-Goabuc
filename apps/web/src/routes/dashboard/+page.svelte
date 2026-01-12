@@ -34,16 +34,17 @@
 	<dir class="w-fit rounded-xl bg-[#0070BB] px-5 pt-5 pb-3">
 		<h1 class="text-5xl font-bold">Manage Courses</h1>
 		<br />
-		
+
 		<div class="text-semibold">
 			<a
-			href="/dashboard/edit/courses"
-			class="rounded-md bg-[#2592B8] px-3 py-2 text-[#FFF] hover:bg-[#6DD4B1]">Create new course</a
+				href="/dashboard/edit/courses"
+				class="rounded-md bg-[#2592B8] px-3 py-2 text-[#FFF] hover:bg-[#6DD4B1]"
+				>Create new course</a
 			>
 		</div>
-		
+
 		<br />
-		
+
 		{#await coursesPromise}
 			<p>Loading...</p>
 		{:then data}
