@@ -115,7 +115,7 @@
 			<p>Attempt at {quizMarked.submittedAt}</p>
 			<p>Score: {quizMarked.score}/{quizMarked.maxScore}</p>
 			{#each quizMarked.correctPerQuestion as ar, ai}
-				<p>Question {ai}: {ar == true ? 'correct' : 'incorrect'}</p>
+				<p>Question {ai + 1}: {ar == true ? 'correct' : 'incorrect'}</p>
 			{/each}
 		{/if}
 	{/if}
