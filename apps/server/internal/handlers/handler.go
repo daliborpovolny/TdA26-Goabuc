@@ -62,7 +62,7 @@ func (r *RequestCtx) ServerError(err error) error {
 
 	fmt.Println("Unexpected error", err)
 
-	return r.Echo.JSON(http.StatusInternalServerError, map[string]string{"message": "Internal server error"})
+	return r.Echo.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 }
 
 func (r *RequestCtx) JSONMsg(code int, msg string) error {
