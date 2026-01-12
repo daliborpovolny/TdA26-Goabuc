@@ -32,13 +32,13 @@
 <DataLoader promise={coursesPromise}>
 	{#snippet children(course: Course)}
 		<div class="mx-auto max-w-2xl space-y-8 p-6">
-		<title>{course.name}</title>
-		<div class="ml-5">
-			<div>
-				<h1 class="text-5xl underline">{course.name}</h1>
-				<br />
-				<p>{course.description}</p>
-			</div>
+			<title>{course.name}</title>
+			<div class="ml-5">
+				<div>
+					<h1 class="text-5xl underline">{course.name}</h1>
+					<br />
+					<p>{course.description}</p>
+				</div>
 
 				<div>
 					{#if course.materials && course.materials.length > 0}

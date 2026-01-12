@@ -1,14 +1,13 @@
 <script lang="ts">
-
 	import type { Quiz, QuizSubmit, QuizMarked } from '$lib/types';
 
 	let { quiz, courseId }: { quiz: Quiz; courseId: string } = $props();
 
 	let collapsed = $state(true);
 
-	let quizSubmit: QuizSubmit = {answers: []}
+	let quizSubmit: QuizSubmit = { answers: [] };
 
-	let quizMarked: QuizMarked | null = $state(null)
+	let quizMarked: QuizMarked | null = $state(null);
 
 	async function submitQuiz(e: Event) {
 		e.preventDefault();
@@ -24,7 +23,7 @@
 		});
 
 		if (res.status == 200) {
-			quizMarked = await res.json()
+			quizMarked = await res.json();
 		}
 	}
 </script>
@@ -66,10 +65,10 @@
 										name={`${qi}-single-choice`}
 										onchange={() => {
 											quizSubmit.answers[qi] = {
-												uuid: "",
-												comment: "",
+												uuid: '',
+												comment: '',
 												selectedIndex: oi
-											}
+											};
 										}}
 										class="h-4 w-4"
 									/>
@@ -81,10 +80,10 @@
 										onchange={(e) => {
 											if (quizSubmit.answers[qi] == null) {
 												quizSubmit.answers[qi] = {
-													uuid: "",
-													comment: "",
+													uuid: '',
+													comment: '',
 													selectedIndices: []
-												}
+												};
 											}
 
 											if (e.currentTarget.checked) {
@@ -113,11 +112,10 @@
 		</form>
 
 		{#if quizMarked}
-		
-			<p>Attempt at {quizMarked.submittedAt} </p>
+			<p>Attempt at {quizMarked.submittedAt}</p>
 			<p>Score: {quizMarked.score}/{quizMarked.maxScore}</p>
 			{#each quizMarked.correctPerQuestion as ar, ai}
-				<p>Question {ai}: {ar == true ? "correct" : "incorrect"}</p>
+				<p>Question {ai}: {ar == true ? 'correct' : 'incorrect'}</p>
 			{/each}
 		{/if}
 	{/if}

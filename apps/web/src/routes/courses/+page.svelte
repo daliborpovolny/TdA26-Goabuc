@@ -33,7 +33,7 @@
 		{#snippet children(courses: Course[])}
 			<ul>
 				{#each courses as course}
-					<div class="bg-[#0070BB] p-5 m-2 w-fit rounded-xl text-white">
+					<div class="m-2 w-fit rounded-xl bg-[#0070BB] p-5 text-white">
 						<a class="font-medium underline" href="/courses/{course.uuid}"> {course.name} </a>
 						<p>{course.description}</p>
 					</div>
