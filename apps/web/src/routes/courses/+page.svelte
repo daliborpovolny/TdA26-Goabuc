@@ -25,8 +25,8 @@
 
 <br />
 
-<div class="mx-5 text-3xl">
-	<div class="w-fit rounded-xl bg-[#0070BB] px-5 pt-5 pb-3">
+<div class="text-center text-3xl flex justify-center">
+	<div class="w-[65%] rounded-xl bg-[#0070BB] px-5 pt-5 pb-3 space-y-2">
 		<h1 class="text-5xl font-bold">Courses</h1>
 		<br />
 

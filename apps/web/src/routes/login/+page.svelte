@@ -47,7 +47,7 @@
 			type="email"
 			bind:value={email}
 			required
-			class="outline-offset-none w-full rounded-md border-[4px] border-[#1A1A1A] px-4 py-2 font-semibold focus:border-[#91F5AD] focus:outline-2 focus:outline-[#91F5AD]"
+			class="outline-offset-none w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:outline-2 focus:outline-[#91F5AD] focus:bg-white"
 		/>
 	</div>
 	<div>
@@ -57,7 +57,7 @@
 			type="password"
 			bind:value={password}
 			required
-			class="w-full rounded-md border-[4px] border-[#1A1A1A] px-4 py-2 focus:border-[#91F5AD] focus:outline-2 focus:outline-[#91F5AD]"
+			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 focus:outline-2 focus:outline-[#91F5AD] focus:bg-white"
 		/>
 	</div>
 	<button
