@@ -28,35 +28,37 @@
 	}
 </script>
 
-<br />
 <DataLoader promise={coursesPromise}>
 	{#snippet children(course: Course)}
-		<div class="min-w-fit p-6 flex justify-center">
+		<div class="p-6 flex justify-center">
 			<title>{course.name}</title>
-			<div class="space-y-8">
-				<div>
-					<h1 class="text-5xl font-bold underline decoration-5">{course.name}</h1>
-					<br />
-					<p class="text-2xl">{course.description}</p>
+			<div class="space-y-8 w-[50%]">
+				<h1 class="text-5xl font-bold mb-0">{course.name}</h1>
+				<div class="bg-[#0070BB] rounded-xl p-2">
+					<div class="bg-[#91F5AD] rounded-xl p-4">
+						<p class="text-2xl">{course.description}</p>
+					</div>
 				</div>
 
 				<div>
 					{#if course.materials && course.materials.length > 0}
-						<h1 class="text-3xl font-semibold">Materials</h1>
-						<br>
-						{#each course.materials as material}
-							<ViewMaterial {material} />
-						{/each}
+						<h1 class="text-3xl font-bold">Materials</h1>
+						<div class="bg-[#0070BB] p-2 space-y-2 rounded-xl">
+							{#each course.materials as material}
+								<ViewMaterial {material} />
+							{/each}
+						</div>
 					{/if}
 				</div>
 
 				<div>
 					{#if course.quizzes && course.quizzes.length > 0}
-						<h1 class="text-3xl font-semibold">Quizzes</h1>
-						<br>
-						{#each course.quizzes as quiz}
-							<TakeQuiz {quiz} courseId={course.uuid} />
-						{/each}
+						<h1 class="text-3xl font-bold">Quizzes</h1>
+						<div class="bg-[#0070BB] p-2 space-y-2 rounded-xl">
+							{#each course.quizzes as quiz}
+								<TakeQuiz {quiz} courseId={course.uuid} />
+							{/each}
+						</div>
 					{/if}
 				</div>
 			</div>

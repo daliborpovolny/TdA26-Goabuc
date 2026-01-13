@@ -28,16 +28,14 @@
 	}
 </script>
 
-<div class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4">
-	<button type="button" class="text-2xl" onclick={() => (collapsed = !collapsed)}
+<div class="space-y-2 rounded-xl bg-[#91F5AD] p-4">
+	<button type="button" class="cursor-pointer w-[100%] text-left text-2xl font-bold" onclick={() => (collapsed = !collapsed)}
 		>{quiz.title}</button
 	>
-	<br />
-
 	{#if !collapsed}
-		<form onsubmit={submitQuiz}>
+		<form onsubmit={submitQuiz} class="space-y-2">
 			{#each quiz.questions as q, qi}
-				<div class="space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+				<div class="space-y-4 rounded-xl border border-[#1A1A1A] bg-white p-4 shadow-sm">
 					<div class="flex items-center justify-between">
 						<h3 class="text-lg font-semibold">
 							Question {qi + 1} - {q.type === 'singleChoice' ? 'Single choice' : 'Multiple choice'}

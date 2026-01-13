@@ -23,24 +23,22 @@
 
 <title>Courses</title>
 
-<br />
-
-<div class="text-center text-3xl flex justify-center w-[100%]">
-	<div class="max-w-[50%] rounded-xl bg-[#0070BB] px-5 pt-5 pb-3 space-y-2">
-		<h1 class="text-5xl font-bold">Courses</h1>
-		<br />
-
-		<DataLoader promise={coursesPromise}>
-			{#snippet children(courses: Course[])}
-				{#each courses as course}
-					<a href="/courses/{course.uuid}">
-						<div class="mb-2 w-[100%] rounded-xl bg-[#91F5AD] p-5 text-left">
-							<h2 class="text-medium mb-2 font-semibold underline decoration-3">{course.name}</h2>
-							<p>{course.description}</p>
-						</div>
-					</a>
-				{/each}
-			{/snippet}
-		</DataLoader>
+<div class="p-6">
+	<h1 class="text-5xl font-bold text-center underline">Courses</h1>
+	<div class="text-center text-3xl flex justify-center w-[100%]">
+		<div class="max-w-[50%] rounded-xl bg-[#0070BB] px-3 pt-3 pb-1 space-y-2">
+			<DataLoader promise={coursesPromise}>
+				{#snippet children(courses: Course[])}
+					{#each courses as course}
+						<a href="/courses/{course.uuid}">
+							<div class="mb-2 w-[100%] rounded-xl bg-[#91F5AD] p-3 text-left">
+								<h2 class="text-medium mb-2 font-semibold underline decoration-3">{course.name}</h2>
+								<p class="text-ellipsis">{course.description}</p>
+							</div>
+						</a>
+					{/each}
+				{/snippet}
+			</DataLoader>
+		</div>
 	</div>
 </div>

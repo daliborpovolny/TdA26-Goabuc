@@ -9,7 +9,7 @@
 
 <DataLoader promise={dataPromise}>
 	{#snippet children(user: User)}
-		<div class="ml-4 text-3xl">
+		<div class="ml-4 text-3xl text-center">
 			<br />
 			<h1 class="text-5xl font-bold">This is you!</h1>
 			<br />
