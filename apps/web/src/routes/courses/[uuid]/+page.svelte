@@ -31,9 +31,9 @@
 <br />
 <DataLoader promise={coursesPromise}>
 	{#snippet children(course: Course)}
-		<div class="mx-auto max-w-[50%] min-w-fit space-y-8 p-6">
+		<div class="min-w-fit p-6 flex justify-center">
 			<title>{course.name}</title>
-			<div class="ml-5">
+			<div class="space-y-8">
 				<div>
 					<h1 class="text-5xl font-bold underline decoration-5">{course.name}</h1>
 					<br />
@@ -42,28 +42,20 @@
 
 				<div>
 					{#if course.materials && course.materials.length > 0}
-						<br />
-						<h1 class="text-3xl">Materials</h1>
-						<br />
-
+						<h1 class="text-3xl font-semibold">Materials</h1>
+						<br>
 						{#each course.materials as material}
 							<ViewMaterial {material} />
-							<br />
-							<br />
 						{/each}
 					{/if}
 				</div>
 
 				<div>
 					{#if course.quizzes && course.quizzes.length > 0}
-						<br />
-						<h1 class="text-3xl">Quizzes</h1>
-						<br />
-
+						<h1 class="text-3xl font-semibold">Quizzes</h1>
+						<br>
 						{#each course.quizzes as quiz}
 							<TakeQuiz {quiz} courseId={course.uuid} />
-							<br />
-							<br />
 						{/each}
 					{/if}
 				</div>

@@ -30,7 +30,7 @@
 
 <br />
 
-<div class="text-3xl flex justify-center">
+<div class="text-3xl flex justify-center w-[100%]">
 	<dir class="w-fit rounded-xl bg-[#0070BB] px-5 pt-5 pb-3">
 		<h1 class="text-5xl font-bold">Manage Courses</h1>
 		<br />
