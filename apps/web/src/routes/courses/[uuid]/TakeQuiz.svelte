@@ -65,7 +65,7 @@
 										name={`${qi}-single-choice`}
 										onchange={() => {
 											quizSubmit.answers[qi] = {
-												uuid: '',
+												uuid: q.uuid,
 												comment: '',
 												selectedIndex: oi
 											};
@@ -80,7 +80,7 @@
 										onchange={(e) => {
 											if (quizSubmit.answers[qi] == null) {
 												quizSubmit.answers[qi] = {
-													uuid: '',
+													uuid: q.uuid,
 													comment: '',
 													selectedIndices: []
 												};
