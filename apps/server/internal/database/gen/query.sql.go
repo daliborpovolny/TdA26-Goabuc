@@ -742,14 +742,6 @@ func (q *Queries) MakeUserAdmin(ctx context.Context, userID int64) error {
 	return err
 }
 
-const removeQuestionsOfQuiz = `-- name: RemoveQuestionsOfQuiz :execresult
-DELETE FROM question WHERE quizz_uuid = ?
-`
-
-func (q *Queries) RemoveQuestionsOfQuiz(ctx context.Context, quizzUuid string) (sql.Result, error) {
-	return q.db.ExecContext(ctx, removeQuestionsOfQuiz, quizzUuid)
-}
-
 const updateCourse = `-- name: UpdateCourse :one
 UPDATE course SET name = ?, description = ?, updated_at = ? WHERE course.uuid = ? RETURNING uuid, name, description, created_at, updated_at
 `

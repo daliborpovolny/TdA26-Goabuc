@@ -1,6 +1,8 @@
 package quizzes
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
@@ -50,15 +52,21 @@ func (h *Handler) CreateQuiz(c echo.Context) error {
 	}
 
 	for i := range quiz.Questions {
-		// if quiz.Questions[i].Uuid == "" {
-		// 	quiz.Questions[i].Uuid = uuid.NewString()
-		// }
-		quiz.Questions[i].Uuid = uuid.NewString()
-
+		if quiz.Questions[i].Uuid == "" {
+			quiz.Questions[i].Uuid = uuid.NewString()
+		}
+		// quiz.Questions[i].Uuid = uuid.NewString()
 	}
 
 	dbQuiz, err := h.service.CreateQuiz(quiz, courseId, r.Ctx)
 	if err != nil {
+		var eqbf *ErrQuestionBadFormat
+
+		if errors.As(err, &eqbf) {
+			fmt.Println("bad format sucker!")
+			return r.Error(http.StatusBadRequest, eqbf.Error())
+		}
+
 		return r.ServerError(err)
 	}
 	return r.Echo.JSON(http.StatusCreated, dbQuiz)
@@ -72,7 +80,7 @@ func (h *Handler) GetQuiz(c echo.Context) error {
 	quiz, err := h.service.GetQuiz(quizId, r.Ctx)
 	if err != nil {
 		if err == ErrQuizNotFound {
-			return r.Error(http.StatusBadRequest, "unknown quiz id")
+			return r.Error(http.StatusNotFound, "unknown quiz id")
 		}
 		return r.ServerError(err)
 	}
@@ -94,7 +102,9 @@ func (h *Handler) UpdateQuiz(c echo.Context) error {
 	}
 
 	for i := range quiz.Questions {
-		quiz.Questions[i].Uuid = uuid.NewString()
+		if quiz.Questions[i].Uuid == "" {
+			quiz.Questions[i].Uuid = uuid.NewString()
+		}
 	}
 
 	quiz.Uuid = quizId
@@ -107,6 +117,14 @@ func (h *Handler) UpdateQuiz(c echo.Context) error {
 		if err == ErrBadQuestionType {
 			return r.Error(http.StatusBadRequest, "invalid question type")
 		}
+
+		var eqbf *ErrQuestionBadFormat
+
+		if errors.As(err, &eqbf) {
+			fmt.Println("bad format sucker!")
+			return r.Error(http.StatusBadRequest, eqbf.Error())
+		}
+
 		return r.ServerError(err)
 	}
 
@@ -168,6 +186,12 @@ func (h *Handler) SubmitQuizAnswers(c echo.Context) error {
 			return r.Error(http.StatusBadRequest, err.Error())
 		}
 
+		var ebr *ErrBadRequest
+		if errors.As(err, &ebr) {
+			return r.Error(http.StatusBadRequest, ebr.Error())
+		}
+
+		fmt.Println("ERRORROOOOO: \n\n\n\n", err)
 		return r.ServerError(err)
 	}
 

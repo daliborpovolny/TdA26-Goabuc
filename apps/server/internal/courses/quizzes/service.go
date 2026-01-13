@@ -52,20 +52,33 @@ func (s *Service) validateQuestions(questions []Question) error {
 	for i, q := range questions {
 
 		if uuid.Validate(q.Uuid) != nil || q.Uuid == "" {
-			return errors.New("bad uuid format on question number: " + strconv.Itoa(i+1))
+			return &ErrQuestionBadFormat{
+				questionNumber: i,
+				message:        "bad uuid format",
+			}
 		}
 
 		switch q.QueType {
 		case "singleChoice":
 			if q.CorrectIndex == nil {
-				return errors.New("no correct index on question number: " + strconv.Itoa(i+1))
+				return &ErrQuestionBadFormat{
+					questionNumber: i,
+					message:        "no correct index set",
+				}
 			}
+
 		case "multipleChoice":
 			if len(q.CorrectIndices) == 0 {
-				return errors.New("no correct index on question number: " + strconv.Itoa(i+1))
+				return &ErrQuestionBadFormat{
+					questionNumber: i,
+					message:        "correct indices are empty, must be at least one correct option",
+				}
 			}
 		default:
-			return errors.New("invalid question type, must be either singleChoice or multipleChoice")
+			return &ErrQuestionBadFormat{
+				questionNumber: i,
+				message:        "invalid question type, must be singleChoice or multipleChoice",
+			}
 		}
 	}
 	return nil
@@ -217,15 +230,19 @@ func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 			}
 		}
 
+		if uuid.Validate(question.Uuid) != nil || question.Uuid == "" {
+			question.Uuid = uuid.NewString()
+		}
+
 		dbQuestion, err := s.q.CreateQuestion(ctx, db.CreateQuestionParams{
-			Uuid:           uuid.NewString(),
+			Uuid:           question.Uuid,
 			QuizUuid:       quiz.Uuid,
 			Type:           question.QueType,
 			QuestionText:   question.Question,
 			Options:        strings.Join(question.Options, "|"),
 			CorrectIndices: strings.Join(stringIndices, "|"),
 		})
-		fmt.Println(dbQuestion)
+
 		if err != nil {
 			return nil, err
 		}
@@ -434,7 +451,8 @@ func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequ
 		for _, stringIndex := range strings.Split(question.CorrectIndices, "|") {
 			intIndex, err := strconv.Atoi(stringIndex)
 			if err != nil {
-				fmt.Println("invalid question in db! WHO IS RESPONSIBLE?", question)
+				// fmt.Println("invalid question in db! WHO IS RESPONSIBLE?", question)
+				// &ErrBadRequest{}
 				return nil, err
 			}
 			correctAnswers = append(correctAnswers, intIndex)
@@ -444,7 +462,7 @@ func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequ
 		selectedAnswers := answers.Answers[id].SelectedIndices
 		if selectedAnswers == nil {
 			if answers.Answers[id].SelectedIndex == nil {
-				return nil, errors.New("answer must either have selectedIndex or selectedIndices")
+				return nil, &ErrBadRequest{"answer must either have selectedIndex or selectedIndices"}
 			}
 			selectedAnswers = []int{*answers.Answers[id].SelectedIndex}
 		}

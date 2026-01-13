@@ -97,5 +97,5 @@ CREATE TABLE IF NOT EXISTS answer (
     submitted_at INTEGER NOT NULL,
 
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
-    FOREIGN KEY (quiz_uuid) REFERENCES question(uuid) ON DELETE CASCADE
+    FOREIGN KEY (quiz_uuid) REFERENCES quizz(uuid) ON DELETE CASCADE
 );
