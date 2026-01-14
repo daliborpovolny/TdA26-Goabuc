@@ -40,7 +40,7 @@
 						<p class="text-2xl">{course.description}</p>
 					</div>
 				</div>
-				
+
 				<div>
 					{#if course.materials && course.materials.length > 0}
 						<h1 class="text-3xl font-bold">Materials</h1>

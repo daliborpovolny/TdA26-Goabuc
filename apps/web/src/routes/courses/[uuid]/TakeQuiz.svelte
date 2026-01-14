@@ -7,8 +7,6 @@
 
 	let quizSubmit: QuizSubmit = { answers: [] };
 
-	$inspect(quizSubmit.answers);
-
 	let quizMarked: QuizMarked | null = $state(null);
 
 	let missingAnswers: number[] = $state([]);
@@ -105,11 +103,7 @@
 										type="radio"
 										name={`${qi}-single-choice`}
 										onchange={() => {
-											// quizSubmit.answers[qi] = {
-											// 	uuid: q.uuid,
-											// 	comment: '',
-											// 	selectedIndex: oi
-											// };
+
 											quizSubmit.answers[qi].selectedIndex = oi;
 										}}
 										class="h-4 w-4"
@@ -119,13 +113,6 @@
 										type="checkbox"
 										name={`${qi}-multiple-choice`}
 										onchange={(e) => {
-											// if (quizSubmit.answers[qi] == null) {
-											// 	quizSubmit.answers[qi] = {
-											// 		uuid: q.uuid,
-											// 		comment: '',
-											// 		selectedIndices: []
-											// 	};
-											// }
 
 											if (e.currentTarget.checked) {
 												quizSubmit.answers[qi].selectedIndices?.push(oi);
@@ -157,7 +144,7 @@
 			</div>
 		</form>
 
-		{#if missingAnswers}
+		{#if missingAnswers.length > 0}
 			<p>
 				Missing an answer at question{missingAnswers.length > 1 ? 's' : ''}: {missingAnswers.join(
 					', '

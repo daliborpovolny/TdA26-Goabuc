@@ -92,6 +92,8 @@
 	import EditMaterial from './EditMaterial.svelte';
 	import EditCourse from './EditCourse.svelte';
 	import EditQuiz from './EditQuiz.svelte';
+	import CreateFeedPost from './CreateFeedPost.svelte';
+	import EditFeed from './EditFeed.svelte';
 
 	let courseId: string = page.params.uuid!;
 
@@ -170,6 +172,7 @@
 			</button>
 			{#if showCreateQuiz}
 				<br />
+				<br />
 				<EditQuiz edit={false} courseId={course.uuid} onchange={onCreateQuizSubmit} />
 			{/if}
 			<br /><br />
@@ -179,6 +182,12 @@
 				<br />
 			{/each}
 
+			<h1 class="text-3xl">Feed</h1>
+			<br />
+
+			<CreateFeedPost courseId={course.uuid} />
+
+			<EditFeed courseId={course.uuid} />
 			<br />
 		</section>
 	</div>

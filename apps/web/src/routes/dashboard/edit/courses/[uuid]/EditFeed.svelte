@@ -2,8 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 
 	import type { FeedPost } from '$lib/types';
-
-	import ViewFeedItem from './ViewFeedItem.svelte';
+	import EditFeedPost from './EditFeedPost.svelte';
 
 	let { courseId }: { courseId: string } = $props();
 
@@ -40,6 +39,8 @@
 		// 3. FIX: Add a specific listener for "new_post"
 		eventSource.addEventListener('new_post', (event) => {
 			if (!event.data) return;
+
+			console.log('Received new_post:', event.data); // Debug log
 
 			try {
 				let newPost: FeedPost = JSON.parse(event.data);
@@ -86,7 +87,7 @@
 		{#if !collapsed}
 			<div class="flex flex-col gap-4">
 				{#each posts as post (post.uuid)}
-					<ViewFeedItem {post} />
+					<EditFeedPost {courseId} {post} />
 				{/each}
 			</div>
 		{/if}
