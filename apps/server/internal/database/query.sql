@@ -205,3 +205,23 @@ INSERT INTO answer (
 
     sqlc.arg(submitted_at)
 ) RETURNING *;
+
+-- name: GetPostsByCourse :many
+SELECT * FROM feed_posts
+WHERE course_uuid = ?
+ORDER BY created_at DESC;
+
+-- name: CreatePost :one
+INSERT INTO feed_posts (uuid, course_uuid, type, message, is_edited, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+RETURNING *;
+
+-- name: UpdatePost :one
+UPDATE feed_posts
+SET message = ?, is_edited = 1, updated_at = ?
+WHERE uuid = ?
+RETURNING *;
+
+-- name: DeletePost :exec
+DELETE FROM feed_posts
+WHERE uuid = ?;

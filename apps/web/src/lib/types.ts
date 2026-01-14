@@ -1,3 +1,7 @@
+/// Types for interaction with backend
+
+// Course
+
 export interface Course {
 	uuid: string;
 	type: string;
@@ -6,6 +10,8 @@ export interface Course {
 	materials: Material[];
 	quizzes: Quiz[];
 }
+
+// Materials
 
 export interface BaseMaterial {
 	uuid: string;
@@ -28,6 +34,8 @@ export interface UrlMaterial extends BaseMaterial {
 }
 
 export type Material = FileMaterial | UrlMaterial;
+
+// Quizzes
 
 export interface BaseQuestion {
 	uuid: string;
@@ -72,4 +80,15 @@ export interface QuizMarked {
 	maxScore: number;
 	correctPerQuestion: boolean[];
 	submittedAt: string;
+}
+
+// Feed
+
+export interface FeedPost {
+	uuid: string;
+	type: 'manual' | 'auto';
+	message: string;
+	edited: boolean;
+	createdAt: string;
+	updatedAt: string;
 }

@@ -99,3 +99,17 @@ CREATE TABLE IF NOT EXISTS answer (
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
     FOREIGN KEY (quiz_uuid) REFERENCES quizz(uuid) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS feed_posts (
+    uuid TEXT PRIMARY KEY,
+    course_uuid TEXT NOT NULL,
+
+    type TEXT NOT NULL, -- 'manual' or 'auto'
+    message TEXT NOT NULL,
+    is_edited BOOLEAN NOT NULL DEFAULT 0,
+    
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (course_uuid) REFERENCES course(uuid) ON DELETE CASCADE
+);

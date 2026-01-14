@@ -14,6 +14,7 @@ import (
 	"tourbackend/internal/courses/materials"
 	"tourbackend/internal/courses/quizzes"
 	db "tourbackend/internal/database"
+	"tourbackend/internal/feeds"
 	"tourbackend/internal/middlewares"
 
 	"github.com/labstack/echo/v4"
@@ -116,6 +117,17 @@ func main() {
 	quizzes.DELETE("/:quizId", quizzesHandler.DeleteQuiz)
 
 	quizzes.POST("/:quizId/submit", quizzesHandler.SubmitQuizAnswers)
+
+	//* Course Feeds
+	feedsService := feeds.NewService(queries, "./static")
+	feedsHandler := feeds.NewHandler(STATIC_PATH, feedsService, queries, IS_DEPLOYED)
+
+	e.GET("/courses/:courseId/feed", feedsHandler.GetCourseFeed)
+	e.POST("/courses/:courseId/feed", feedsHandler.CreateFeedPost)
+	e.PUT("/courses/:courseId/feed/:postId", feedsHandler.UpdateFeedPost)
+	e.DELETE("/courses/:courseId/feed/:postId", feedsHandler.DeleteFeedPost)
+
+	e.GET("/courses/:courseId/feed/stream", feedsHandler.StreamFeed)
 
 	//* Static
 	e.Static("/static", STATIC_PATH)

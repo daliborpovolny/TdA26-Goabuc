@@ -113,6 +113,45 @@ func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) 
 	return i, err
 }
 
+const createPost = `-- name: CreatePost :one
+INSERT INTO feed_posts (uuid, course_uuid, type, message, is_edited, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+RETURNING uuid, course_uuid, type, message, is_edited, created_at, updated_at
+`
+
+type CreatePostParams struct {
+	Uuid       string `json:"uuid"`
+	CourseUuid string `json:"course_uuid"`
+	Type       string `json:"type"`
+	Message    string `json:"message"`
+	IsEdited   bool   `json:"is_edited"`
+	CreatedAt  int64  `json:"created_at"`
+	UpdatedAt  int64  `json:"updated_at"`
+}
+
+func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (FeedPost, error) {
+	row := q.db.QueryRowContext(ctx, createPost,
+		arg.Uuid,
+		arg.CourseUuid,
+		arg.Type,
+		arg.Message,
+		arg.IsEdited,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	var i FeedPost
+	err := row.Scan(
+		&i.Uuid,
+		&i.CourseUuid,
+		&i.Type,
+		&i.Message,
+		&i.IsEdited,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const createQuestion = `-- name: CreateQuestion :one
 
 INSERT INTO question (
@@ -282,6 +321,16 @@ func (q *Queries) DeleteMaterial(ctx context.Context, uuid string) (sql.Result, 
 	return q.db.ExecContext(ctx, deleteMaterial, uuid)
 }
 
+const deletePost = `-- name: DeletePost :exec
+DELETE FROM feed_posts
+WHERE uuid = ?
+`
+
+func (q *Queries) DeletePost(ctx context.Context, uuid string) error {
+	_, err := q.db.ExecContext(ctx, deletePost, uuid)
+	return err
+}
+
 const deleteQuestionsOfQuiz = `-- name: DeleteQuestionsOfQuiz :execresult
 DELETE FROM question WHERE quizz_uuid = ?
 `
@@ -336,6 +385,43 @@ func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getPostsByCourse = `-- name: GetPostsByCourse :many
+SELECT uuid, course_uuid, type, message, is_edited, created_at, updated_at FROM feed_posts
+WHERE course_uuid = ?
+ORDER BY created_at DESC
+`
+
+func (q *Queries) GetPostsByCourse(ctx context.Context, courseUuid string) ([]FeedPost, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsByCourse, courseUuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FeedPost
+	for rows.Next() {
+		var i FeedPost
+		if err := rows.Scan(
+			&i.Uuid,
+			&i.CourseUuid,
+			&i.Type,
+			&i.Message,
+			&i.IsEdited,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getQuestionsOfQuiz = `-- name: GetQuestionsOfQuiz :many
@@ -852,6 +938,34 @@ func (q *Queries) UpdateMaterialPartial(ctx context.Context, arg UpdateMaterialP
 		&i.FaviconUrl,
 		&i.MimeType,
 		&i.ByteSize,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updatePost = `-- name: UpdatePost :one
+UPDATE feed_posts
+SET message = ?, is_edited = 1, updated_at = ?
+WHERE uuid = ?
+RETURNING uuid, course_uuid, type, message, is_edited, created_at, updated_at
+`
+
+type UpdatePostParams struct {
+	Message   string `json:"message"`
+	UpdatedAt int64  `json:"updated_at"`
+	Uuid      string `json:"uuid"`
+}
+
+func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (FeedPost, error) {
+	row := q.db.QueryRowContext(ctx, updatePost, arg.Message, arg.UpdatedAt, arg.Uuid)
+	var i FeedPost
+	err := row.Scan(
+		&i.Uuid,
+		&i.CourseUuid,
+		&i.Type,
+		&i.Message,
+		&i.IsEdited,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

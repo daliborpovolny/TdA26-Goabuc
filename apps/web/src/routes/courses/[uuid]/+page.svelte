@@ -4,6 +4,7 @@
 	import DataLoader from '$lib/components/DataLoader.svelte';
 	import type { Course } from '$lib/types';
 	import TakeQuiz from './TakeQuiz.svelte';
+	import ViewFeed from './ViewFeed.svelte';
 
 	let coursesPromise: Promise<any> = loadCourseDetail();
 
@@ -40,6 +41,8 @@
 					</div>
 				</div>
 
+				<br>
+
 				<div>
 					{#if course.materials && course.materials.length > 0}
 						<h1 class="text-3xl font-bold">Materials</h1>
@@ -49,7 +52,9 @@
 							{/each}
 						</div>
 					{/if}
+					<br>	
 				</div>
+
 
 				<div>
 					{#if course.quizzes && course.quizzes.length > 0}
@@ -61,6 +66,9 @@
 						</div>
 					{/if}
 				</div>
+
+
+				<ViewFeed courseId={course.uuid} />
 			</div>
 		</div>
 	{/snippet}

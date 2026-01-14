@@ -31,6 +31,16 @@ type Course struct {
 	UpdatedAt   int64  `json:"updated_at"`
 }
 
+type FeedPost struct {
+	Uuid       string `json:"uuid"`
+	CourseUuid string `json:"course_uuid"`
+	Type       string `json:"type"`
+	Message    string `json:"message"`
+	IsEdited   bool   `json:"is_edited"`
+	CreatedAt  int64  `json:"created_at"`
+	UpdatedAt  int64  `json:"updated_at"`
+}
+
 type Material struct {
 	Uuid        string         `json:"uuid"`
 	CourseUuid  string         `json:"course_uuid"`
