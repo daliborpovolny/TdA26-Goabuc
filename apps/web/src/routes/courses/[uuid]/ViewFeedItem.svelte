@@ -2,8 +2,6 @@
 	import type { FeedPost } from '$lib/types';
 
 	let { post }: { post: FeedPost } = $props();
-
-	$inspect(post);
 </script>
 
 <div class="border p-1">
