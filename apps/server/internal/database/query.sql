@@ -212,6 +212,10 @@ SELECT * FROM feed_posts
 WHERE course_uuid = ?
 ORDER BY created_at DESC;
 
+-- name: GetPost :one
+SELECT * FROM feed_posts
+WHERE uuid = ?;
+
 -- name: CreatePost :one
 INSERT INTO feed_posts (uuid, course_uuid, type, message, is_edited, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?, ?)

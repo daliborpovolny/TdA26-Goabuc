@@ -13,6 +13,7 @@ import (
 	"time"
 
 	db "tourbackend/internal/database/gen"
+	"tourbackend/internal/feeds"
 	"tourbackend/internal/utils"
 
 	"github.com/gabriel-vasile/mimetype"
@@ -86,12 +87,13 @@ func (f UrlMaterial) GetType() string {
 }
 
 type Service struct {
-	q          *db.Queries
-	staticPath string
+	q            *db.Queries
+	staticPath   string
+	feedsService *feeds.Service
 }
 
-func NewService(queries *db.Queries, staticPath string) *Service {
-	return &Service{queries, staticPath}
+func NewService(queries *db.Queries, staticPath string, feedsService *feeds.Service) *Service {
+	return &Service{queries, staticPath, feedsService}
 }
 
 func (s *Service) deriveFaviconUrl(url string) string {
@@ -334,6 +336,7 @@ func (s *Service) CreateFileMaterial(req *CreateFileMaterialRequest, materialId 
 		return nil, err
 	}
 
+	s.feedsService.CreateAutomaticPost("New file material: "+req.Name+" published", req.CourseId, ctx)
 	return FileMaterial{
 		Uuid:        dbMat.Uuid,
 		Type:        dbMat.Type,
@@ -373,6 +376,7 @@ func (s *Service) CreateUrlMaterial(req CreateUrlMaterialRequest, materialId str
 		return nil, err
 	}
 
+	s.feedsService.CreateAutomaticPost("New url material: "+req.Name+" published", req.CourseId, ctx)
 	return UrlMaterial{
 		Uuid:        dbMat.Uuid,
 		Type:        dbMat.Type,
@@ -458,6 +462,7 @@ func (s *Service) UpdateFileMaterial(req *UpdateFileMaterialRequest, fileHeader 
 		return nil, err
 	}
 
+	s.feedsService.CreateAutomaticPost("File material: "+*req.Name+" updated", req.CourseId, ctx)
 	return FileMaterial{
 		Uuid:        dbMat.Uuid,
 		Type:        dbMat.Type,
@@ -491,6 +496,8 @@ func (s *Service) UpdateUrlMaterial(req *UpdateUrlMaterialRequest, ctx context.C
 	if err != nil {
 		return nil, err
 	}
+
+	s.feedsService.CreateAutomaticPost("Url material: "+*req.Name+" updated", req.CourseId, ctx)
 	return UrlMaterial{
 		Uuid:        dbMat.Uuid,
 		Type:        dbMat.Type,

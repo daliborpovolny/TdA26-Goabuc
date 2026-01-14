@@ -33,29 +33,41 @@
 			headers: { 'Content-Type': 'application/json' },
 		});
 
-		// if (res.ok) {
-		// 	initialMessage = message;
-		// }
 	}
 </script>
 
-<form onsubmit={editFeedPost}>
-	<input type="hidden" name="uuid" value={post.uuid} />
+<form onsubmit={editFeedPost} class="rounded border">
 
-	<textarea
-		name="message"
-		class="mb-2 w-full rounded border p-2"
-		bind:value={message}
-		required>
-	</textarea>
+	{#if post.type === 'manual'}
+		<textarea
+			name="message"
+			class="mb-2 w-full p-2"
+			bind:value={message}
+			required>
+		</textarea>
 
-	{#if message !== initialMessage}
-		<button class="rounded bg-blue-600 px-4 py-2 text-white">
-			Edit
+		{#if message !== initialMessage}
+			<button class="rounded bg-blue-600 px-4 py-2 text-white">
+				Edit
+			</button>
+		{/if}
+
+		<button  type="button" onclick={deleteFeedPost} class="rounded bg-red-600 px-4 py-2 text-white">
+			Delete
 		</button>
+	
+	{:else}
+		<p class="mb-2 w-full p-2"
+>
+		{message}
+
+		</p>
+	
 	{/if}
 
-	<button  type="button" onclick={deleteFeedPost} class="rounded bg-red-600 px-4 py-2 text-white">
-		Delete
-	</button>
+	{#if post.createdAt != post.updatedAt}
+		<p>Updated at: {post.updatedAt}</p>
+	{/if}
+	<p>Created at: {post.createdAt}</p>
+
 </form>

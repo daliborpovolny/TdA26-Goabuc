@@ -8,6 +8,7 @@ import (
 	materials "tourbackend/internal/courses/materials"
 	"tourbackend/internal/courses/quizzes"
 	db "tourbackend/internal/database/gen"
+	"tourbackend/internal/feeds"
 	"tourbackend/internal/utils"
 )
 
@@ -15,13 +16,15 @@ type Service struct {
 	q                *db.Queries
 	materialsService *materials.Service
 	quizzesService   *quizzes.Service
+	feedsService     *feeds.Service
 }
 
-func NewService(queries *db.Queries, materialsService *materials.Service, quizzesService *quizzes.Service) *Service {
+func NewService(queries *db.Queries, materialsService *materials.Service, quizzesService *quizzes.Service, feedsService *feeds.Service) *Service {
 	return &Service{
 		queries,
 		materialsService,
 		quizzesService,
+		feedsService,
 	}
 }
 
@@ -30,6 +33,7 @@ func (s *Service) CreateCourse(params db.CreateCourseParams, ctx context.Context
 	if err != nil {
 		return nil, err
 	}
+
 	return &course, nil
 }
 
@@ -82,6 +86,8 @@ func (s *Service) UpdateCourse(params db.UpdateCourseParams, ctx context.Context
 		}
 		return nil, errors.New("Failed to update the course")
 	}
+
+	s.feedsService.CreateAutomaticPost("Course updated", params.Uuid, ctx)
 
 	return &updated, nil
 }

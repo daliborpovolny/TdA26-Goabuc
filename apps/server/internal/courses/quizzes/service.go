@@ -12,18 +12,20 @@ import (
 	"strings"
 	"time"
 	db "tourbackend/internal/database/gen"
+	"tourbackend/internal/feeds"
 	"tourbackend/internal/utils"
 
 	"github.com/google/uuid"
 )
 
 type Service struct {
-	q          *db.Queries
-	staticPath string
+	q            *db.Queries
+	staticPath   string
+	feedsService *feeds.Service
 }
 
-func NewService(queries *db.Queries, staticPath string) *Service {
-	return &Service{queries, staticPath}
+func NewService(queries *db.Queries, staticPath string, feedsService *feeds.Service) *Service {
+	return &Service{queries, staticPath, feedsService}
 }
 
 type Quiz struct {
@@ -134,6 +136,7 @@ func (s *Service) CreateQuiz(quiz Quiz, courseId string, ctx context.Context) (*
 		dbQuestions = append(dbQuestions, dbQuestion)
 	}
 
+	s.feedsService.CreateAutomaticPost("New quiz: "+quiz.Title+" published", courseId, ctx)
 	return s.dbQuizToQuiz(dbQuiz, dbQuestions)
 
 }
@@ -250,6 +253,7 @@ func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 		dbQuestions = append(dbQuestions, dbQuestion)
 	}
 
+	s.feedsService.CreateAutomaticPost("Quiz:"+quiz.Title+"updated", quiz.Uuid, ctx)
 	return s.dbQuizToQuiz(dbQuiz, dbQuestions)
 }
 

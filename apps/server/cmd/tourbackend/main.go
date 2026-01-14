@@ -80,11 +80,22 @@ func main() {
 	e.GET("/me", authHandler.Profile)
 	e.POST("/logout", authHandler.Logout)
 
-	//* Courses and it's deps (materials and quizzes - TODO)
-	matsService := materials.NewService(queries, STATIC_PATH)
-	quizzesService := quizzes.NewService(queries, STATIC_PATH)
+	//* Course Feeds
+	feedsService := feeds.NewService(queries, "./static")
+	feedsHandler := feeds.NewHandler(STATIC_PATH, feedsService, queries, IS_DEPLOYED)
 
-	courseService := courses.NewService(queries, matsService, quizzesService)
+	e.GET("/courses/:courseId/feed", feedsHandler.GetCourseFeed)
+	e.POST("/courses/:courseId/feed", feedsHandler.CreateFeedPost)
+	e.PUT("/courses/:courseId/feed/:postId", feedsHandler.UpdateFeedPost)
+	e.DELETE("/courses/:courseId/feed/:postId", feedsHandler.DeleteFeedPost)
+
+	e.GET("/courses/:courseId/feed/stream", feedsHandler.StreamFeed)
+
+	//* Courses and it's deps (materials and quizzes - TODO)
+	matsService := materials.NewService(queries, STATIC_PATH, feedsService)
+	quizzesService := quizzes.NewService(queries, STATIC_PATH, feedsService)
+
+	courseService := courses.NewService(queries, matsService, quizzesService, feedsService)
 
 	coursesHandler := courses.NewCourseHandler(queries, IS_DEPLOYED, courseService)
 
@@ -117,17 +128,6 @@ func main() {
 	quizzes.DELETE("/:quizId", quizzesHandler.DeleteQuiz)
 
 	quizzes.POST("/:quizId/submit", quizzesHandler.SubmitQuizAnswers)
-
-	//* Course Feeds
-	feedsService := feeds.NewService(queries, "./static")
-	feedsHandler := feeds.NewHandler(STATIC_PATH, feedsService, queries, IS_DEPLOYED)
-
-	e.GET("/courses/:courseId/feed", feedsHandler.GetCourseFeed)
-	e.POST("/courses/:courseId/feed", feedsHandler.CreateFeedPost)
-	e.PUT("/courses/:courseId/feed/:postId", feedsHandler.UpdateFeedPost)
-	e.DELETE("/courses/:courseId/feed/:postId", feedsHandler.DeleteFeedPost)
-
-	e.GET("/courses/:courseId/feed/stream", feedsHandler.StreamFeed)
 
 	//* Static
 	e.Static("/static", STATIC_PATH)

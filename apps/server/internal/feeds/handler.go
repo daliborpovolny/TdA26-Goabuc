@@ -2,6 +2,7 @@ package feeds
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -9,6 +10,7 @@ import (
 
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
+	"tourbackend/internal/utils"
 )
 
 type Handler struct {
@@ -57,6 +59,8 @@ func (h *Handler) CreateFeedPost(c echo.Context) error {
 
 // PUT /courses/{courseId}/feed/{postId}
 func (h *Handler) UpdateFeedPost(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
 	courseID := c.Param("courseId")
 	postID := c.Param("postId")
 
@@ -67,6 +71,11 @@ func (h *Handler) UpdateFeedPost(c echo.Context) error {
 
 	post, err := h.service.UpdatePost(c.Request().Context(), courseID, postID, req.Message)
 	if err != nil {
+		var ebr *utils.ErrBadRequest
+		if errors.As(err, &ebr) {
+			return r.Error(http.StatusBadRequest, ebr.Error())
+		}
+
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 

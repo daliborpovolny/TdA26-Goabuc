@@ -387,6 +387,26 @@ func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error
 	return i, err
 }
 
+const getPost = `-- name: GetPost :one
+SELECT uuid, course_uuid, type, message, is_edited, created_at, updated_at FROM feed_posts
+WHERE uuid = ?
+`
+
+func (q *Queries) GetPost(ctx context.Context, uuid string) (FeedPost, error) {
+	row := q.db.QueryRowContext(ctx, getPost, uuid)
+	var i FeedPost
+	err := row.Scan(
+		&i.Uuid,
+		&i.CourseUuid,
+		&i.Type,
+		&i.Message,
+		&i.IsEdited,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getPostsByCourse = `-- name: GetPostsByCourse :many
 SELECT uuid, course_uuid, type, message, is_edited, created_at, updated_at FROM feed_posts
 WHERE course_uuid = ?

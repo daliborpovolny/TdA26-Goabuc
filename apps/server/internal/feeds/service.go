@@ -7,6 +7,7 @@ import (
 	"time"
 
 	db "tourbackend/internal/database/gen"
+	"tourbackend/internal/utils"
 
 	"github.com/google/uuid"
 )
@@ -91,7 +92,7 @@ func (s *Service) GetFeed(ctx context.Context, courseID string) ([]FeedPostRespo
 	return response, nil
 }
 
-func (s *Service) CreateManualPost(ctx context.Context, courseID, message string) (FeedPostResponse, error) {
+func (s *Service) CreateManualPost(ctx context.Context, courseID string, message string) (FeedPostResponse, error) {
 	now := time.Now().Unix()
 	newPost, err := s.q.CreatePost(ctx, db.CreatePostParams{
 		Uuid:       uuid.New().String(),
@@ -115,7 +116,37 @@ func (s *Service) CreateManualPost(ctx context.Context, courseID, message string
 	return resp, nil
 }
 
+func (s *Service) CreateAutomaticPost(message string, courseId string, ctx context.Context) (FeedPostResponse, error) {
+	now := time.Now().Unix()
+	newPost, err := s.q.CreatePost(ctx, db.CreatePostParams{
+		Uuid:       uuid.New().String(),
+		CourseUuid: courseId,
+		Type:       "system",
+		Message:    message,
+		IsEdited:   false, // Assuming generated bool
+		CreatedAt:  now,   // Adjust based on your SQLC time configuration
+		UpdatedAt:  now,
+	})
+	if err != nil {
+		fmt.Println(err)
+		return FeedPostResponse{}, err
+	}
+
+	resp := dbFeedPostToFeedPost(newPost)
+
+	// TRIGGER SSE: Notify all listeners
+	go s.broadcast(courseId, resp)
+
+	return resp, nil
+}
+
 func (s *Service) UpdatePost(ctx context.Context, courseID, postID, message string) (FeedPostResponse, error) {
+
+	post, err := s.q.GetPost(ctx, postID)
+	if post.Type != "manual" {
+		return FeedPostResponse{}, &utils.ErrBadRequest{Message: "only manual questions can be edited"}
+	}
+
 	updatedPost, err := s.q.UpdatePost(ctx, db.UpdatePostParams{
 		Message:   message,
 		Uuid:      postID,

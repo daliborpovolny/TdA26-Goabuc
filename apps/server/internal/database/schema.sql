@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS feed_posts (
     uuid TEXT PRIMARY KEY,
     course_uuid TEXT NOT NULL,
 
-    type TEXT NOT NULL, -- 'manual' or 'auto'
+    type TEXT NOT NULL, -- 'manual' or 'system'
     message TEXT NOT NULL,
     is_edited BOOLEAN NOT NULL DEFAULT 0,
     
