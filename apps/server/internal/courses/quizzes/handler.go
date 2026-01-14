@@ -28,7 +28,9 @@ func NewHandler(pathToStatic string, service *Service, queries *db.Queries, isDe
 func (h *Handler) ListQuizzes(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
-	quizzes, err := h.service.ListQuizes(r.Ctx)
+	courseId := c.Param("courseId")
+
+	quizzes, err := h.service.ListQuizes(courseId, r.Ctx)
 	if err != nil {
 		return r.ServerError(err)
 	}

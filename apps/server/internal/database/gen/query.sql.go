@@ -763,6 +763,7 @@ SELECT
 FROM quizz qz
 LEFT JOIN question qs
     ON qs.quizz_uuid = qz.uuid
+WHERE qz.course_uuid = ?
 ORDER BY qz.uuid ASC, qs.question_order ASC
 `
 
@@ -781,8 +782,8 @@ type ListQuizzesRow struct {
 	QuestionCorrectIndices sql.NullString `json:"question_correct_indices"`
 }
 
-func (q *Queries) ListQuizzes(ctx context.Context) ([]ListQuizzesRow, error) {
-	rows, err := q.db.QueryContext(ctx, listQuizzes)
+func (q *Queries) ListQuizzes(ctx context.Context, courseUuid string) ([]ListQuizzesRow, error) {
+	rows, err := q.db.QueryContext(ctx, listQuizzes, courseUuid)
 	if err != nil {
 		return nil, err
 	}

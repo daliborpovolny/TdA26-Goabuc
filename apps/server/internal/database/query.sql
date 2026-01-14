@@ -148,6 +148,7 @@ SELECT
 FROM quizz qz
 LEFT JOIN question qs
     ON qs.quizz_uuid = qz.uuid
+WHERE qz.course_uuid = ?
 ORDER BY qz.uuid ASC, qs.question_order ASC;
 --* Question
 

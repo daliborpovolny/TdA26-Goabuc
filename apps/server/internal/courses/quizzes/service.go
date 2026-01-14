@@ -380,9 +380,9 @@ func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizzesRow) ([]Quiz
 	return quizzes, nil
 }
 
-func (s *Service) ListQuizes(ctx context.Context) ([]Quiz, error) {
+func (s *Service) ListQuizes(courseId string, ctx context.Context) ([]Quiz, error) {
 
-	rows, err := s.q.ListQuizzes(ctx)
+	rows, err := s.q.ListQuizzes(ctx, courseId)
 	if err != nil {
 		return nil, err
 	}

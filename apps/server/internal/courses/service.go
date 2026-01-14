@@ -56,7 +56,7 @@ func (s *Service) GetCourse(courseId string, host string, scheme string, ctx con
 		return nil, err
 	}
 
-	quizzes, err := s.quizzesService.ListQuizes(ctx)
+	quizzes, err := s.quizzesService.ListQuizes(courseId, ctx)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
