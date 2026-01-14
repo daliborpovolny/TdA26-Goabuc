@@ -89,6 +89,8 @@ func (s *Service) GetFeed(ctx context.Context, courseID string) ([]FeedPostRespo
 	for _, p := range posts {
 		response = append(response, dbFeedPostToFeedPost(p))
 	}
+
+	fmt.Println(response)
 	return response, nil
 }
 

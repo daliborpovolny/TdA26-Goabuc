@@ -38,11 +38,12 @@ func (s *Service) CreateCourse(params db.CreateCourseParams, ctx context.Context
 }
 
 type GetCourseResponse struct {
-	Uuid        string               `json:"uuid"`
-	Name        string               `json:"name"`
-	Description string               `json:"description"`
-	Materials   []materials.Material `json:"materials"`
-	Quizzes     []quizzes.Quiz       `json:"quizzes"`
+	Uuid        string                   `json:"uuid"`
+	Name        string                   `json:"name"`
+	Description string                   `json:"description"`
+	Materials   []materials.Material     `json:"materials"`
+	Quizzes     []quizzes.Quiz           `json:"quizzes"`
+	Feed        []feeds.FeedPostResponse `json:"feed"`
 }
 
 func (s *Service) GetCourse(courseId string, host string, scheme string, ctx context.Context) (*GetCourseResponse, error) {
@@ -66,12 +67,23 @@ func (s *Service) GetCourse(courseId string, host string, scheme string, ctx con
 		return nil, err
 	}
 
+	feed, err := s.feedsService.GetFeed(ctx, courseId)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	if feed == nil {
+		feed = []feeds.FeedPostResponse{}
+	}
+
 	courseDetail := GetCourseResponse{
 		Uuid:        course.Uuid,
 		Name:        course.Name,
 		Description: course.Description,
 		Materials:   mats,
 		Quizzes:     quizzes,
+		Feed:        feed,
 	}
 
 	return &courseDetail, nil
