@@ -40,23 +40,18 @@
 		eventSource.addEventListener('new_post', (event) => {
 			if (!event.data) return;
 
-			console.log('Received new_post:', event.data); // Debug log
-
 			try {
 				let newPost: FeedPost = JSON.parse(event.data);
 				console.log(newPost);
 
+				const index = posts.findIndex((p) => p.uuid === newPost.uuid);
 
-                const index = posts.findIndex(p => p.uuid === newPost.uuid);
-
-                if (index !== -1) {
-                    posts[index] = newPost;
-                    posts = [...posts];
-                } else {
-
-                    posts = [newPost, ...posts];
-                }
-
+				if (index !== -1) {
+					posts[index] = newPost;
+					posts = [...posts];
+				} else {
+					posts = [newPost, ...posts];
+				}
 			} catch (err) {
 				console.error('Error parsing SSE message:', err);
 			}

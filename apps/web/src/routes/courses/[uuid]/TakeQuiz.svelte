@@ -103,7 +103,6 @@
 										type="radio"
 										name={`${qi}-single-choice`}
 										onchange={() => {
-
 											quizSubmit.answers[qi].selectedIndex = oi;
 										}}
 										class="h-4 w-4"
@@ -113,7 +112,6 @@
 										type="checkbox"
 										name={`${qi}-multiple-choice`}
 										onchange={(e) => {
-
 											if (e.currentTarget.checked) {
 												quizSubmit.answers[qi].selectedIndices?.push(oi);
 											} else {
