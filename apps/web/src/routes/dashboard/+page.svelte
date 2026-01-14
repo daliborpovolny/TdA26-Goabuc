@@ -29,10 +29,10 @@
 <title>Dashboard</title>
 
 <div class="p-6">
-	<h1 class="text-5xl font-bold text-center mb-2">Manage Courses</h1>
-	<div class="text-3xl flex justify-center w-[100%]">
-		<div class="w-fit rounded-xl bg-[#0070BB] px-3 pt-3 pb-1 space-y-2">
-			<div class="text-semibold mb-5 mt-2">
+	<h1 class="mb-2 text-center text-5xl font-bold">Manage Courses</h1>
+	<div class="flex w-[100%] justify-center text-3xl">
+		<div class="w-fit space-y-2 rounded-xl bg-[#0070BB] px-3 pt-3 pb-1">
+			<div class="text-semibold mt-2 mb-5">
 				<a
 					href="/dashboard/edit/courses"
 					class="rounded-md bg-[#2592B8] px-3 py-2 text-[#FFF] hover:bg-[#6DD4B1]"

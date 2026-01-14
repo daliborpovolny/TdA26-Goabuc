@@ -53,7 +53,7 @@
 			type="text"
 			bind:value={first_name}
 			required
-			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:outline-2 focus:outline-[#91F5AD] focus:bg-white"
+			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:bg-white focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 
@@ -64,7 +64,7 @@
 			type="text"
 			bind:value={last_name}
 			required
-			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:outline-2 focus:outline-[#91F5AD] focus:bg-white"
+			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:bg-white focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 
@@ -75,7 +75,7 @@
 			type="email"
 			bind:value={email}
 			required
-			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:outline-2 focus:outline-[#91F5AD] focus:bg-white"
+			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:bg-white focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 
@@ -86,7 +86,7 @@
 			type="password"
 			bind:value={password}
 			required
-			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:outline-2 focus:outline-[#91F5AD] focus:bg-white"
+			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:bg-white focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 

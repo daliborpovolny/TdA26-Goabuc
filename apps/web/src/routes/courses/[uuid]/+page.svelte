@@ -31,42 +31,40 @@
 
 <DataLoader promise={coursesPromise}>
 	{#snippet children(course: Course)}
-		<div class="p-6 flex justify-center">
+		<div class="flex justify-center p-6">
 			<title>{course.name}</title>
-			<div class="space-y-8 w-[50%]">
-				<h1 class="text-5xl font-bold mb-0">{course.name}</h1>
-				<div class="bg-[#0070BB] rounded-xl p-2">
-					<div class="bg-[#91F5AD] rounded-xl p-4">
+			<div class="w-[50%] space-y-8">
+				<h1 class="mb-0 text-5xl font-bold">{course.name}</h1>
+				<div class="rounded-xl bg-[#0070BB] p-2">
+					<div class="rounded-xl bg-[#91F5AD] p-4">
 						<p class="text-2xl">{course.description}</p>
 					</div>
 				</div>
 
-				<br>
+				<br />
 
 				<div>
 					{#if course.materials && course.materials.length > 0}
 						<h1 class="text-3xl font-bold">Materials</h1>
-						<div class="bg-[#0070BB] p-2 space-y-2 rounded-xl">
+						<div class="space-y-2 rounded-xl bg-[#0070BB] p-2">
 							{#each course.materials as material}
 								<ViewMaterial {material} />
 							{/each}
 						</div>
 					{/if}
-					<br>	
+					<br />
 				</div>
-
 
 				<div>
 					{#if course.quizzes && course.quizzes.length > 0}
 						<h1 class="text-3xl font-bold">Quizzes</h1>
-						<div class="bg-[#0070BB] p-2 space-y-2 rounded-xl">
+						<div class="space-y-2 rounded-xl bg-[#0070BB] p-2">
 							{#each course.quizzes as quiz}
 								<TakeQuiz {quiz} courseId={course.uuid} />
 							{/each}
 						</div>
 					{/if}
 				</div>
-
 
 				<ViewFeed courseId={course.uuid} />
 			</div>

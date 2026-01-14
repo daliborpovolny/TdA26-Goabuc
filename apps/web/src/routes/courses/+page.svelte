@@ -24,9 +24,9 @@
 <title>Courses</title>
 
 <div class="p-6">
-	<h1 class="text-5xl font-bold text-center underline">Courses</h1>
-	<div class="text-center text-3xl flex justify-center w-[100%]">
-		<div class="max-w-[50%] rounded-xl bg-[#0070BB] px-3 pt-3 pb-1 space-y-2">
+	<h1 class="text-center text-5xl font-bold underline">Courses</h1>
+	<div class="flex w-[100%] justify-center text-center text-3xl">
+		<div class="max-w-[50%] space-y-2 rounded-xl bg-[#0070BB] px-3 pt-3 pb-1">
 			<DataLoader promise={coursesPromise}>
 				{#snippet children(courses: Course[])}
 					{#each courses as course}

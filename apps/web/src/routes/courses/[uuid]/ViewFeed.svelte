@@ -7,7 +7,7 @@
 
 	let { courseId }: { courseId: string } = $props();
 
-    let collapsed = $state(true)
+	let collapsed = $state(true);
 
 	let posts: FeedPost[] = $state([]);
 	loadCourseFeed();
@@ -83,18 +83,16 @@
 	// $: sortedPosts = Array.from($postsStore.values()).sort((a, b) =>
 	//     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 	// );
-
 </script>
 
 <div class="space-y-4 p-4">
+	<button onclick={() => (collapsed = !collapsed)} type="button" class="text-3xl">News Feed</button>
 
-    <button onclick={() => (collapsed = !collapsed)} type="button" class="text-3xl">News Feed</button>
-
-    {#if !collapsed}
-        <div class="flex flex-col gap-4">
-            {#each posts as post (post.uuid)}
-                <ViewFeedItem {post} />
-            {/each}
-        </div>
-    {/if}
+	{#if !collapsed}
+		<div class="flex flex-col gap-4">
+			{#each posts as post (post.uuid)}
+				<ViewFeedItem {post} />
+			{/each}
+		</div>
+	{/if}
 </div>
