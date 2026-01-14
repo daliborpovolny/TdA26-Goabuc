@@ -48,17 +48,6 @@
 				console.log(newPost);
 
 				posts.unshift(newPost);
-
-				// postsStore.update((currentMap) => {
-				//     // 1. Create a copy of the current map to ensure reactivity triggers
-				//     const newMap = new Map(currentMap);
-
-				//     // 2. Add or update the post
-				//     newMap.set(newPost.uuid, newPost);
-
-				//     // 3. Return the new map to update the store
-				//     return newMap;
-				// });
 			} catch (err) {
 				console.error('Error parsing SSE message:', err);
 			}
@@ -78,21 +67,20 @@
 			eventSource.close();
 		}
 	});
-
-	// // Convert map to array and sort by date descending for display
-	// $: sortedPosts = Array.from($postsStore.values()).sort((a, b) =>
-	//     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-	// );
 </script>
 
 <div class="space-y-4 p-4">
-	<button onclick={() => (collapsed = !collapsed)} type="button" class="text-3xl">News Feed</button>
+	{#if posts.length > 0}
+		<button onclick={() => (collapsed = !collapsed)} type="button" class="text-3xl"
+			>News Feed</button
+		>
 
-	{#if !collapsed}
-		<div class="flex flex-col gap-4">
-			{#each posts as post (post.uuid)}
-				<ViewFeedItem {post} />
-			{/each}
-		</div>
+		{#if !collapsed}
+			<div class="flex flex-col gap-4">
+				{#each posts as post (post.uuid)}
+					<ViewFeedItem {post} />
+				{/each}
+			</div>
+		{/if}
 	{/if}
 </div>
