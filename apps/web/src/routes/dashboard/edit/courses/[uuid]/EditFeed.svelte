@@ -42,7 +42,6 @@
 
 			try {
 				let newPost: FeedPost = JSON.parse(event.data);
-				console.log(newPost);
 
 				const index = posts.findIndex((p) => p.uuid === newPost.uuid);
 

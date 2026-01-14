@@ -15,6 +15,10 @@
 			headers: { 'Content-type': 'application/json' },
 			body: JSON.stringify(data)
 		});
+
+		if (res.ok) {
+			collapsed = true;
+		}
 	}
 </script>
 
