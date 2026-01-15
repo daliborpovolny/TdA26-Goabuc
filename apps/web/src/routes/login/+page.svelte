@@ -37,7 +37,7 @@
 
 <form
 	on:submit={login}
-	class="mx-auto mt-10 max-w-md space-y-4 rounded-xl bg-[#0070BB] p-6 shadow-lg"
+	class="flex mx-auto flex-col max-w-xs md:max-w-md mt-10 space-y-4 rounded-xl bg-[#0070BB] p-6 shadow-lg"
 >
 	<h2 class="text-center text-5xl font-bold">Login</h2>
 	<div>
@@ -47,7 +47,7 @@
 			type="email"
 			bind:value={email}
 			required
-			class="outline-offset-none w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:bg-white focus:outline-2 focus:outline-[#91F5AD]"
+			class="w-full outline-offset-none rounded-md border-4 border-[#1A1A1A] p-2 font-semibold bg-white focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 	<div>
@@ -57,12 +57,12 @@
 			type="password"
 			bind:value={password}
 			required
-			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 focus:bg-white focus:outline-2 focus:outline-[#91F5AD]"
+			class="w-full rounded-md border-4 border-[#1A1A1A] p-2 bg-white focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 	<button
 		type="submit"
-		class="colors w-full cursor-pointer rounded-md bg-[#91F5AD] px-4 py-2 text-2xl font-semibold text-[#1A1A1A] transition transition-colors hover:bg-[#6DD4B1]"
+		class="colors cursor-pointer rounded-md bg-[#91F5AD] px-4 py-2 text-xl font-semibold text-[#1A1A1A] transition hover:bg-[#6DD4B1]"
 	>
 		Login
 	</button>
