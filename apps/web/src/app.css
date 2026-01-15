@@ -1,6 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap');
 @import 'tailwindcss';
 
+@theme {
+  --color-p-green: #91F5AD;
+  --color-p-blue: #0070BB;
+  --color-s-white: #FFFFFF;
+  --color-s-black: #1A1A1A;
+  --color-s-blue-darker: #0257A5;
+  --color-s-1: #6DD4B1;
+  --color-s-2: #49B3B4;
+  --color-s-3: #2592B8;
+}
+
 html,
 body {
 	font-family: 'Dosis', sans-serif;
