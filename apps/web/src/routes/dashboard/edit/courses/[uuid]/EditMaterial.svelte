@@ -1,154 +1,161 @@
 <script lang="ts">
-	import type { Material } from '$lib/types';
+    import type { Material } from '$lib/types';
+    import { fade, slide } from 'svelte/transition';
 
-	let {
-		material,
-		courseUuid,
-		onchange
-	}: {
-		material: Material;
-		courseUuid: string;
-		onchange: () => void;
-	} = $props();
+    let {
+        material,
+        courseUuid,
+        onchange
+    }: {
+        material: Material;
+        courseUuid: string;
+        onchange: () => void;
+    } = $props();
 
-	let collapsed = $state(true);
+    let collapsed = $state(true);
+    let isSaving = $state(false);
+    let showSuccess = $state(false);
 
-	async function remove(e: Event) {
-		e.preventDefault();
+    async function remove(e: Event) {
+        e.preventDefault();
+        if (!confirm(`Are you sure you want to delete "${material.name}"?`)) return;
+        
+        await fetch(`/api/courses/${courseUuid}/materials/${material.uuid}`, { method: 'DELETE' });
+        onchange();
+    }
 
-		if (!confirm('Are you sure?')) return;
-		await fetch(`/api/courses/${courseUuid}/materials/${material.uuid}`, { method: 'DELETE' });
-		onchange();
-	}
+    async function handleUpdate(e: Event, type: 'file' | 'url') {
+        e.preventDefault();
+        isSaving = true;
 
-	async function saveUrlMaterial(e: Event) {
-		e.preventDefault();
+        const form = e.target as HTMLFormElement;
+        const formData = new FormData(form);
+        
+        const options: RequestInit = {
+            method: 'PUT',
+            body: type === 'url' 
+                ? JSON.stringify(Object.fromEntries(formData)) 
+                : formData
+        };
 
-		let formData = new FormData(e.target as HTMLFormElement);
-		let formJson = JSON.stringify(Object.fromEntries(formData));
+        if (type === 'url') {
+            options.headers = { 'Content-type': 'application/json' };
+        }
 
-		await fetch(`/api/courses/${courseUuid}/materials/${material.uuid}`, {
-			method: 'PUT',
-			headers: { 'Content-type': 'application/json' },
-			body: formJson
-		});
-
-		onchange();
-	}
-
-	async function saveFileMaterial(e: Event) {
-		e.preventDefault();
-
-		let formData = new FormData(e.target as HTMLFormElement);
-		await fetch(`/api/courses/${courseUuid}/materials/${material.uuid}`, {
-			method: 'PUT',
-			body: formData
-		});
-		onchange();
-	}
+        try {
+            const res = await fetch(`/api/courses/${courseUuid}/materials/${material.uuid}`, options);
+            if (res.ok) {
+                showSuccess = true;
+                onchange();
+                setTimeout(() => showSuccess = false, 2000);
+            }
+        } finally {
+            isSaving = false;
+        }
+    }
 </script>
 
-<div class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4">
-	<button type="button" class="text-2xl" onclick={() => (collapsed = !collapsed)}
-		>{material.name}</button
-	>
+<div class="overflow-hidden rounded-xl border-4 border-s-black bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] transition-all">
+    <button 
+        type="button" 
+        class="flex w-full items-center justify-between p-4 text-left hover:bg-p-green/10"
+        onclick={() => (collapsed = !collapsed)}
+    >
+        <div class="flex items-center gap-3">
+            <span class="text-xl">{material.type === 'file' ? '📁' : '🔗'}</span>
+            <span class="text-xl font-black uppercase tracking-tight text-s-black">{material.name}</span>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            {#if showSuccess}
+                <span transition:fade class="text-xs font-bold uppercase text-p-green">✓ Saved</span>
+            {/if}
+            <span class="text-xl transition-transform duration-300 {collapsed ? '' : 'rotate-180'}">▼</span>
+        </div>
+    </button>
 
-	{#if !collapsed}
-		{#if material.type === 'file'}
-			<form method="POST" enctype="multipart/form-data" onsubmit={saveFileMaterial}>
-				<input type="hidden" name="type" value="file" />
+    {#if !collapsed}
+        <div transition:slide class="border-t-4 border-s-black bg-gray-50 p-6">
+            <form 
+                onsubmit={(e) => handleUpdate(e, material.type as 'file' | 'url')}
+                enctype={material.type === 'file' ? 'multipart/form-data' : undefined}
+                class="space-y-5"
+            >
+                <input type="hidden" name="type" value={material.type} />
 
-				<div class="flex flex-col">
-					<label class="text-sm font-medium text-gray-700" for="name">Name</label>
-					<input
-						type="text"
-						name="name"
-						value={material.name}
-						required
-						class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
-					/>
-				</div>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div class="space-y-1">
+                        <label class="text-xs font-black uppercase tracking-widest text-gray-500" for="name">Display Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={material.name}
+                            required
+                            class="w-full rounded-xl border-2 border-s-black p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
+                        />
+                    </div>
 
-				<div class="flex flex-col">
-					<label class="text-sm font-medium text-gray-700" for="description">Description</label>
-					<textarea
-						name="description"
-						value={material.description}
-						class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
-					></textarea>
-				</div>
+                    {#if material.type === 'url'}
+                        <div class="space-y-1">
+                            <label class="text-xs font-black uppercase tracking-widest text-gray-500" for="url">Resource URL</label>
+                            <input
+                                type="url"
+                                name="url"
+                                value={material.url}
+                                required
+                                class="w-full rounded-xl border-2 border-s-black p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
+                            />
+                        </div>
+                    {:else}
+                        <div class="space-y-1">
+                            <label class="text-xs font-black uppercase tracking-widest text-gray-500" for="file">Replace File (Optional)</label>
+                            <input 
+                                type="file" 
+                                name="file" 
+                                class="w-full cursor-pointer rounded-xl border-2 border-dashed border-s-black p-2 font-bold file:mr-4 file:rounded-lg file:border-0 file:bg-s-black file:px-4 file:py-1 file:text-sm file:font-semibold file:text-white" 
+                            />
+                        </div>
+                    {/if}
+                </div>
 
-				<div class="flex flex-col">
-					<label class="text-sm font-medium text-gray-700" for="file">Replace Existing File</label>
-					<input type="file" name="file" class="mt-1 text-gray-900" />
-				</div>
+                <div class="space-y-1">
+                    <label class="text-xs font-black uppercase tracking-widest text-gray-500" for="description">Description</label>
+                    <textarea
+                        name="description"
+                        rows="2"
+                        value={material.description}
+                        class="w-full rounded-xl border-2 border-s-black p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
+                    ></textarea>
+                </div>
 
-				<a class="text-sm font-medium text-gray-700 hover:text-gray-500" href={material.fileUrl}
-					>View Existing File</a
-				>
+                <div class="flex items-center justify-between pt-4 border-t-2 border-gray-200">
+                    <div>
+                        {#if material.type === 'file'}
+                            <a class="text-sm font-bold text-p-blue underline hover:text-s-2" href={material.fileUrl} target="_blank">
+                                👁️ View Current File
+                            </a>
+                        {/if}
+                    </div>
 
-				<br />
-
-				<button class="mt-5 rounded-md bg-green-800 px-4 py-2 text-white hover:bg-green-700">
-					Save
-				</button>
-
-				<button
-					onclick={remove}
-					class="rounded-md bg-red-800 px-4 py-2 text-white hover:bg-red-700"
-				>
-					Remove
-				</button>
-			</form>
-		{:else if material.type === 'url'}
-			<form
-				class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4"
-				method="POST"
-				onsubmit={saveUrlMaterial}
-			>
-				<input type="hidden" name="type" value="url" />
-
-				<div class="flex flex-col">
-					<label class="text-sm font-medium text-gray-700" for="name">Name</label>
-					<input
-						type="text"
-						name="name"
-						value={material.name}
-						required
-						class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
-					/>
-				</div>
-
-				<div class="flex flex-col">
-					<label class="text-sm font-medium text-gray-700" for="description">Description</label>
-					<textarea
-						name="description"
-						value={material.description}
-						class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
-					></textarea>
-				</div>
-
-				<div class="flex flex-col">
-					<label class="text-sm font-medium text-gray-700" for="name">Url</label>
-					<input
-						type="text"
-						name="url"
-						value={material.url}
-						required
-						class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
-					/>
-				</div>
-				<button class="rounded-md bg-green-800 px-4 py-2 text-white hover:bg-green-700">
-					Save
-				</button>
-
-				<button
-					onclick={remove}
-					class="rounded-md bg-red-800 px-4 py-2 text-white hover:bg-red-700"
-				>
-					Remove
-				</button>
-			</form>
-		{/if}
-	{/if}
+                    <div class="flex gap-3">
+                        <button
+                            type="button"
+                            onclick={remove}
+                            class="rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black uppercase text-white shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+                        >
+                            Delete
+                        </button>
+                        
+                        <button 
+                            type="submit" 
+                            disabled={isSaving}
+                            class="rounded-lg border-2 border-s-black bg-p-green px-6 py-2 text-xs font-black uppercase text-s-black shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50"
+                        >
+                            {isSaving ? 'Saving...' : 'Save Changes'}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    {/if}
 </div>

@@ -1,93 +1,9 @@
-<!-- <script lang="ts">
-	import { page } from '$app/state';
-
-	import DataLoader from '$lib/components/DataLoader.svelte';
-	import type { Course } from '$lib/types';
-
-	import CreateMaterial from './CreateMaterial.svelte';
-	import EditMaterial from './EditMaterial.svelte';
-	import EditCourse from './EditCourse.svelte';
-	import EditQuiz from './EditQuiz.svelte';
-
-	let courseId: string = page.params.uuid!;
-
-	let showCreateQuiz: boolean = $state(false)
-
-	let refreshCount = $state(0);
-	const reload = () => refreshCount++;
-
-	let coursePromise = $derived.by(async () => {
-		refreshCount;
-		const res = await fetch(`/api/courses/${courseId}`);
-		if (!res.ok) throw new Error('Failed to load course');
-		return res.json();
-	});
-	$inspect(coursePromise)
-
-
-</script>
-
-<DataLoader promise={coursePromise}>
-	{#snippet children(course: Course)}
-		<div class="mx-auto max-w-2xl space-y-8 p-6">
-			<section>
-				<EditCourse {course} onchange={reload} />
-			</section>
-
-			<hr />
-
-			<section>
-				<h1 class="text-3xl">Materials</h1>
-				<br />
-
-				<CreateMaterial courseUuid={courseId} onchange={reload} />
-				<br />
-
-				{#if course.materials.length > 0}
-					<h1 class="mb-3 text-2xl font-semibold text-gray-800">Edit Materials</h1>
-
-					{#each course.materials as material}
-						<EditMaterial {material} courseUuid={courseId} onchange={reload} />
-						<br />
-					{/each}
-				{/if}
-
-				<h1 class="text-3xl">Quizzes</h1>
-				<br />
-
-				{#if course.quizzes.length > 0} 
-
-					{#each course.quizzes as quiz}
-						
-						<br>
-						<h2 class="text-2xl">{quiz.title}</h2>
-						<br>
-
-						<EditQuiz edit={true} {quiz} courseId={course.uuid} onchange={reload} />
-						<br>
-						<hr>
-
-						{/each}
-				{/if}
-
-				<button type="button" class="text-3xl" onclick={() => (showCreateQuiz = !showCreateQuiz)} >Create New Quiz</button>
-				{#if showCreateQuiz}
-					<br />
-					
-					<EditQuiz edit={false} courseId={course.uuid} onchange={() => (reload()) } />
-			
-				{/if}
-					</section>
-		</div>
-	{/snippet}
-</DataLoader> -->
-
 <script lang="ts">
 	import { page } from '$app/state';
-
-	// import DataLoader from '$lib/components/DataLoader.svelte';
+	import { fade, slide } from 'svelte/transition';
 	import type { Course } from '$lib/types';
 
+	// Subcomponents
 	import CreateMaterial from './CreateMaterial.svelte';
 	import EditMaterial from './EditMaterial.svelte';
 	import EditCourse from './EditCourse.svelte';
@@ -95,20 +11,16 @@
 	import CreateFeedPost from './CreateFeedPost.svelte';
 	import EditFeed from './EditFeed.svelte';
 
-	let courseId: string = page.params.uuid!;
-
-	let showCreateQuiz: boolean = $state(false);
+	let courseId = page.params.uuid!;
+	let showCreateQuiz = $state(false);
+	let activeSection = $state('general'); // 'general', 'materials', 'quizzes', 'feed'
 
 	let course = $state<Course | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
 	async function loadCourse() {
-		if (course === null) {
-			loading = true;
-		}
 		error = null;
-
 		try {
 			const res = await fetch(`/api/courses/${courseId}`);
 			if (!res.ok) throw new Error('Failed to load course');
@@ -120,7 +32,6 @@
 		}
 	}
 
-	// initial load
 	loadCourse();
 
 	function onCreateQuizSubmit() {
@@ -129,66 +40,136 @@
 	}
 </script>
 
-{#if loading}
-	<div class="loading">Loading data...</div>
-{:else if error}
-	<div class="error">
-		<p>Something went wrong: {error}</p>
-		<button onclick={loadCourse}>Retry</button>
-	</div>
-{:else if course}
-	<div class="mx-auto max-w-2xl space-y-8 p-6">
-		<section>
-			<EditCourse {course} onchange={loadCourse} />
-		</section>
+<svelte:head>
+	<title>Editing: {course?.name || 'Course'} | TdA</title>
+</svelte:head>
 
-		<hr />
-
-		<section>
-			<h1 class="text-3xl">Materials</h1>
-			<br />
-
-			<CreateMaterial courseUuid={courseId} onchange={loadCourse} />
-			<br />
-
-			{#if course.materials.length > 0}
-				<h1 class="mb-3 text-2xl font-semibold text-gray-800">Edit Materials</h1>
-
-				{#each course.materials as material (material.uuid)}
-					<EditMaterial {material} courseUuid={courseId} onchange={loadCourse} />
-					<br />
-				{/each}
-			{/if}
-
-			<h1 class="text-3xl">Quizzes</h1>
-			<br />
-
+<div class="min-h-screen bg-s-white p-4 md:p-8">
+	{#if loading}
+		<div class="flex h-64 flex-col items-center justify-center space-y-4">
+			<div
+				class="h-12 w-12 animate-spin rounded-full border-4 border-p-blue border-t-p-green"
+			></div>
+			<p class="font-black tracking-widest text-s-black uppercase">Syncing Academy Data...</p>
+		</div>
+	{:else if error}
+		<div
+			class="mx-auto max-w-md rounded-xl border-4 border-s-black bg-red-500 p-6 text-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+		>
+			<p class="text-2xl font-black">SYSTEM ERROR</p>
+			<p class="mt-2 font-bold">{error}</p>
 			<button
-				type="button"
-				class="rounded-md border border-stone-400 bg-stone-100 px-4 py-2 text-gray-800 hover:bg-stone-200"
-				onclick={() => (showCreateQuiz = !showCreateQuiz)}
+				onclick={loadCourse}
+				class="mt-4 rounded-lg bg-s-black px-4 py-2 font-bold hover:bg-white hover:text-s-black"
+				>Retry Connection</button
 			>
-				New Quiz
-			</button>
-			{#if showCreateQuiz}
-				<br />
-				<br />
-				<EditQuiz edit={false} courseId={course.uuid} onchange={onCreateQuizSubmit} />
-			{/if}
-			<br /><br />
+		</div>
+	{:else if course}
+		<div class="mx-auto max-w-5xl">
+			<header
+				class="mb-8 flex flex-col justify-between gap-4 border-b-4 border-s-black pb-6 md:flex-row md:items-end"
+			>
+				<div>
+					<a href="/dashboard" class="text-sm font-black text-p-blue uppercase hover:underline"
+						>← Dashboard</a
+					>
+					<h1 class="text-4xl font-black tracking-tighter uppercase md:text-6xl">
+						Editor: <span class="text-p-blue">{course.name}</span>
+					</h1>
+				</div>
+				<a
+					href="/courses/{course.uuid}"
+					target="_blank"
+					class="rounded-lg border-2 border-s-black bg-p-green px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:shadow-none"
+				>
+					View 👁️
+				</a>
+			</header>
 
-			{#each course.quizzes as quiz (quiz.uuid)}
-				<EditQuiz edit={true} {quiz} courseId={course.uuid} onchange={loadCourse} />
-				<br />
-			{/each}
+			<div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
+				<nav class="space-y-2 lg:col-span-3">
+					{#each [{ id: 'general', label: 'General Info', icon: '📝' }, { id: 'materials', label: 'Materials', icon: '📁' }, { id: 'quizzes', label: 'Quizzes', icon: '📝' }, { id: 'feed', label: 'Course Feed', icon: '💬' }] as section}
+						<button
+							onclick={() => (activeSection = section.id)}
+							class="flex w-full items-center gap-3 rounded-xl border-2 border-s-black p-4 text-left font-black tracking-tight uppercase transition-all
+                            {activeSection === section.id
+								? 'translate-x-1 bg-p-blue text-white shadow-none'
+								: 'bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green'}"
+						>
+							<span>{section.icon}</span>
+							{section.label}
+						</button>
+					{/each}
+				</nav>
 
-			<h1 class="text-3xl">Feed</h1>
-			<br />
+				<main class="lg:col-span-9">
+					<div
+						class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]"
+					>
+						{#if activeSection === 'general'}
+							<div in:fade>
+								<h2 class="mb-6 text-3xl font-black text-p-blue uppercase italic">
+									Course Settings
+								</h2>
+								<EditCourse {course} onchange={loadCourse} />
+							</div>
+						{:else if activeSection === 'materials'}
+							<div in:fade class="space-y-8">
+								<div>
+									<h2 class="mb-4 text-3xl font-black text-s-2 uppercase">Add Content</h2>
+									<CreateMaterial courseUuid={courseId} onchange={loadCourse} />
+								</div>
 
-			<CreateFeedPost courseId={course.uuid} />
+								{#if course.materials.length > 0}
+									<div class="space-y-4 border-t-2 border-dashed border-gray-200 pt-6">
+										<h3 class="text-xl font-black uppercase">
+											Existing Materials ({course.materials.length})
+										</h3>
+										{#each course.materials as material (material.uuid)}
+											<EditMaterial {material} courseUuid={courseId} onchange={loadCourse} />
+										{/each}
+									</div>
+								{/if}
+							</div>
+						{:else if activeSection === 'quizzes'}
+							<div in:fade class="space-y-6">
+								<div class="flex items-center justify-between">
+									<h2 class="text-3xl font-black text-p-blue uppercase">Examinations</h2>
+									<button
+										onclick={() => (showCreateQuiz = !showCreateQuiz)}
+										class="rounded-lg border-2 border-s-black bg-p-green px-4 py-2 font-bold uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:shadow-none"
+									>
+										{showCreateQuiz ? 'Cancel' : '+ New Quiz'}
+									</button>
+								</div>
 
-			<EditFeed courseId={course.uuid} />
-			<br />
-		</section>
-	</div>
-{/if}
+								{#if showCreateQuiz}
+									<div transition:slide class="rounded-xl border-2 border-s-black bg-gray-50 p-4">
+										<EditQuiz edit={false} courseId={course.uuid} onchange={onCreateQuizSubmit} />
+									</div>
+								{/if}
+
+								<div class="space-y-4">
+									{#each course.quizzes as quiz (quiz.uuid)}
+										<EditQuiz edit={true} {quiz} courseId={course.uuid} onchange={loadCourse} />
+									{/each}
+								</div>
+							</div>
+						{:else if activeSection === 'feed'}
+							<div in:fade class="space-y-8">
+								<div>
+									<h2 class="mb-4 text-3xl font-black text-s-3 uppercase">Post Update</h2>
+									<CreateFeedPost courseId={course.uuid} />
+								</div>
+								<div class="border-t-2 border-dashed border-gray-200 pt-6">
+									<h3 class="mb-4 text-xl font-black text-gray-500 uppercase">History</h3>
+									<EditFeed courseId={course.uuid} />
+								</div>
+							</div>
+						{/if}
+					</div>
+				</main>
+			</div>
+		</div>
+	{/if}
+</div>

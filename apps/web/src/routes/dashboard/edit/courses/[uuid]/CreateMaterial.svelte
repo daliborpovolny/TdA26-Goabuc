@@ -1,136 +1,133 @@
 <script lang="ts">
-	let { courseUuid, onchange }: { courseUuid: string; onchange: () => void } = $props();
+    import { fade, slide } from 'svelte/transition';
 
-	let materialType: 'file' | '' | 'url' = $state('');
+    let { courseUuid, onchange }: { courseUuid: string; onchange: () => void } = $props();
 
-	async function createUrlMaterial(e: Event) {
-		e.preventDefault();
+    let materialType: 'file' | '' | 'url' = $state('');
+    let isSaving = $state(false);
+    let showSuccess = $state(false);
 
-		let formData = new FormData(e.target as HTMLFormElement);
-		let formJson = JSON.stringify(Object.fromEntries(formData));
+    async function handleUpload(e: Event, type: 'file' | 'url') {
+        e.preventDefault();
+        isSaving = true;
 
-		await fetch(`/api/courses/${courseUuid}/materials`, {
-			method: 'POST',
-			headers: { 'Content-type': 'application/json' },
-			body: formJson
-		});
+        const form = e.target as HTMLFormElement;
+        const formData = new FormData(form);
+        
+        const options: RequestInit = {
+            method: 'POST',
+            body: type === 'url' 
+                ? JSON.stringify(Object.fromEntries(formData)) 
+                : formData
+        };
 
-		materialType = '';
-		onchange();
-	}
+        if (type === 'url') {
+            options.headers = { 'Content-type': 'application/json' };
+        }
 
-	async function createFileMaterial(e: Event) {
-		e.preventDefault();
-
-		let formData = new FormData(e.target as HTMLFormElement);
-		await fetch(`/api/courses/${courseUuid}/materials`, {
-			method: 'POST',
-			body: formData
-		});
-
-		materialType = '';
-		onchange();
-	}
+        try {
+            const res = await fetch(`/api/courses/${courseUuid}/materials`, options);
+            if (res.ok) {
+                materialType = '';
+                showSuccess = true;
+                onchange();
+                setTimeout(() => showSuccess = false, 2000);
+            }
+        } finally {
+            isSaving = false;
+        }
+    }
 </script>
 
-<div>
-	<div class="flex gap-4">
-		<button
-			onclick={() => (materialType = materialType === 'url' || materialType == '' ? 'file' : '')}
-			class="rounded-md border border-stone-400 bg-stone-100 px-4 py-2 text-gray-800 hover:bg-stone-200 {materialType ===
-			'file'
-				? 'bg-stone-200'
-				: ''}"
-		>
-			New File Material
-		</button>
-		<button
-			onclick={() => (materialType = materialType === 'file' || materialType == '' ? 'url' : '')}
-			class="rounded-md border border-stone-400 bg-stone-100 px-4 py-2 text-gray-800 hover:bg-stone-200 {materialType ===
-			'url'
-				? 'bg-stone-200'
-				: ''}"
-		>
-			New Url Material
-		</button>
-	</div>
+<div class="space-y-4">
+    <div class="flex flex-wrap gap-4">
+        <button
+            onclick={() => (materialType = materialType === 'file' ? '' : 'file')}
+            class="group relative flex items-center gap-2 rounded-xl border-4 border-s-black px-6 py-3 font-black uppercase tracking-widest transition-all
+            {materialType === 'file' ? 'bg-p-blue text-white translate-x-1 translate-y-1 shadow-none' : 'bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green'}"
+        >
+            <span>📁</span> File
+        </button>
 
-	<br />
+        <button
+            onclick={() => (materialType = materialType === 'url' ? '' : 'url')}
+            class="group relative flex items-center gap-2 rounded-xl border-4 border-s-black px-6 py-3 font-black uppercase tracking-widest transition-all
+            {materialType === 'url' ? 'bg-p-blue text-white translate-x-1 translate-y-1 shadow-none' : 'bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green'}"
+        >
+            <span>🔗</span> Link
+        </button>
 
-	{#if materialType === 'file'}
-		<form
-			class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4"
-			method="POST"
-			enctype="multipart/form-data"
-			onsubmit={createFileMaterial}
-		>
-			<!-- required by API -->
-			<input type="hidden" name="type" value="file" />
+        {#if showSuccess}
+            <div transition:fade class="flex items-center font-bold text-p-green uppercase tracking-tighter">
+                ✓ Material Added to Course
+            </div>
+        {/if}
+    </div>
 
-			<div class="flex flex-col">
-				<label class="text-sm font-medium text-gray-700" for="name">Name</label>
-				<input
-					type="text"
-					name="name"
-					required
-					class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
-				/>
-			</div>
+    {#if materialType !== ''}
+        <div transition:slide class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]">
+            <form
+                onsubmit={(e) => handleUpload(e, materialType as 'file' | 'url')}
+                class="space-y-4"
+                enctype={materialType === 'file' ? 'multipart/form-data' : undefined}
+            >
+                <input type="hidden" name="type" value={materialType} />
 
-			<div class="flex flex-col">
-				<label class="text-sm font-medium text-gray-700" for="description">Description</label>
-				<textarea
-					name="description"
-					class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
-				></textarea>
-			</div>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div class="space-y-1">
+                        <label class="text-xs font-black uppercase tracking-widest text-gray-500" for="name">Display Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            required
+                            placeholder={materialType === 'file' ? 'Lecture_Notes.pdf' : 'Useful Resource Name'}
+                            class="w-full rounded-xl border-2 border-s-black p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
+                        />
+                    </div>
 
-			<div class="flex flex-col">
-				<label class="text-sm font-medium text-gray-700" for="file">File</label>
-				<input type="file" name="file" required class="mt-1 text-gray-900" />
-			</div>
+                    {#if materialType === 'url'}
+                        <div class="space-y-1">
+                            <label class="text-xs font-black uppercase tracking-widest text-gray-500" for="url">URL Address</label>
+                            <input
+                                type="url"
+                                name="url"
+                                required
+                                placeholder="https://..."
+                                class="w-full rounded-xl border-2 border-s-black p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
+                            />
+                        </div>
+                    {:else}
+                        <div class="space-y-1">
+                            <label class="text-xs font-black uppercase tracking-widest text-gray-500" for="file">Select File</label>
+                            <input 
+                                type="file" 
+                                name="file" 
+                                required 
+                                class="w-full cursor-pointer rounded-xl border-2 border-dashed border-s-black p-2 font-bold file:mr-4 file:rounded-lg file:border-0 file:bg-s-black file:px-4 file:py-1 file:text-sm file:font-semibold file:text-white" 
+                            />
+                        </div>
+                    {/if}
+                </div>
 
-			<button class="rounded-md bg-stone-800 px-4 py-2 text-white hover:bg-stone-700">
-				Create
-			</button>
-		</form>
-	{:else if materialType === 'url'}
-		<form
-			method="POST"
-			onsubmit={createUrlMaterial}
-			class="space-y-4 rounded-lg border border-stone-300 bg-stone-50 p-4"
-		>
-			<input type="hidden" name="type" value="url" />
+                <div class="space-y-1">
+                    <label class="text-xs font-black uppercase tracking-widest text-gray-500" for="description">Brief Description (Optional)</label>
+                    <textarea
+                        name="description"
+                        rows="2"
+                        class="w-full rounded-xl border-2 border-s-black p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
+                    ></textarea>
+                </div>
 
-			<div class="flex flex-col">
-				<label class="text-sm font-medium text-gray-700" for="name">Name</label>
-				<input
-					type="text"
-					name="name"
-					class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
-				/>
-			</div>
-
-			<div class="flex flex-col">
-				<label class="text-sm font-medium text-gray-700" for="description">Description</label>
-				<textarea
-					name="description"
-					class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
-				></textarea>
-			</div>
-
-			<div class="flex flex-col">
-				<label class="text-sm font-medium text-gray-700" for="url">URL</label>
-				<input
-					type="url"
-					name="url"
-					class="mt-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-stone-400 focus:outline-none"
-				/>
-			</div>
-
-			<button class="rounded-md bg-stone-800 px-4 py-2 text-white hover:bg-stone-700">
-				Create
-			</button>
-		</form>
-	{/if}
+                <div class="flex justify-end pt-2">
+                    <button 
+                        type="submit" 
+                        disabled={isSaving}
+                        class="rounded-xl border-4 border-s-black bg-p-green px-8 py-2 text-lg font-black uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:opacity-50"
+                    >
+                        {isSaving ? 'Uploading...' : 'Confirm Creation'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    {/if}
 </div>

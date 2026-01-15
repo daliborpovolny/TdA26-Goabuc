@@ -1,89 +1,72 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
+    import { fade, slide } from 'svelte/transition';
+    import type { FeedPost } from '$lib/types';
+    import EditFeedPost from './EditFeedPost.svelte';
 
-	import type { FeedPost } from '$lib/types';
-	import EditFeedPost from './EditFeedPost.svelte';
+    let { courseId }: { courseId: string } = $props();
+    let collapsed = $state(true);
+    let posts: FeedPost[] = $state([]);
+    let isConnected = $state(false);
 
-	let { courseId }: { courseId: string } = $props();
+    loadCourseFeed();
 
-	let collapsed = $state(true);
+    async function loadCourseFeed() {
+        let res = await fetch(`/api/courses/${courseId}/feed`);
+        posts = await res.json();
+    }
 
-	let posts: FeedPost[] = $state([]);
-	loadCourseFeed();
+    let eventSource: EventSource;
 
-	async function loadCourseFeed() {
-		let res = await fetch(`/api/courses/${courseId}/feed`, {
-			method: 'GET',
-			headers: { 'Content-type': 'application/json' }
-		});
+    onMount(() => {
+        eventSource = new EventSource(`/api/courses/${courseId}/feed/stream`);
+        
+        eventSource.onopen = () => isConnected = true;
+        eventSource.onerror = () => isConnected = false;
 
-		let data: FeedPost[] = await res.json();
-		posts = data;
-	}
+        eventSource.addEventListener('new_post', (event) => {
+            if (!event.data) return;
+            try {
+                let newPost: FeedPost = JSON.parse(event.data);
+                const index = posts.findIndex((p) => p.uuid === newPost.uuid);
+                if (index !== -1) {
+                    posts[index] = newPost;
+                } else {
+                    posts = [newPost, ...posts];
+                }
+            } catch (err) {
+                console.error('Error parsing SSE message:', err);
+            }
+        });
 
-	let eventSource: EventSource;
-
-	onMount(() => {
-		eventSource = new EventSource(`/api/courses/${courseId}/feed/stream`);
-
-		// 1. Debugging: Check if connection opens
-		eventSource.onopen = () => {
-			console.log('SSE Connection Open');
-		};
-
-		// 2. ERROR: This only catches unnamed messages
-		eventSource.onmessage = (e) => {
-			console.log('Received unnamed message:', e.data);
-		};
-
-		// 3. FIX: Add a specific listener for "new_post"
-		eventSource.addEventListener('new_post', (event) => {
-			if (!event.data) return;
-
-			try {
-				let newPost: FeedPost = JSON.parse(event.data);
-
-				const index = posts.findIndex((p) => p.uuid === newPost.uuid);
-
-				if (index !== -1) {
-					posts[index] = newPost;
-					posts = [...posts];
-				} else {
-					posts = [newPost, ...posts];
-				}
-			} catch (err) {
-				console.error('Error parsing SSE message:', err);
-			}
-		});
-
-		eventSource.onerror = (err) => {
-			console.error('SSE connection error:', err);
-		};
-
-		return () => {
-			eventSource?.close();
-		};
-	});
-
-	onDestroy(() => {
-		if (eventSource) {
-			eventSource.close();
-		}
-	});
+        return () => eventSource?.close();
+    });
 </script>
 
-<div class="space-y-4 p-4">
-	{#if posts.length > 0}
-		<button onclick={() => (collapsed = !collapsed)} type="button" class="text-3xl"
-			>News Feed</button
-		>
+<div class="space-y-4">
+    {#if posts.length > 0}
+        <button 
+            onclick={() => (collapsed = !collapsed)} 
+            type="button" 
+            class="flex items-center gap-3 text-3xl font-black uppercase tracking-tighter hover:text-p-blue"
+        >
+            <span>News Feed</span>
+            <span class="text-sm transition-transform {collapsed ? '' : 'rotate-180'}">▼</span>
+            
+            {#if isConnected}
+                <span class="flex items-center gap-1 text-xs font-bold text-p-green">
+                    <span class="h-2 w-2 animate-pulse rounded-full bg-p-green"></span>
+                    Live
+                </span>
+            {/if}
+        </button>
 
-		{#if !collapsed}
-			<div class="flex flex-col gap-4">
-				{#each posts as post (post.uuid)}
-					<EditFeedPost {courseId} {post} />
-				{/each}
-			</div>
-		{/if}
-	{/if}
+        {#if !collapsed}
+            <div transition:slide class="flex flex-col gap-6 pt-4">
+                {#each posts as post (post.uuid)}
+                    <EditFeedPost {courseId} {post} />
+                {/each}
+            </div>
+        {/if}
+    {/if}
 </div>

@@ -1,58 +1,96 @@
 <script lang="ts">
-	import type { FeedPost } from '$lib/types';
+    import type { FeedPost } from '$lib/types';
+    import { fade } from 'svelte/transition';
 
-	let { post, courseId }: { post: FeedPost; courseId: string } = $props();
+    let { post, courseId }: { post: FeedPost; courseId: string } = $props();
 
-	let message = $state(post.message);
-	let initialMessage = $state(post.message);
+    let message = $state(post.message);
+    let initialMessage = $state(post.message);
+    let isSaving = $state(false);
+    let showSuccess = $state(false);
 
-	async function editFeedPost(e: Event) {
-		e.preventDefault();
+    const isManual = post.type === 'manual';
+    const isEdited = $derived(message !== initialMessage);
 
-		const form = e.currentTarget as HTMLFormElement;
-		const formData = new FormData(form);
-		const data = Object.fromEntries(formData);
+    async function editFeedPost(e: Event) {
+        e.preventDefault();
+        isSaving = true;
 
-		const res = await fetch(`/api/courses/${courseId}/feed/${post.uuid}`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(data)
-		});
+        const res = await fetch(`/api/courses/${courseId}/feed/${post.uuid}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+        });
 
-		if (res.ok) {
-			initialMessage = message;
-		}
-	}
+        if (res.ok) {
+            initialMessage = message;
+            showSuccess = true;
+            setTimeout(() => showSuccess = false, 2000);
+        }
+        isSaving = false;
+    }
 
-	async function deleteFeedPost(e: Event) {
-		e.preventDefault();
-
-		const res = await fetch(`/api/courses/${courseId}/feed/${post.uuid}`, {
-			method: 'DELETE',
-			headers: { 'Content-Type': 'application/json' }
-		});
-	}
+    async function deleteFeedPost() {
+        if (!confirm('Delete this post forever?')) return;
+        await fetch(`/api/courses/${courseId}/feed/${post.uuid}`, { method: 'DELETE' });
+    }
 </script>
 
-<form onsubmit={editFeedPost} class="rounded border">
-	{#if post.type === 'manual'}
-		<textarea name="message" class="mb-2 w-full p-2" bind:value={message} required> </textarea>
+<div class="group relative">
+    <div class="absolute inset-0 translate-x-1.5 translate-y-1.5 rounded-xl bg-s-black"></div>
 
-		{#if message !== initialMessage}
-			<button class="rounded bg-blue-600 px-4 py-2 text-white"> Edit </button>
-		{/if}
+    <form 
+        onsubmit={editFeedPost} 
+        class="relative flex flex-col gap-3 rounded-xl border-2 border-s-black p-4 transition-colors
+        {isManual ? 'bg-white' : 'bg-gray-100 opacity-80'}"
+    >
+        <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+            <span class="text-[10px] font-black uppercase tracking-widest {isManual ? 'text-p-blue' : 'text-gray-500'}">
+                {isManual ? 'Teacher Post' : 'System Automation'}
+            </span>
+            <div class="flex items-center gap-2">
+                {#if showSuccess}
+                    <span transition:fade class="text-[10px] font-bold text-p-green uppercase">✓ Updated</span>
+                {/if}
+                <span class="text-[10px] font-bold text-gray-400">{post.createdAt}</span>
+            </div>
+        </div>
 
-		<button type="button" onclick={deleteFeedPost} class="rounded bg-red-600 px-4 py-2 text-white">
-			Delete
-		</button>
-	{:else}
-		<p class="mb-2 w-full p-2">
-			{message}
-		</p>
-	{/if}
+        {#if isManual}
+            <textarea 
+                name="message" 
+                class="min-h-[80px] w-full resize-none bg-transparent font-bold text-s-black focus:outline-none" 
+                bind:value={message} 
+                required
+            ></textarea>
 
-	{#if post.createdAt != post.updatedAt}
-		<p>Updated at: {post.updatedAt}</p>
-	{/if}
-	<p>Created at: {post.createdAt}</p>
-</form>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                {#if isEdited}
+                    <button 
+                        transition:fade
+                        disabled={isSaving}
+                        class="rounded-lg border-2 border-s-black bg-p-green px-3 py-1 text-xs font-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+                    >
+                        {isSaving ? '...' : 'Save Edit'}
+                    </button>
+                {/if}
+
+                <button 
+                    type="button" 
+                    onclick={deleteFeedPost} 
+                    class="rounded-lg border-2 border-s-black bg-red-500 px-3 py-1 text-xs font-black uppercase text-white shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+                >
+                    Delete
+                </button>
+            </div>
+        {:else}
+            <p class="py-2 font-medium italic text-gray-600">
+                {message}
+            </p>
+        {/if}
+
+        {#if post.createdAt !== post.updatedAt}
+            <p class="text-[9px] font-bold uppercase text-gray-300">Edited: {post.updatedAt}</p>
+        {/if}
+    </form>
+</div>
