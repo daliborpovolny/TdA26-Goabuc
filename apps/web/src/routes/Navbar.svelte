@@ -2,7 +2,7 @@
 	import { auth } from '$lib/auth.svelte';
 	import NavbarLink from './NavbarLink.svelte';
 
-	let show = $state(true);
+	let show = $state(false);
 
 	function onclick(): void {
 		show = false;
