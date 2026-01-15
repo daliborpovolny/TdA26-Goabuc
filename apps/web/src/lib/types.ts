@@ -86,7 +86,7 @@ export interface QuizMarked {
 
 export interface FeedPost {
 	uuid: string;
-	type: 'manual' | 'auto';
+	type: 'manual' | 'system';
 	message: string;
 	edited: boolean;
 	createdAt: string;

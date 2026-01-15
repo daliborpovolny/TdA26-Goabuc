@@ -7,7 +7,7 @@
 
 	let { courseId }: { courseId: string } = $props();
 
-	let collapsed = $state(true);
+	let collapsed = $state(false);
 
 	let posts: FeedPost[] = $state([]);
 	loadCourseFeed();
@@ -75,10 +75,6 @@
 
 <div class="space-y-4 p-4">
 	{#if posts.length > 0}
-		<button onclick={() => (collapsed = !collapsed)} type="button" class="text-3xl"
-			>News Feed</button
-		>
-
 		{#if !collapsed}
 			<div class="flex flex-col gap-4">
 				{#each posts as post (post.uuid)}

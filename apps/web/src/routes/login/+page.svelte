@@ -37,7 +37,7 @@
 
 <form
 	on:submit={login}
-	class="flex mx-auto flex-col max-w-xs md:max-w-md mt-10 space-y-4 rounded-xl bg-[#0070BB] p-6 shadow-lg"
+	class="mx-auto mt-10 flex max-w-xs flex-col space-y-4 rounded-xl bg-[#0070BB] p-6 shadow-lg md:max-w-md"
 >
 	<h2 class="text-center text-5xl font-bold">Login</h2>
 	<div>
@@ -47,7 +47,7 @@
 			type="email"
 			bind:value={email}
 			required
-			class="w-full outline-offset-none rounded-md border-4 border-[#1A1A1A] p-2 font-semibold bg-white focus:outline-2 focus:outline-[#91F5AD]"
+			class="outline-offset-none w-full rounded-md border-4 border-[#1A1A1A] bg-white p-2 font-semibold focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 	<div>
@@ -57,7 +57,7 @@
 			type="password"
 			bind:value={password}
 			required
-			class="w-full rounded-md border-4 border-[#1A1A1A] p-2 bg-white focus:outline-2 focus:outline-[#91F5AD]"
+			class="w-full rounded-md border-4 border-[#1A1A1A] bg-white p-2 focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 	<button
