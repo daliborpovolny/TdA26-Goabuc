@@ -39,7 +39,7 @@
 <title>Register</title>
 
 <form
-	class="mx-auto mt-10 max-w-md space-y-4 rounded-xl bg-[#0070BB] p-6 shadow-lg"
+	class="flex mx-auto flex-col max-w-xs md:max-w-md mt-10 space-y-4 rounded-xl bg-[#0070BB] p-6 shadow-lg"
 	on:submit={register}
 >
 	<h2 class="text-center text-5xl font-bold">Register</h2>
@@ -53,7 +53,7 @@
 			type="text"
 			bind:value={first_name}
 			required
-			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:bg-white focus:outline-2 focus:outline-[#91F5AD]"
+			class="w-full rounded-md border-4 border-[#1A1A1A] p-2 font-semibold bg-white focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 
@@ -64,7 +64,7 @@
 			type="text"
 			bind:value={last_name}
 			required
-			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:bg-white focus:outline-2 focus:outline-[#91F5AD]"
+			class="w-full rounded-md border-4 border-[#1A1A1A] p-2 font-semibold bg-white focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 
@@ -75,7 +75,7 @@
 			type="email"
 			bind:value={email}
 			required
-			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:bg-white focus:outline-2 focus:outline-[#91F5AD]"
+			class="w-full rounded-md border-4 border-[#1A1A1A] p-2 font-semibold bg-white focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 
@@ -86,7 +86,7 @@
 			type="password"
 			bind:value={password}
 			required
-			class="w-full rounded-md border-[4px] border-[#1A1A1A] p-2 font-semibold focus:bg-white focus:outline-2 focus:outline-[#91F5AD]"
+			class="w-full rounded-md border-4 border-[#1A1A1A] p-2 font-semibold bg-white focus:outline-2 focus:outline-[#91F5AD]"
 		/>
 	</div>
 
