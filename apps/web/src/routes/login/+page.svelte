@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { auth } from '$lib/auth.svelte';
+	import { fade } from 'svelte/transition';
 
-	let email = '';
-	let password = '';
+	let email = $state('');
+	let password = $state('');
+	let loginPromise: Promise<any> | null = $state(null);
 
-	let loginPromise: Promise<any> | null = null;
+	function handleLogin(e: Event) {
+		e.preventDefault();
 
-	function login() {
 		loginPromise = fetch('/api/login', {
 			method: 'POST',
 			headers: { 'Content-type': 'application/json' },
@@ -15,68 +17,104 @@
 			body: JSON.stringify({ email, password })
 		})
 			.then(async (res) => {
-				if (!res.ok) {
-					const err = await res.json();
-					throw new Error(err.message || 'Login failed');
-				}
-				return res.json();
+				const data = await res.json();
+
+				if (!res.ok) throw new Error(data.message || 'Login failed');
+				return data;
 			})
 			.then((data) => {
 				auth.check();
-
-				setTimeout(() => {
-					goto('/dashboard');
-				}, 1500);
-
+				setTimeout(() => goto('/dashboard'), 1500);
 				return data;
 			});
+
+		// loginPromise = null
 	}
 </script>
 
-<title>Login</title>
+<svelte:head>
+	<title>Login | TdA</title>
+</svelte:head>
 
-<form
-	on:submit={login}
-	class="mx-auto mt-10 flex max-w-xs flex-col space-y-4 rounded-xl bg-[#0070BB] p-6 shadow-lg md:max-w-md"
->
-	<h2 class="text-center text-5xl font-bold">Login</h2>
-	<div>
-		<label for="email" class="mb-1 block text-xl font-semibold">Email</label>
-		<input
-			id="email"
-			type="email"
-			bind:value={email}
-			required
-			class="outline-offset-none w-full rounded-md border-4 border-[#1A1A1A] bg-white p-2 font-semibold focus:outline-2 focus:outline-[#91F5AD]"
-		/>
-	</div>
-	<div>
-		<label for="password" class="mb-1 block text-xl font-semibold">Password</label>
-		<input
-			id="password"
-			type="password"
-			bind:value={password}
-			required
-			class="w-full rounded-md border-4 border-[#1A1A1A] bg-white p-2 focus:outline-2 focus:outline-[#91F5AD]"
-		/>
-	</div>
-	<button
-		type="submit"
-		class="colors cursor-pointer rounded-md bg-[#91F5AD] px-4 py-2 text-xl font-semibold text-[#1A1A1A] transition hover:bg-[#6DD4B1]"
-	>
-		Login
-	</button>
-	<p class="text-center text-xl font-semibold text-[#1A1A1A]">
-		Don't have an account? <a href="/register" class="text-[#91F5AD] hover:underline">Register</a>
-	</p>
+<div class="flex min-h-[80vh] items-center justify-center p-4">
+	<div class="relative w-full max-w-md">
+		<div class="absolute inset-0 translate-x-3 translate-y-3 rounded-2xl bg-s-black"></div>
 
-	{#if loginPromise}
-		{#await loginPromise}
-			<p class="text-xl font-semibold">Logging in...</p>
-		{:then data}
-			<p class="text-xl font-semibold text-[#91F5AD]">Success! Welcome {data.first_name}</p>
-		{:catch error}
-			<p class="text-xl font-semibold text-red-500 capitalize">{error.message}</p>
-		{/await}
-	{/if}
-</form>
+		<form
+			onsubmit={handleLogin}
+			class="relative flex flex-col space-y-6 rounded-2xl border-4 border-s-black bg-p-blue p-8 shadow-none"
+		>
+			<div class="text-center">
+				<h2 class="text-5xl font-black tracking-tighter text-white uppercase">Login</h2>
+				<div class="mx-auto mt-2 h-1.5 w-16 bg-p-green"></div>
+			</div>
+
+			<div class="space-y-4">
+				<div>
+					<label
+						for="email"
+						class="mb-2 block text-lg font-bold tracking-wide text-white uppercase"
+					>
+						Username
+					</label>
+					<input
+						id="email"
+						type="text"
+						bind:value={email}
+						required
+						placeholder="you@example.com"
+						class="w-full rounded-xl border-4 border-s-black bg-white p-3 font-bold text-s-black placeholder:text-gray-400 focus:ring-4 focus:ring-p-green focus:outline-none"
+					/>
+				</div>
+
+				<div>
+					<label
+						for="password"
+						class="mb-2 block text-lg font-bold tracking-wide text-white uppercase"
+					>
+						Password
+					</label>
+					<input
+						id="password"
+						type="password"
+						bind:value={password}
+						required
+						placeholder="••••••••"
+						class="w-full rounded-xl border-4 border-s-black bg-white p-3 font-bold text-s-black placeholder:text-gray-400 focus:ring-4 focus:ring-p-green focus:outline-none"
+					/>
+				</div>
+			</div>
+
+			<button
+				type="submit"
+				class="group relative mt-4 overflow-hidden rounded-xl border-4 border-s-black bg-p-green py-4 text-2xl font-black tracking-widest text-s-black uppercase transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] disabled:opacity-50"
+			>
+				<span>Enter Academy</span>
+			</button>
+
+			<p class="text-center font-bold text-white">
+				New here?
+				<a
+					href="/register"
+					class="text-p-green underline decoration-4 underline-offset-4 hover:text-white"
+				>
+					Create Account
+				</a>
+			</p>
+
+			{#if loginPromise}
+				<div class="mt-4 text-center font-black tracking-tight uppercase" transition:fade>
+					{#await loginPromise}
+						<p class="text-white">Checking credentials...</p>
+					{:then data}
+						<p class="text-p-green">Welcome back, {data.first_name}!</p>
+					{:catch error}
+						<p class="rounded-lg border-2 border-s-black bg-red-500 p-2 text-white">
+							{error.message}
+						</p>
+					{/await}
+				</div>
+			{/if}
+		</form>
+	</div>
+</div>
