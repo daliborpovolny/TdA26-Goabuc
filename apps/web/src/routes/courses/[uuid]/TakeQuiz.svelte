@@ -8,6 +8,7 @@
 	let quizSubmit: QuizSubmit = { answers: [] };
 	let quizMarked: QuizMarked | null = $state(null);
 	let missingAnswers: number[] = $state([]);
+	let attempsCount: number = $state(quiz.attemptsCount);
 
 	// initialize answers
 	for (let question of quiz.questions) {
@@ -37,7 +38,28 @@
 			body: JSON.stringify(quizSubmit)
 		});
 
-		if (res.ok) quizMarked = await res.json();
+		if (res.ok) {
+			attempsCount += 1;
+			quizMarked = await res.json();
+		}
+	}
+
+	function isCorrectOption(qi: number, oi: number) {
+		const q = quiz.questions[qi];
+		if (q.type === 'singleChoice') {
+			return q.correctIndex === oi;
+		} else {
+			return q.correctIndices.includes(oi);
+		}
+	}
+
+	function isSelectedOption(qi: number, oi: number) {
+		const ans = quizSubmit.answers[qi];
+		if (quiz.questions[qi].type === 'singleChoice') {
+			return ans.selectedIndex === oi;
+		} else {
+			return ans.selectedIndices?.includes(oi);
+		}
 	}
 
 	function resetState() {
@@ -57,6 +79,7 @@
 		<div class="flex items-center gap-3">
 			<span class="text-2xl">📝</span>
 			<span class="text-xl font-bold md:text-2xl">{quiz.title}</span>
+			<span class="text-xl">Attempts Taken: {attempsCount}</span>
 		</div>
 		<span class="text-xl transition-transform {collapsed ? '' : 'rotate-180'}">▼</span>
 	</button>
@@ -105,15 +128,42 @@
 						<div class="grid gap-2">
 							{#each q.options as option, oi}
 								<label
-									class="flex cursor-pointer items-center justify-between rounded-lg border-2 border-s-black p-3 transition-all hover:bg-gray-50 has-checked:border-p-blue has-checked:bg-p-blue/10"
+									class="flex cursor-pointer items-center justify-between rounded-lg border-2 border-s-black p-3 transition-all
+            {quizMarked ? 'cursor-default' : 'hover:bg-gray-50'}
+            {quizMarked && isCorrectOption(qi, oi)
+										? 'border-p-green bg-p-green/20 ring-2 ring-p-green'
+										: ''}
+            {quizMarked && isSelectedOption(qi, oi) && !isCorrectOption(qi, oi)
+										? 'border-red-500 bg-red-100'
+										: ''}
+            {!quizMarked ? 'has-checked:border-p-blue has-checked:bg-p-blue/10' : ''}"
 								>
-									<span class="text-lg font-medium">{option}</span>
+									<div class="flex items-center gap-2">
+										<span class="text-lg font-medium">{option}</span>
+
+										{#if quizMarked && isCorrectOption(qi, oi)}
+											<span
+												class="rounded bg-p-green px-1.5 py-0.5 text-[10px] font-black text-s-black uppercase"
+											>
+												Correct Answer
+											</span>
+										{/if}
+
+										{#if quizMarked && isSelectedOption(qi, oi) && !isCorrectOption(qi, oi)}
+											<span
+												class="rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-black text-white uppercase"
+											>
+												Your Choice
+											</span>
+										{/if}
+									</div>
 
 									{#if q.type === 'singleChoice'}
 										<input
 											type="radio"
 											name={`q-${qi}`}
 											disabled={!!quizMarked}
+											checked={quizSubmit.answers[qi].selectedIndex === oi}
 											onchange={() => (quizSubmit.answers[qi].selectedIndex = oi)}
 											class="h-5 w-5 border-2 border-s-black accent-p-blue"
 										/>
@@ -121,6 +171,7 @@
 										<input
 											type="checkbox"
 											disabled={!!quizMarked}
+											checked={quizSubmit.answers[qi].selectedIndices?.includes(oi)}
 											onchange={(e) => {
 												if (e.currentTarget.checked)
 													quizSubmit.answers[qi].selectedIndices?.push(oi);

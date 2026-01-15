@@ -3,7 +3,17 @@
 
 	let { material }: { material: Material } = $props();
 
-	let collapsed = $state(true); // Default to collapsed for a cleaner list
+	let collapsed = $state(true);
+
+	// Helper to get the favicon from a URL
+	function getFavicon(url: string) {
+		try {
+			const domain = new URL(url).hostname;
+			return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+		} catch {
+			return `https://www.google.com/s2/favicons?domain=google.com&sz=64`;
+		}
+	}
 </script>
 
 <div
@@ -15,8 +25,14 @@
 		onclick={() => (collapsed = !collapsed)}
 	>
 		<div class="flex items-center gap-3">
-			<span class="text-2xl">
-				{material.type === 'file' ? '📁' : '🔗'}
+			<span
+				class="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-s-black bg-white text-2xl"
+			>
+				{#if material.type === 'file'}
+					📁
+				{:else if material.type === 'url'}
+					<img src={getFavicon(material.url)} alt="site icon" class="h-6 w-6 rounded-sm" />
+				{/if}
 			</span>
 			<span class="text-xl font-bold md:text-2xl">{material.name}</span>
 		</div>
@@ -38,6 +54,7 @@
 				{#if material.type === 'file'}
 					<a
 						href={material.fileUrl}
+						target="_blank"
 						class="flex items-center gap-2 rounded-lg border-2 border-s-black bg-s-2 px-4 py-2 font-bold text-white transition-all hover:bg-s-1 hover:text-s-black active:translate-y-1"
 					>
 						<span>👁️</span> View File
