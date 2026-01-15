@@ -625,6 +625,18 @@ func (q *Queries) GetUserBySessionToken(ctx context.Context, token string) (GetU
 	return i, err
 }
 
+const incrementQuizAttemptsCount = `-- name: IncrementQuizAttemptsCount :exec
+UPDATE quizz
+SET
+    attempts_count = attempts_count + 1
+WHERE uuid = ?
+`
+
+func (q *Queries) IncrementQuizAttemptsCount(ctx context.Context, uuid string) error {
+	_, err := q.db.ExecContext(ctx, incrementQuizAttemptsCount, uuid)
+	return err
+}
+
 const insertAnswer = `-- name: InsertAnswer :one
 
 INSERT INTO answer (

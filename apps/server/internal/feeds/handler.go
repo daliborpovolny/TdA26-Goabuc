@@ -128,7 +128,7 @@ func (h *Handler) StreamFeed(c echo.Context) error {
 	for {
 		select {
 		case post := <-msgChan:
-			fmt.Println("sending msg")
+			// fmt.Println("sending msg")
 			// Format:
 			// event: new_post
 			// data: {...json...}

@@ -106,6 +106,12 @@ SET
 WHERE uuid = sqlc.arg(uuid)
 RETURNING *;
 
+-- name: IncrementQuizAttemptsCount :exec
+UPDATE quizz
+SET
+    attempts_count = attempts_count + 1
+WHERE uuid = ?;
+
 -- name: DeleteQuizz :execresult
 DELETE FROM quizz WHERE uuid = ?;
 
@@ -206,6 +212,10 @@ INSERT INTO answer (
 
     sqlc.arg(submitted_at)
 ) RETURNING *;
+
+-- TODO RETURN ANSWERS AND SHOW THEM ON FRONTEND
+
+--* Posts
 
 -- name: GetPostsByCourse :many
 SELECT * FROM feed_posts

@@ -63,13 +63,13 @@ func (s *Service) broadcast(courseID string, post FeedPostResponse) {
 	s.clientsMux.RLock()
 	defer s.clientsMux.RUnlock()
 
-	fmt.Println("broadcasting!")
+	// fmt.Println("broadcasting!")
 
 	for _, ch := range s.clients[courseID] {
 
 		select {
 		case ch <- post:
-			fmt.Println("chose this one?")
+			// fmt.Println("chose this one?")
 		default:
 			// Skip if channel is full to prevent blocking the whole server
 		}
@@ -90,7 +90,7 @@ func (s *Service) GetFeed(ctx context.Context, courseID string) ([]FeedPostRespo
 		response = append(response, dbFeedPostToFeedPost(p))
 	}
 
-	fmt.Println(response)
+	// fmt.Println(response)
 	return response, nil
 }
 
@@ -101,8 +101,8 @@ func (s *Service) CreateManualPost(ctx context.Context, courseID string, message
 		CourseUuid: courseID,
 		Type:       "manual",
 		Message:    message,
-		IsEdited:   false, // Assuming generated bool
-		CreatedAt:  now,   // Adjust based on your SQLC time configuration
+		IsEdited:   false,
+		CreatedAt:  now,
 		UpdatedAt:  now,
 	})
 	if err != nil {
@@ -112,7 +112,6 @@ func (s *Service) CreateManualPost(ctx context.Context, courseID string, message
 
 	resp := dbFeedPostToFeedPost(newPost)
 
-	// TRIGGER SSE: Notify all listeners
 	go s.broadcast(courseID, resp)
 
 	return resp, nil
@@ -125,8 +124,8 @@ func (s *Service) CreateAutomaticPost(message string, courseId string, ctx conte
 		CourseUuid: courseId,
 		Type:       "system",
 		Message:    message,
-		IsEdited:   false, // Assuming generated bool
-		CreatedAt:  now,   // Adjust based on your SQLC time configuration
+		IsEdited:   false,
+		CreatedAt:  now,
 		UpdatedAt:  now,
 	})
 	if err != nil {
@@ -136,7 +135,6 @@ func (s *Service) CreateAutomaticPost(message string, courseId string, ctx conte
 
 	resp := dbFeedPostToFeedPost(newPost)
 
-	// TRIGGER SSE: Notify all listeners
 	go s.broadcast(courseId, resp)
 
 	return resp, nil
@@ -161,7 +159,6 @@ func (s *Service) UpdatePost(ctx context.Context, courseID, postID, message stri
 
 	resp := dbFeedPostToFeedPost(updatedPost)
 
-	// TRIGGER SSE: Notify that a post changed (Client handles logic to update UI)
 	go s.broadcast(courseID, resp)
 
 	return resp, nil
@@ -170,8 +167,7 @@ func (s *Service) UpdatePost(ctx context.Context, courseID, postID, message stri
 func (s *Service) DeletePost(ctx context.Context, courseID, postID string) error {
 	return s.q.DeletePost(ctx, postID)
 
-	// Note: You might want to broadcast a "delete" event type here if your frontend supports it,
-	// but the spec only showed Post objects in SSE.
+	//TODO broadcast delete
 }
 
 // StreamFeed handles the connection lifecycle for SSE

@@ -514,6 +514,11 @@ func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequ
 		return nil, err
 	}
 
+	err = s.q.IncrementQuizAttemptsCount(ctx, quizId)
+	if err != nil {
+		return nil, err
+	}
+
 	return &outcome, nil
 
 }
