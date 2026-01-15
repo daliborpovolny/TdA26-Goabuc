@@ -72,7 +72,8 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		CourseId:    course1.Uuid,
 		MatType:     "url",
 		Url:         "https://www.youtube.com/watch?v=FtES7Gd5gHE",
-		Description: "Pottery introduction video",
+		Name:        "Pottery intruduction video",
+		Description: "a short video to introduce students into the topic of pottery",
 	}, uuid.NewString(), ctx)
 	if err != nil {
 		return err
@@ -82,7 +83,8 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		CourseId:    course1.Uuid,
 		MatType:     "url",
 		Url:         "https://www.youtube.com/watch?v=2taUjbCb3N8",
-		Description: "History of pottery",
+		Name:        "History of pottery",
+		Description: "a longer video  going through the history of pottery",
 	}, uuid.NewString(), ctx)
 	if err != nil {
 		return err
@@ -137,14 +139,16 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		CourseId:    course2.Uuid,
 		MatType:     "url",
 		Url:         "https://www.youtube.com/watch?v=ND-h-Qxym1M",
-		Description: "Potions basics",
+		Name:        "Potions basics",
+		Description: "a short video to introduce students into the topic of pottery",
 	}, uuid.NewString(), ctx)
 
 	_, err = ms.CreateUrlMaterial(materials.CreateUrlMaterialRequest{
 		CourseId:    course2.Uuid,
 		MatType:     "url",
 		Url:         "https://www.youtube.com/watch?v=K0sIBsp-d6A",
-		Description: "Potions in popular culture",
+		Name:        "Potions in popular culture",
+		Description: "blah blah lorem ipsum etcetera casius belli",
 	}, uuid.NewString(), ctx)
 
 	//* Course 3
