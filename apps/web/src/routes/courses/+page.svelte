@@ -25,17 +25,18 @@
 
 <div class="p-6">
 	<h1 class="text-center text-5xl font-bold underline">Courses</h1>
-	<div class="flex w-[100%] justify-center text-center text-3xl">
-		<div class="max-w-[50%] space-y-2 rounded-xl bg-[#0070BB] px-3 pt-3 pb-1">
+	<br />
+	<div class="flex justify-center text-center text-3xl">
+		<div class=" min-w-2/3 space-y-2 rounded-xl bg-[#0070BB] px-3 pt-3 pb-1">
 			<DataLoader promise={coursesPromise}>
 				{#snippet children(courses: Course[])}
 					{#each courses as course}
 						<a href="/courses/{course.uuid}">
-							<div class="mb-2 w-[100%] rounded-xl bg-[#91F5AD] p-3 text-left">
-								<h2 class="text-medium mb-2 font-semibold underline decoration-3">{course.name}</h2>
-								<p class="text-ellipsis">{course.description}</p>
+							<div class="mb-2 rounded-xl bg-[#91F5AD] p-3 text-left">
+								<h2 class="text-medium mb-2 font-semibold decoration-3">{course.name}</h2>
 							</div>
 						</a>
+						<br />
 					{/each}
 				{/snippet}
 			</DataLoader>
