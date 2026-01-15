@@ -55,7 +55,7 @@ func main() {
 	RESET_DB = strings.ToLower(os.Getenv("RESET_DB")) == "true"
 	SEED := strings.ToLower(os.Getenv("SEED")) == "true"
 
-	db, queries := db.Initialize(RESET_DB, SEED)
+	db, queries := db.Initialize(RESET_DB)
 	defer db.Close()
 	fmt.Println("initialized db")
 
@@ -131,6 +131,20 @@ func main() {
 
 	//* Static
 	e.Static("/static", STATIC_PATH)
+
+	// Seed the db with 3 courses
+	if SEED {
+		err := seed(queries, courseService, feedsService, matsService, quizzesService)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// Create the admin account as described in the 1. phase
+	err = createAdmin(queries)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println("ready!")
 

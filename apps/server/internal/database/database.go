@@ -4,14 +4,10 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
-	"fmt"
 	"os"
-	"time"
 
 	gen "tourbackend/internal/database/gen"
-	"tourbackend/internal/utils"
 
-	"github.com/google/uuid"
 	_ "modernc.org/sqlite"
 )
 
@@ -20,7 +16,7 @@ var PATH_TO_DB string = "../../internal/database/db_file.db"
 //go:embed schema.sql
 var ddl string
 
-func Initialize(resetDB bool, seed bool) (*sql.DB, *gen.Queries) {
+func Initialize(resetDB bool) (*sql.DB, *gen.Queries) {
 
 	PATH_TO_DB_ENV := os.Getenv("PATH_TO_DB")
 	if PATH_TO_DB_ENV != "" {
@@ -46,65 +42,5 @@ func Initialize(resetDB bool, seed bool) (*sql.DB, *gen.Queries) {
 	}
 
 	queries := gen.New(db)
-
-	if seed {
-		Seed(queries)
-		fmt.Println("db reseted and seeded")
-	}
-
 	return db, queries
-}
-
-// this inserts initial data into database which is useful for testing
-func Seed(queries *gen.Queries) {
-
-	ctx := context.Background()
-
-	hash, err := utils.HashPassword("1234")
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = queries.CreateUser(ctx, gen.CreateUserParams{
-		FirstName: "Adminov",
-		LastName:  "Adminsky",
-		Email:     "ad.min@goabuc.cz",
-		Hash:      hash,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	now := time.Now().Unix()
-	_, err = queries.CreateCourse(ctx, gen.CreateCourseParams{
-		Uuid:        uuid.NewString(),
-		Name:        "Pottery for Beginners",
-		Description: "Intro into the wonderful world of pottery. No matter you experience you are welcome!",
-		CreatedAt:   now,
-		UpdatedAt:   now,
-	})
-
-	now = time.Now().Unix()
-	_, err = queries.CreateCourse(ctx, gen.CreateCourseParams{
-		Uuid:        uuid.NewString(),
-		Name:        "Potions 101",
-		Description: "Intro into potion making, fast-paced course for serious sorcerers only",
-		CreatedAt:   now,
-		UpdatedAt:   now,
-	})
-
-	now = time.Now().Unix()
-	_, err = queries.CreateCourse(ctx, gen.CreateCourseParams{
-		Uuid:        uuid.NewString(),
-		Name:        "Zebra Riding Advanced",
-		Description: "A guide to advanced zebra riding techniques, must already own a zebra",
-		CreatedAt:   now,
-		UpdatedAt:   now,
-	})
-
-	// queries.CreateQuizz(ctx, gen.CreateQuizzParams{
-	// 	Uuid: uuid.NewString(),
-	// 	CourseUuid: course1.Uuid,
-	// 	Title: "How to Potter the Pot",
-	// })
 }
