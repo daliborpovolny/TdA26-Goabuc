@@ -1,9 +1,19 @@
 <script lang="ts">
-	let { name, url, onclick }: { name: string; url: string; onclick?: () => void } = $props();
+    import { page } from '$app/state';
+    
+    let { name, url, onclick }: { name: string; url: string; onclick?: () => void } = $props();
+
+    // Determine if this link is currently active
+    let isActive = $derived(page.url.pathname === url);
 </script>
 
 <a
-	{onclick}
-	class="flex h-[61px] items-center rounded-md px-3 py-2 text-[#FFF] hover:bg-[#91F5AD] hover:text-[#1A1A1A]"
-	href={url}>{name}</a
+    href={url}
+    {onclick}
+    class="flex w-full items-center px-6 py-5 font-black uppercase tracking-widest transition-all md:h-[72px] md:w-auto md:px-5 md:py-0 md:text-sm
+    {isActive 
+        ? 'bg-p-green text-s-black' 
+        : 'text-white hover:bg-p-green/20 hover:text-p-green'}"
 >
+    {name}
+</a>
