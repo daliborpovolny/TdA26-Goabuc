@@ -248,13 +248,13 @@
 							Results
 					</a>
 
-						<button
+						<!-- <button
 							type="submit"
 							disabled={isSaving}
 							class="rounded-lg border-2 border-s-black bg-p-green px-8 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
 						>
 							{isSaving ? 'Saving...' : 'Save Quiz'}
-						</button>
+						</button> -->
 
 						{#if props.edit}
 							<button
