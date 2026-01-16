@@ -215,6 +215,9 @@ INSERT INTO answer (
 
 -- TODO RETURN ANSWERS AND SHOW THEM ON FRONTEND
 
+-- name: GetAnswersOfQuiz :many
+SELECT * FROM answer WHERE quiz_uuid = ?;
+
 --* Posts
 
 -- name: GetPostsByCourse :many

@@ -199,3 +199,19 @@ func (h *Handler) SubmitQuizAnswers(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, outcome)
 }
+
+func (h *Handler) GetAnswersOfQuiz(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	quizId := r.Echo.Param("quizId")
+	if quizId == "" {
+		return r.Error(http.StatusBadRequest, "Quizid must be set")
+	}
+
+	answers, err := h.service.GetAnswersOfQuiz(quizId, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+
+	return c.JSON(http.StatusOK, answers)
+}

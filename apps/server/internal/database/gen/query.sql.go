@@ -347,6 +347,44 @@ func (q *Queries) DeleteQuizz(ctx context.Context, uuid string) (sql.Result, err
 	return q.db.ExecContext(ctx, deleteQuizz, uuid)
 }
 
+const getAnswersOfQuiz = `-- name: GetAnswersOfQuiz :many
+
+SELECT quiz_uuid, comment, score, max_score, user_id, attempt_number, submitted_at, "foreign" FROM answer WHERE quiz_uuid = ?
+`
+
+// TODO RETURN ANSWERS AND SHOW THEM ON FRONTEND
+func (q *Queries) GetAnswersOfQuiz(ctx context.Context, quizUuid string) ([]Answer, error) {
+	rows, err := q.db.QueryContext(ctx, getAnswersOfQuiz, quizUuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Answer
+	for rows.Next() {
+		var i Answer
+		if err := rows.Scan(
+			&i.QuizUuid,
+			&i.Comment,
+			&i.Score,
+			&i.MaxScore,
+			&i.UserID,
+			&i.AttemptNumber,
+			&i.SubmittedAt,
+			&i.Foreign,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCourse = `-- name: GetCourse :one
 SELECT uuid, name, description, created_at, updated_at FROM course WHERE course.uuid == ?
 `
@@ -408,11 +446,13 @@ func (q *Queries) GetPost(ctx context.Context, uuid string) (FeedPost, error) {
 }
 
 const getPostsByCourse = `-- name: GetPostsByCourse :many
+
 SELECT uuid, course_uuid, type, message, is_edited, created_at, updated_at FROM feed_posts
 WHERE course_uuid = ?
 ORDER BY created_at DESC
 `
 
+// * Posts
 func (q *Queries) GetPostsByCourse(ctx context.Context, courseUuid string) ([]FeedPost, error) {
 	rows, err := q.db.QueryContext(ctx, getPostsByCourse, courseUuid)
 	if err != nil {

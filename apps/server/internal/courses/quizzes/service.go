@@ -522,3 +522,13 @@ func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequ
 	return &outcome, nil
 
 }
+
+func (s *Service) GetAnswersOfQuiz(quizId string, ctx context.Context) ([]db.Answer, error) {
+
+	answers, err := s.q.GetAnswersOfQuiz(ctx, quizId)
+	if err != nil {
+		return nil, err
+	}
+
+	return answers, nil
+}
