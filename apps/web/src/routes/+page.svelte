@@ -19,7 +19,7 @@
 		<div class="mx-auto max-w-6xl">
 			<div class="max-w-3xl space-y-6">
 				<h1 class="text-6xl font-black tracking-tighter uppercase md:text-8xl" in:fly={{ y: 20 }}>
-					Tour de <span class="text-p-green">App!</span>
+					Think different <span class="text-p-green">Academy</span>
 				</h1>
 
 				{#await dataPromise}
