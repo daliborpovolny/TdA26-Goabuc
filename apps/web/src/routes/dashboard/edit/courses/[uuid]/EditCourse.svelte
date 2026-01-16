@@ -101,7 +101,7 @@
 				></textarea>
 			</div>
 
-			<div class="pt-2">
+			<div class="pt-2 space-y-2 space-x-3">
 				<button
 					type="submit"
 					disabled={isSaving}
@@ -114,7 +114,7 @@
 					type="button"
 					onclick={deleteCourse}
 					disabled={isSaving}
-					class=" group relative ml-3 cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-red-400 px-8 py-3 text-xl font-black tracking-widest text-white uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
+					class=" group relative cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-red-400 px-8 py-3 text-xl font-black tracking-widest text-white uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
 				>
 					{isSaving ? 'Deleting...' : 'Delete'}
 				</button>

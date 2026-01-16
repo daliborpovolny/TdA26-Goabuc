@@ -133,11 +133,11 @@
 							</div>
 						{:else if activeSection === 'quizzes'}
 							<div in:fade class="space-y-6">
-								<div class="flex items-center justify-between">
+								<div class="flex items-center justify-between space-x-1">
 									<h2 class="text-3xl font-black text-p-blue uppercase">Examinations</h2>
 									<button
 										onclick={() => (showCreateQuiz = !showCreateQuiz)}
-										class="rounded-lg border-2 border-s-black bg-p-green px-4 py-2 font-bold uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:shadow-none"
+										class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-4 py-2 font-bold uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:shadow-none"
 									>
 										{showCreateQuiz ? 'Cancel' : '+ New Quiz'}
 									</button>

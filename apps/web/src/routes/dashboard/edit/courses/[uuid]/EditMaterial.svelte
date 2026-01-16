@@ -139,15 +139,17 @@
 					></textarea>
 				</div>
 
-				<div class="flex items-center justify-between border-t-2 border-gray-200 pt-4">
+				<div class="flex items-center justify-between border-t-2 border-gray-200 pt-4 gap-3">
 					<div>
 						{#if material.type === 'file'}
 							<a
-								class="text-sm font-bold text-p-blue underline hover:text-s-2"
+								class="text-md font-bold text-p-blue hover:text-s-2"
 								href={material.fileUrl}
 								target="_blank"
 							>
-								👁️ View Current File
+								<div class="bg-p-blue rounded-lg border-s-black border-2 p-2 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none">
+									👁️
+								</div>
 							</a>
 						{/if}
 					</div>
