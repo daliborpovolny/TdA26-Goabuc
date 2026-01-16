@@ -104,7 +104,7 @@
 				{:else}
 					<div class="col-span-full py-20 text-center">
 						<p class="text-3xl font-black uppercase text-gray-300 italic">
-							No courses match "{searchTerm}"
+							{searchTerm === '' ? 'No Courses Exist Yet' : 'No courses match ' + searchTerm}
 						</p>
 					</div>
 				{/each}

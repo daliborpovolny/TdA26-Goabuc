@@ -60,7 +60,6 @@
 				<span class="text-[10px] font-bold text-gray-400">{post.createdAt}</span>
 			</div>
 		</div>
-		min-h-20
 
 		{#if isManual}
 			<textarea

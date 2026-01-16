@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import type { Course } from '$lib/types';
 	import { fade } from 'svelte/transition';
 
@@ -22,6 +23,26 @@
 			});
 
 			if (res.ok) {
+				onchange();
+				showSuccess = true;
+				setTimeout(() => (showSuccess = false), 2000);
+			}
+		} finally {
+			isSaving = false;
+		}
+	}
+
+	async function deleteCourse(e: Event) {
+		e.preventDefault();
+		isSaving = true;
+
+		try {
+			const res = await fetch(`/api/courses/${course.uuid}`, {
+				method: 'DELETE'
+			});
+
+			if (res.ok) {
+				goto('/dashboard');
 				onchange();
 				showSuccess = true;
 				setTimeout(() => (showSuccess = false), 2000);
@@ -90,6 +111,18 @@
 						class="absolute inset-0 translate-x-1 translate-y-1 bg-s-black opacity-0 group-hover:opacity-10"
 					></div>
 					{isSaving ? 'Syncing...' : 'Save Settings'}
+				</button>
+
+				<button
+					type="button"
+					onclick={deleteCourse}
+					disabled={isSaving}
+					class="group relative ml-3 overflow-hidden rounded-xl border-4 border-s-black bg-red-400 px-8 py-3 text-xl font-black tracking-widest text-white uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
+				>
+					<div
+						class="absolute inset-0 translate-x-1 translate-y-1 bg-s-black opacity-0 group-hover:opacity-10"
+					></div>
+					{isSaving ? 'Deleting...' : 'Delete'}
 				</button>
 			</div>
 		</form>
