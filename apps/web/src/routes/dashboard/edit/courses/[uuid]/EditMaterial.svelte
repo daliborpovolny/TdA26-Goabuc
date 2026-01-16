@@ -58,7 +58,7 @@
 >
 	<button
 		type="button"
-		class="flex w-full items-center justify-between p-4 text-left hover:bg-p-green/10"
+		class="flex w-full cursor-pointer items-center justify-between p-4 text-left hover:bg-p-green/10"
 		onclick={() => (collapsed = !collapsed)}
 	>
 		<div class="flex items-center gap-3">
@@ -156,7 +156,7 @@
 						<button
 							type="button"
 							onclick={remove}
-							class="rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+							class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
 						>
 							Delete
 						</button>
@@ -164,7 +164,7 @@
 						<button
 							type="submit"
 							disabled={isSaving}
-							class="rounded-lg border-2 border-s-black bg-p-green px-6 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50"
+							class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-6 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50"
 						>
 							{isSaving ? 'Saving...' : 'Save Changes'}
 						</button>

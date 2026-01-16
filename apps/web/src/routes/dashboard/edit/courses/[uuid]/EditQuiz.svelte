@@ -108,7 +108,7 @@
 	{#if props.edit}
 		<button
 			type="button"
-			class="flex w-full items-center justify-between bg-white p-4 text-left hover:bg-p-green/10"
+			class="flex w-full cursor-pointer items-center justify-between bg-white p-4 text-left hover:bg-p-green/10"
 			onclick={() => (collapsed = !collapsed)}
 		>
 			<div class="flex items-center gap-3">
@@ -153,7 +153,7 @@
 								<button
 									type="button"
 									onclick={() => removeQuestion(qi)}
-									class="text-xs font-bold text-red-500 hover:underline"
+									class="cursor-pointer text-xs font-bold text-red-500 hover:underline"
 								>
 									Remove Question
 								</button>
@@ -187,7 +187,7 @@
 													name={`correct-${qi}`}
 													checked={q.correctIndex === oi}
 													onchange={() => (q.correctIndex = oi)}
-													class="h-5 w-5 accent-p-green"
+													class="h-5 w-5 cursor-pointer accent-p-green"
 												/>
 											{:else}
 												<input
@@ -197,14 +197,14 @@
 														if (e.currentTarget.checked) q.correctIndices.push(oi);
 														else q.correctIndices = q.correctIndices.filter((i) => i !== oi);
 													}}
-													class="h-5 w-5 accent-p-green"
+													class="h-5 w-5 cursor-pointer accent-p-green"
 												/>
 											{/if}
 										</div>
 										<button
 											type="button"
 											onclick={() => removeOption(q, oi)}
-											class="px-1 font-bold text-red-500 opacity-0 group-hover:opacity-100"
+											class="cursor-pointer px-1 font-bold text-red-500 opacity-0 group-hover:opacity-100"
 											>✕</button
 										>
 									</div>
@@ -213,7 +213,7 @@
 								<button
 									type="button"
 									onclick={() => addOption(q)}
-									class="text-xs font-black tracking-widest text-p-blue uppercase hover:text-s-2"
+									class="cursor-pointer text-xs font-black tracking-widest text-p-blue uppercase hover:text-s-2"
 								>
 									+ Add Option
 								</button>
@@ -226,14 +226,14 @@
 					<button
 						type="button"
 						onclick={() => addQuestion('singleChoice')}
-						class="rounded-lg border-2 border-s-black bg-s-3 px-4 py-2 text-xs font-black text-white uppercase hover:bg-s-2"
+						class="cursor-pointer rounded-lg border-2 border-s-black bg-s-3 px-4 py-2 text-xs font-black text-white uppercase hover:bg-s-2"
 					>
 						+ Single Choice
 					</button>
 					<button
 						type="button"
 						onclick={() => addQuestion('multipleChoice')}
-						class="rounded-lg border-2 border-s-black bg-s-3 px-4 py-2 text-xs font-black text-white uppercase hover:bg-s-2"
+						class="cursor-pointer rounded-lg border-2 border-s-black bg-s-3 px-4 py-2 text-xs font-black text-white uppercase hover:bg-s-2"
 					>
 						+ Multiple Choice
 					</button>
@@ -243,7 +243,7 @@
 							<button
 								type="button"
 								onclick={deleteQuiz}
-								class="rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black text-white uppercase"
+								class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
 							>
 								Delete Quiz
 							</button>
@@ -251,7 +251,7 @@
 						<button
 							type="submit"
 							disabled={isSaving}
-							class="rounded-lg border-2 border-s-black bg-p-green px-8 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+							class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-8 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
 						>
 							{isSaving ? 'Saving...' : 'Save Quiz'}
 						</button>

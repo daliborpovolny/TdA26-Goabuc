@@ -80,7 +80,7 @@
 				<a
 					href="/courses/{course.uuid}"
 					target="_blank"
-					class="rounded-lg border-2 border-s-black bg-p-green px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:shadow-none"
+					class="rounded-lg border-2 border-s-black bg-p-green px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition hover:shadow-none"
 				>
 					View 👁️
 				</a>
@@ -91,7 +91,7 @@
 					{#each [{ id: 'general', label: 'General Info', icon: '📝' }, { id: 'materials', label: 'Materials', icon: '📁' }, { id: 'quizzes', label: 'Quizzes', icon: '📝' }, { id: 'feed', label: 'Course Feed', icon: '💬' }] as section}
 						<button
 							onclick={() => (activeSection = section.id)}
-							class="flex w-full items-center gap-3 rounded-xl border-2 border-s-black p-4 text-left font-black tracking-tight uppercase transition-all
+							class="flex w-full cursor-pointer items-center gap-3 rounded-xl border-2 border-s-black p-4 text-left font-black tracking-tight uppercase transition-all
                             {activeSection === section.id
 								? 'translate-x-1 bg-p-blue text-white shadow-none'
 								: 'bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green'}"

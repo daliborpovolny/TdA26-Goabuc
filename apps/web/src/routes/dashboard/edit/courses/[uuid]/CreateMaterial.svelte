@@ -41,7 +41,7 @@
 	<div class="flex flex-wrap gap-4">
 		<button
 			onclick={() => (materialType = materialType === 'file' ? '' : 'file')}
-			class="group relative flex items-center gap-2 rounded-xl border-4 border-s-black px-6 py-3 font-black tracking-widest uppercase transition-all
+			class="group relative flex cursor-pointer items-center gap-2 rounded-xl border-4 border-s-black px-6 py-3 font-black tracking-widest uppercase transition-all
             {materialType === 'file'
 				? 'translate-x-1 translate-y-1 bg-p-blue text-white shadow-none'
 				: 'bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green'}"
@@ -51,7 +51,7 @@
 
 		<button
 			onclick={() => (materialType = materialType === 'url' ? '' : 'url')}
-			class="group relative flex items-center gap-2 rounded-xl border-4 border-s-black px-6 py-3 font-black tracking-widest uppercase transition-all
+			class="group relative flex cursor-pointer items-center gap-2 rounded-xl border-4 border-s-black px-6 py-3 font-black tracking-widest uppercase transition-all
             {materialType === 'url'
 				? 'translate-x-1 translate-y-1 bg-p-blue text-white shadow-none'
 				: 'bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green'}"
@@ -139,7 +139,7 @@
 					<button
 						type="submit"
 						disabled={isSaving}
-						class="rounded-xl border-4 border-s-black bg-p-green px-8 py-2 text-lg font-black tracking-widest uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:opacity-50"
+						class="cursor-pointer rounded-xl border-4 border-s-black bg-p-green px-8 py-2 text-lg font-black tracking-widest uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:opacity-50"
 					>
 						{isSaving ? 'Uploading...' : 'Confirm Creation'}
 					</button>

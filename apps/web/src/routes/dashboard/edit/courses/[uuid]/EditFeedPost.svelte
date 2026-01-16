@@ -74,7 +74,7 @@
 					<button
 						transition:fade
 						disabled={isSaving}
-						class="rounded-lg border-2 border-s-black bg-p-green px-3 py-1 text-xs font-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+						class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-3 py-1 text-xs font-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
 					>
 						{isSaving ? '...' : 'Save Edit'}
 					</button>
@@ -83,7 +83,7 @@
 				<button
 					type="button"
 					onclick={deleteFeedPost}
-					class="rounded-lg border-2 border-s-black bg-red-500 px-3 py-1 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+					class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-3 py-1 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition active:translate-y-0.5 active:shadow-none"
 				>
 					Delete
 				</button>

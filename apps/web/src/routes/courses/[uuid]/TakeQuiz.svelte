@@ -69,11 +69,11 @@
 </script>
 
 <div
-	class="overflow-hidden rounded-xl border-2 border-s-black bg-p-green shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+	class="overflow-hidden rounded-xl border-2 border-s-black bg-p-green shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] transition-all"
 >
 	<button
 		type="button"
-		class="flex w-full items-center justify-between p-4 text-left hover:bg-black/5"
+		class="flex w-full cursor-pointer items-center justify-between p-4 text-left hover:bg-black/5"
 		onclick={() => (collapsed = !collapsed)}
 	>
 		<div class="flex items-center gap-3">

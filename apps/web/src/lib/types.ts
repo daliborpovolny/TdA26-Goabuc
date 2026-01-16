@@ -109,13 +109,12 @@ export interface FeedPost {
 //     FOREIGN KEY (quiz_uuid) REFERENCES quizz(uuid) ON DELETE CASCADE
 // );
 
-
 export interface QuizOutcome {
 	quiz_uuid: string;
 	comment: string;
 
 	score: number;
-	max_score: number
+	max_score: number;
 
 	user_id: number;
 	attempt_number: number;

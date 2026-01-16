@@ -87,7 +87,7 @@
 
 			<button
 				type="submit"
-				class="group relative mt-4 overflow-hidden rounded-xl border-4 border-s-black bg-p-green py-4 text-2xl font-black tracking-widest text-s-black uppercase transition-all hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 disabled:opacity-50"
+				class="group relative mt-4 cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-p-green py-4 text-2xl font-black tracking-widest text-s-black uppercase transition-all hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 disabled:opacity-50"
 			>
 				<span>Enter Academy</span>
 			</button>

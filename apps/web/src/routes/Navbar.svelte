@@ -35,7 +35,7 @@
 		</div>
 
 		<div
-			class={`flex flex-col items-center md:flex md:flex-1 md:flex-row md:justify-start ${show ? 'flex' : 'hidden'}`}
+			class={`flex flex-col items-center space-x-1 md:flex md:flex-1 md:flex-row md:justify-start ${show ? 'flex' : 'hidden'}`}
 			transition:slide={{ duration: 300 }}
 		>
 			<NavbarLink name="Home" url="/" onclick={closeMenu} />
@@ -50,12 +50,12 @@
 						auth.logout();
 						closeMenu();
 					}}
-					class="w-full px-6 py-4 text-left font-black tracking-widest text-red-300 uppercase hover:bg-red-500 hover:text-white md:ml-auto md:w-auto md:py-2 md:text-sm"
+					class="w-full cursor-pointer px-6 py-4 text-left font-black tracking-widest text-red-300 uppercase hover:bg-red-500 hover:text-white md:ml-auto md:w-auto md:py-2 md:text-sm"
 				>
 					Logout
 				</button>
 			{:else}
-				<div class="flex w-full flex-col md:ml-auto md:w-auto md:flex-row">
+				<div class="flex w-full flex-col space-x-1 md:ml-auto md:w-auto md:flex-row">
 					<NavbarLink name="Login" url="/login" onclick={closeMenu} />
 					<NavbarLink name="Register" url="/register" onclick={closeMenu} />
 				</div>

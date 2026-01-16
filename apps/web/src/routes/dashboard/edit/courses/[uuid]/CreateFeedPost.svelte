@@ -38,7 +38,7 @@
 	<div class="flex items-center gap-4">
 		<button
 			type="button"
-			class="group relative flex items-center gap-2 rounded-xl border-4 border-s-black px-6 py-3 font-black tracking-widest uppercase transition-all
+			class="group relative flex cursor-pointer items-center gap-2 rounded-xl border-4 border-s-black px-6 py-3 font-black tracking-widest uppercase transition-all
             {collapsed
 				? 'bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green'
 				: 'translate-x-1 translate-y-1 bg-p-blue text-white shadow-none'}"
@@ -78,11 +78,8 @@
 						<button
 							type="submit"
 							disabled={isSaving}
-							class="group relative overflow-hidden rounded-xl border-4 border-s-black bg-p-green px-8 py-3 text-xl font-black tracking-widest text-s-black uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
+							class="group relative cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-p-green px-8 py-3 text-xl font-black tracking-widest text-s-black uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
 						>
-							<div
-								class="absolute inset-0 translate-x-1 translate-y-1 bg-s-black opacity-0 group-hover:opacity-10"
-							></div>
 							{isSaving ? 'Sending...' : 'Post Update →'}
 						</button>
 					</div>

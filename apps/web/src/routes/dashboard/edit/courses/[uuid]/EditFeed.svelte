@@ -48,7 +48,7 @@
 		<button
 			onclick={() => (collapsed = !collapsed)}
 			type="button"
-			class="flex items-center gap-3 text-3xl font-black tracking-tighter uppercase hover:text-p-blue"
+			class="flex cursor-pointer items-center gap-3 text-3xl font-black tracking-tighter uppercase hover:text-p-blue"
 		>
 			<span>News Feed</span>
 			<span class="text-sm transition-transform {collapsed ? '' : 'rotate-180'}">▼</span>

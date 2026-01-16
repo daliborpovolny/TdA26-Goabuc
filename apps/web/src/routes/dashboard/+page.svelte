@@ -51,13 +51,13 @@
 			{:then courses}
 				<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 					{#each courses as course}
-						<div class="group relative">
+						<div class="group relative transition hover:-translate-x-1 hover:-translate-y-1">
 							<div
 								class="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-s-black"
 							></div>
 
 							<div
-								class="relative flex flex-col border-4 border-s-black bg-white p-6 transition-all group-hover:bg-p-green"
+								class="relative flex cursor-pointer flex-col border-4 border-s-black bg-white p-6 transition-all group-hover:bg-p-green"
 							>
 								<div class="mb-4 flex justify-between">
 									<span

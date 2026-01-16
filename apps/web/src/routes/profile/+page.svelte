@@ -47,7 +47,7 @@
 					</div>
 
 					<button
-						class="mt-4 w-full rounded-xl border-4 border-s-black bg-s-black py-4 text-sm font-black text-white uppercase transition-all hover:bg-p-green hover:text-s-black active:translate-y-1 active:shadow-none"
+						class="mt-4 w-full cursor-pointer rounded-xl border-4 border-s-black bg-s-black py-4 text-sm font-black text-white uppercase transition-all hover:bg-p-green hover:text-s-black active:translate-y-1 active:shadow-none"
 					>
 						Edit Account Settings
 					</button>

@@ -39,7 +39,7 @@
 					{#each ['materials', 'quizzes', 'feed'] as tab}
 						<button
 							onclick={() => (activeTab = tab)}
-							class="flex-1 rounded-lg py-2 text-lg font-bold capitalize transition-all
+							class="flex-1 cursor-pointer rounded-lg py-2 text-lg font-bold capitalize transition-all
                             {activeTab === tab
 								? 'bg-p-green text-s-black'
 								: 'text-s-white hover:bg-p-blue'}"
@@ -54,7 +54,7 @@
 						<div class="space-y-3">
 							<h2 class="text-2xl font-bold">Course Materials</h2>
 							{#if course.materials?.length}
-								<div class="space-y-2 rounded-xl bg-p-blue p-2">
+								<div class="space-y-2 rounded-xl bg-p-blue p-2 transition-all">
 									{#each course.materials as material}
 										<ViewMaterial {material} />
 									{/each}

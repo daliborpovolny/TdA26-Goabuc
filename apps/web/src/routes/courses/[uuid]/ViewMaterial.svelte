@@ -20,7 +20,7 @@
 	class="overflow-hidden rounded-xl border-2 border-s-black bg-p-green shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] transition-all"
 >
 	<button
-		class="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-black/5"
+		class="flex w-full cursor-pointer items-center justify-between p-4 text-left transition-colors hover:bg-black/5"
 		type="button"
 		onclick={() => (collapsed = !collapsed)}
 	>
