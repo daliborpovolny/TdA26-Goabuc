@@ -139,7 +139,7 @@
 					></textarea>
 				</div>
 
-				<div class="flex items-center justify-between border-t-2 border-gray-200 pt-4 gap-3">
+				<div class="flex items-center justify-between gap-3 border-t-2 border-gray-200 pt-4">
 					<div>
 						{#if material.type === 'file'}
 							<a
@@ -147,7 +147,9 @@
 								href={material.fileUrl}
 								target="_blank"
 							>
-								<div class="bg-p-blue rounded-lg border-s-black border-2 p-2 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none">
+								<div
+									class="rounded-lg border-2 border-s-black bg-p-blue p-2 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+								>
 									👁️
 								</div>
 							</a>

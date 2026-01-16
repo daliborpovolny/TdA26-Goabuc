@@ -6,7 +6,7 @@
 	let outcomes = $state<QuizOutcome[]>([]);
 	let loading = $state(true);
 
-	$inspect(outcomes)
+	$inspect(outcomes);
 
 	async function loadOutcomes() {
 		loading = true;
@@ -45,7 +45,7 @@
 		</div>
 		<button
 			onclick={loadOutcomes}
-			class="rounded-xl border-2 border-s-black bg-white px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green active:translate-y-0.5 active:shadow-none"
+			class="cursor-pointer rounded-xl border-2 border-s-black bg-white px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green active:translate-y-0.5 active:shadow-none"
 		>
 			🔄 Refresh
 		</button>
@@ -63,7 +63,7 @@
 		<div class="relative">
 			<div class="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-s-black"></div>
 
-			<div class="relative overflow-hidden rounded-2xl border-4 border-s-black bg-white">
+			<div class="relative overflow-scroll rounded-2xl border-4 border-s-black bg-white">
 				<table class="w-full border-collapse text-left">
 					<thead class="bg-s-black text-sm tracking-widest text-white uppercase">
 						<tr>

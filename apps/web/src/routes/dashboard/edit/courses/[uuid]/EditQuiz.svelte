@@ -179,7 +179,7 @@
 												required
 												placeholder={`Option ${oi + 1}`}
 												bind:value={q.options[oi]}
-												class="flex-1 bg-transparent font-medium focus:outline-none"
+												class="w-full flex-1 bg-transparent font-medium focus:outline-none"
 											/>
 
 											{#if q.type === 'singleChoice'}
@@ -205,7 +205,7 @@
 										<button
 											type="button"
 											onclick={() => removeOption(q, oi)}
-											class="cursor-pointer px-1 font-bold text-red-500 opacity-0 group-hover:opacity-100"
+											class="cursor-pointer px-1 font-bold text-red-500 opacity-50 group-hover:opacity-100"
 											>✕</button
 										>
 									</div>
@@ -239,14 +239,13 @@
 						+ Multiple Choice
 					</button>
 
-					<div class="ml-auto flex gap-3">
-
+					<div class="ml-auto flex-1 gap-3 space-y-1">
 						<a
-							href={"/dashboard/edit/courses/" + page.params.uuid + "/quizzes/" + quiz.uuid}
+							href={'/dashboard/edit/courses/' + page.params.uuid + '/quizzes/' + quiz.uuid}
 							class="rounded-lg border-2 border-s-black bg-s-2 px-8 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
 						>
 							Results
-					</a>
+						</a>
 
 						<!-- <button
 							type="submit"

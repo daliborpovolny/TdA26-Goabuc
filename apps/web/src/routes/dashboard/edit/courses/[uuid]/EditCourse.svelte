@@ -101,7 +101,7 @@
 				></textarea>
 			</div>
 
-			<div class="pt-2 space-y-2 space-x-3">
+			<div class="space-y-2 space-x-3 pt-2">
 				<button
 					type="submit"
 					disabled={isSaving}
