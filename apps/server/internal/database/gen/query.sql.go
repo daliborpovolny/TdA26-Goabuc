@@ -349,7 +349,7 @@ func (q *Queries) DeleteQuizz(ctx context.Context, uuid string) (sql.Result, err
 
 const getAnswersOfQuiz = `-- name: GetAnswersOfQuiz :many
 
-SELECT quiz_uuid, comment, score, max_score, user_id, attempt_number, submitted_at, "foreign" FROM answer WHERE quiz_uuid = ?
+SELECT quiz_uuid, comment, score, max_score, user_id, attempt_number, submitted_at, "foreign" FROM answer WHERE quiz_uuid = ? ORDER BY answer.submitted_at DESC
 `
 
 // TODO RETURN ANSWERS AND SHOW THEM ON FRONTEND
@@ -698,7 +698,6 @@ INSERT INTO answer (
                     AND answer.user_id = ?5
         )
     END,
-
     ?6
 ) RETURNING quiz_uuid, comment, score, max_score, user_id, attempt_number, submitted_at, "foreign"
 `

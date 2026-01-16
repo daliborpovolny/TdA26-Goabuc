@@ -119,5 +119,5 @@ export interface QuizOutcome {
 	user_id: number;
 	attempt_number: number;
 
-	submitted_at: number;
+	submitted_at: string;
 }

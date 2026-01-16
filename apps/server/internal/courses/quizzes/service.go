@@ -504,11 +504,12 @@ func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequ
 	}
 
 	_, err = s.q.InsertAnswer(ctx, db.InsertAnswerParams{
-		QuizUuid: quizId,
-		Comment:  sql.NullString{String: answers.Comment, Valid: answers.Comment != ""},
-		Score:    int64(outcome.Score),
-		MaxScore: int64(outcome.MaxScore),
-		UserID:   userID,
+		QuizUuid:    quizId,
+		Comment:     sql.NullString{String: answers.Comment, Valid: answers.Comment != ""},
+		Score:       int64(outcome.Score),
+		MaxScore:    int64(outcome.MaxScore),
+		UserID:      userID,
+		SubmittedAt: now,
 	})
 	if err != nil {
 		return nil, err

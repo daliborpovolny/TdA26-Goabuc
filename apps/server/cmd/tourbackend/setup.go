@@ -168,6 +168,7 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		CourseId:    course3.Uuid,
 		MatType:     "url",
 		Url:         "https://www.youtube.com/watch?v=Ph8Vag9VxRU",
+		Name:        "ZEBRAAAS in popular culture",
 		Description: "What will you learn",
 	}, uuid.NewString(), ctx)
 
@@ -175,6 +176,7 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		CourseId:    course3.Uuid,
 		MatType:     "url",
 		Url:         "https://www.youtube.com/watch?v=grjZPfCH6bs",
+		Name:        "eating in popular culture",
 		Description: "What i wish i had for dinner today",
 	}, uuid.NewString(), ctx)
 

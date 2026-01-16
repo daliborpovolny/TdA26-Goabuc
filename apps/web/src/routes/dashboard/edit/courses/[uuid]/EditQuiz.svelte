@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import type { Quiz, Question } from '$lib/types';
 	import { fade, slide } from 'svelte/transition';
 
@@ -239,6 +240,22 @@
 					</button>
 
 					<div class="ml-auto flex gap-3">
+
+						<a
+							href={"/dashboard/edit/courses/" + page.params.uuid + "/quizzes/" + quiz.uuid}
+							class="rounded-lg border-2 border-s-black bg-s-2 px-8 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+						>
+							Results
+					</a>
+
+						<!-- <button
+							type="submit"
+							disabled={isSaving}
+							class="rounded-lg border-2 border-s-black bg-p-green px-8 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+						>
+							{isSaving ? 'Saving...' : 'Save Quiz'}
+						</button> -->
+
 						{#if props.edit}
 							<button
 								type="button"
