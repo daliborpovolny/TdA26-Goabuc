@@ -209,14 +209,13 @@ INSERT INTO answer (
                     AND answer.user_id = sqlc.narg(user_id)
         )
     END,
-
     sqlc.arg(submitted_at)
 ) RETURNING *;
 
 -- TODO RETURN ANSWERS AND SHOW THEM ON FRONTEND
 
 -- name: GetAnswersOfQuiz :many
-SELECT * FROM answer WHERE quiz_uuid = ?;
+SELECT * FROM answer WHERE quiz_uuid = ? ORDER BY answer.submitted_at DESC;
 
 --* Posts
 
