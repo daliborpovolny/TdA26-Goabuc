@@ -523,12 +523,43 @@ func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequ
 
 }
 
-func (s *Service) GetAnswersOfQuiz(quizId string, ctx context.Context) ([]db.Answer, error) {
+type Outcome struct {
+	QuizUuid      string `json:"quiz_uuid"`
+	Comment       string `json:"comment"`
+	Score         int    `json:"score"`
+	MaxScore      int    `json:"max_score"`
+	UserID        int    `json:"user_id"`
+	AttemptNumber int    `json:"attempt_number"`
+	SubmittedAt   string `json:"submitted_at"`
+}
+
+func (s *Service) GetAnswersOfQuiz(quizId string, ctx context.Context) ([]Outcome, error) {
 
 	answers, err := s.q.GetAnswersOfQuiz(ctx, quizId)
 	if err != nil {
 		return nil, err
 	}
 
-	return answers, nil
+	outcomes := make([]Outcome, 0, len(answers))
+	for _, an := range answers {
+		o := Outcome{
+			QuizUuid:      an.QuizUuid,
+			Score:         int(an.Score),
+			MaxScore:      int(an.MaxScore),
+			AttemptNumber: int(an.AttemptNumber),
+			SubmittedAt:   utils.UnixToIso(an.SubmittedAt),
+		}
+
+		if an.Comment.Valid {
+			o.Comment = an.Comment.String
+		}
+
+		if an.UserID.Valid {
+			o.UserID = int(an.UserID.Int64)
+		}
+
+		outcomes = append(outcomes, o)
+	}
+
+	return outcomes, nil
 }

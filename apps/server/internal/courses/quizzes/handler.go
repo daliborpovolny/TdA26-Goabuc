@@ -203,6 +203,8 @@ func (h *Handler) SubmitQuizAnswers(c echo.Context) error {
 func (h *Handler) GetAnswersOfQuiz(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
+	fmt.Println("in the handler")
+
 	quizId := r.Echo.Param("quizId")
 	if quizId == "" {
 		return r.Error(http.StatusBadRequest, "Quizid must be set")
@@ -212,6 +214,8 @@ func (h *Handler) GetAnswersOfQuiz(c echo.Context) error {
 	if err != nil {
 		return r.ServerError(err)
 	}
+
+	fmt.Println(answers)
 
 	return c.JSON(http.StatusOK, answers)
 }
