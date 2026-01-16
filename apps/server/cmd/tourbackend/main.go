@@ -124,6 +124,8 @@ func main() {
 	quizzes.POST("", quizzesHandler.CreateQuiz)
 
 	quizzes.GET("/:quizId", quizzesHandler.GetQuiz)
+	quizzes.GET("/:quizId/answers", quizzesHandler.GetAnswersOfQuiz)
+
 	quizzes.PUT("/:quizId", quizzesHandler.UpdateQuiz)
 	quizzes.DELETE("/:quizId", quizzesHandler.DeleteQuiz)
 
