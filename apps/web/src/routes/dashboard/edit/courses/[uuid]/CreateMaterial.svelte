@@ -117,6 +117,7 @@
 								type="file"
 								name="file"
 								required
+								accept=".pdf,.png,.jpg,.jpeg,.docx,.txt,.mp4,.mp3,.gif"
 								class="w-full cursor-pointer rounded-xl border-2 border-dashed border-s-black p-2 font-bold file:mr-4 file:rounded-lg file:border-0 file:bg-s-black file:px-4 file:py-1 file:text-sm file:font-semibold file:text-white"
 							/>
 						</div>
