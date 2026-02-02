@@ -42,7 +42,7 @@
 
 		<form
 			onsubmit={handleLogin}
-			class="relative flex flex-col space-y-6 rounded-2xl border-4 border-s-black bg-p-blue p-8 shadow-none"
+			class="relative flex flex-col space-y-6 border-4 border-s-black bg-p-blue p-8 shadow-none"
 		>
 			<div class="text-center">
 				<h2 class="text-5xl font-black tracking-tighter text-white uppercase">Login</h2>
@@ -87,7 +87,7 @@
 
 			<button
 				type="submit"
-				class="group relative mt-4 cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-p-green py-4 text-2xl font-black tracking-widest text-s-black uppercase transition-all hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 disabled:opacity-50"
+				class="group relative mt-4 cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-p-green py-4 text-2xl font-black tracking-widest text-s-black uppercase shadow-[5px_5px_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-1 active:translate-y-1 disabled:opacity-50"
 			>
 				<span>Enter Academy</span>
 			</button>
@@ -96,7 +96,7 @@
 				New here?
 				<a
 					href="/register"
-					class="text-p-green underline decoration-4 underline-offset-4 hover:text-white"
+					class="text-p-green underline decoration-2 underline-offset-2 hover:text-white"
 				>
 					Create Account
 				</a>

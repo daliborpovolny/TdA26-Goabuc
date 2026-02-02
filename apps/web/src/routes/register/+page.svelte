@@ -42,7 +42,7 @@
 
 		<form
 			onsubmit={handleRegister}
-			class="relative flex flex-col space-y-6 rounded-2xl border-4 border-s-black bg-p-blue p-6 shadow-none md:p-10"
+			class="relative flex flex-col space-y-6 border-4 border-s-black bg-p-blue p-6 shadow-none md:p-10"
 		>
 			<div class="text-center">
 				<h2 class="text-5xl font-black tracking-tighter text-white uppercase md:text-6xl">
@@ -116,7 +116,7 @@
 			<button
 				type="submit"
 				disabled={!!registerPromise}
-				class="group relative mt-4 cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-p-green py-4 text-2xl font-black tracking-widest text-s-black uppercase transition-all hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 disabled:opacity-50"
+				class="group relative mt-4 cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-p-green py-4 text-2xl font-black tracking-widest text-s-black uppercase shadow-[5px_5px_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-1 active:translate-y-1 disabled:opacity-50"
 			>
 				{#if !registerPromise}
 					<span>Start Learning</span>

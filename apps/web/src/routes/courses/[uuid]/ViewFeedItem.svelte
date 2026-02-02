@@ -5,7 +5,7 @@
 </script>
 
 <div
-	class="group relative flex flex-col gap-2 rounded-xl border-2 border-s-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+	class="group relative flex flex-col gap-2 rounded-xl border-2 border-s-black bg-white p-4 shadow-[4px_4px_0px_rgba(26,26,26,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
 >
 	<div class="flex items-center justify-between">
 		<span
