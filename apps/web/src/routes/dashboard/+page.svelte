@@ -57,7 +57,7 @@
 							></div>
 
 							<div
-								class="relative flex cursor-pointer flex-col border-4 border-s-black bg-white p-6 transition-all group-hover:bg-p-green"
+								class="relative flex flex-col border-4 border-s-black bg-white p-6 transition-all group-hover:bg-p-green"
 							>
 								<div class="mb-4 flex justify-between">
 									<span
