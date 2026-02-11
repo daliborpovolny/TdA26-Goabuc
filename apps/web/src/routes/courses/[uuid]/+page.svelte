@@ -48,6 +48,21 @@
 						</button>
 					{/each}
 				</div>
+					
+				<!--div class="mt-2 min-h-[400px] flex justify-center">
+					<div class="space-y-3">
+							<h2 class="text-2xl font-bold">Course Materials</h2>
+							{#if course.materials?.length}
+								<div class="space-y-2 rounded-xl bg-p-blue p-2 transition-all">
+									{#each course.materials as material}
+										<ViewMaterial {material} />
+									{/each}
+								</div>
+							{:else}
+								<p class="text-gray-500 italic">No materials available yet.</p>
+							{/if}
+						</div>
+				</div-->
 
 				<div class="mt-2 min-h-[400px]">
 					{#if activeTab === 'materials'}
