@@ -41,9 +41,7 @@
 							<button
 								onclick={() => (activeTab = tab)}
 								class="flex-1 cursor-pointer rounded-lg py-2 text-lg font-bold capitalize transition-all
-								{activeTab === tab
-									? 'bg-p-green text-s-black'
-									: 'text-s-white hover:bg-p-blue'}"
+								{activeTab === tab ? 'bg-p-green text-s-black' : 'text-s-white hover:bg-p-blue'}"
 							>
 								{tab}
 							</button>
@@ -52,35 +50,35 @@
 				{/if}
 
 				{#if screen.availWidth > 1080}
-					<div class="mt-2 min-h-[400px] flex justify-center space-x-4">
-						<div class="space-y-3 w-1/3">
-								<h2 class="text-2xl text-center font-bold">Course Materials</h2>
-								{#if course.materials?.length}
-									<div class="space-y-2 rounded-xl bg-p-blue p-2 transition-all">
-										{#each course.materials as material}
-											<ViewMaterial {material} />
-										{/each}
-									</div>
-								{:else}
-									<p class="text-gray-500 italic">No materials available yet.</p>
-								{/if}
-							</div>
-							<div class="space-y-3 w-1/3">
-								<h2 class="text-2xl font-bold text-center">Available Quizzes</h2>
-								{#if course.quizzes?.length}
-									<div class="space-y-2 rounded-xl bg-p-blue p-2">
-										{#each course.quizzes as quiz}
-											<TakeQuiz {quiz} courseId={course.uuid} />
-										{/each}
-									</div>
-								{:else}
-									<p class="text-gray-500 italic">No quizzes assigned to this course.</p>
-								{/if}
-							</div>
-							<div class="space-y-3 w-1/3">
-								<h2 class="text-2xl font-bold text-center">News Feed</h2>
-								<ViewFeed courseId={course.uuid} />
-							</div>
+					<div class="mt-2 flex min-h-[400px] justify-center space-x-4">
+						<div class="w-1/3 space-y-3">
+							<h2 class="text-center text-2xl font-bold">Course Materials</h2>
+							{#if course.materials?.length}
+								<div class="space-y-2 rounded-xl bg-p-blue p-2 transition-all">
+									{#each course.materials as material}
+										<ViewMaterial {material} />
+									{/each}
+								</div>
+							{:else}
+								<p class="text-gray-500 italic">No materials available yet.</p>
+							{/if}
+						</div>
+						<div class="w-1/3 space-y-3">
+							<h2 class="text-center text-2xl font-bold">Available Quizzes</h2>
+							{#if course.quizzes?.length}
+								<div class="space-y-2 rounded-xl bg-p-blue p-2">
+									{#each course.quizzes as quiz}
+										<TakeQuiz {quiz} courseId={course.uuid} />
+									{/each}
+								</div>
+							{:else}
+								<p class="text-gray-500 italic">No quizzes assigned to this course.</p>
+							{/if}
+						</div>
+						<div class="w-1/3 space-y-3">
+							<h2 class="text-center text-2xl font-bold">News Feed</h2>
+							<ViewFeed courseId={course.uuid} />
+						</div>
 					</div>
 				{:else}
 					<div class="mt-2 min-h-[400px]">
@@ -94,7 +92,7 @@
 										{/each}
 									</div>
 								{:else}
-									<p class="text-gray-500 italic">No materials available yet.</p>
+									<p class="text-center text-gray-500 italic">No materials available yet.</p>
 								{/if}
 							</div>
 						{:else if activeTab === 'quizzes'}
@@ -107,7 +105,9 @@
 										{/each}
 									</div>
 								{:else}
-									<p class="text-gray-500 italic">No quizzes assigned to this course.</p>
+									<p class="text-center text-gray-500 italic">
+										No quizzes assigned to this course.
+									</p>
 								{/if}
 							</div>
 						{:else if activeTab === 'feed'}
