@@ -51,7 +51,7 @@
 
 				{#if screen.availWidth > 1080}
 					<div class="mt-2 flex min-h-[400px] justify-center space-x-4">
-						<div class="w-1/3 space-y-text-center space-y-3">
+						<div class="w-1/3 space-y-3">
 							<h2 class="text-center text-2xl font-bold">Course Materials</h2>
 							{#if course.materials?.length}
 								<div class="space-y-2 rounded-xl bg-p-blue p-2 transition-all">
