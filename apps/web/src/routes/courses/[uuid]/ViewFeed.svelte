@@ -73,7 +73,7 @@
 	});
 </script>
 
-<div class="space-y-4 p-4">
+<div class="space-y-4 px-4">
 	{#if posts.length > 0}
 		{#if !collapsed}
 			<div class="flex flex-col gap-4">
