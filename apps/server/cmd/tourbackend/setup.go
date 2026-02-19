@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"time"
 	"tourbackend/internal/courses"
 	"tourbackend/internal/courses/materials"
@@ -41,6 +42,7 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 
 	hash, err := utils.HashPassword("1234")
 	if err != nil {
+		fmt.Println("hash failed")
 		panic(err)
 	}
 
@@ -65,6 +67,7 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		UpdatedAt:   now,
 	}, ctx)
 	if err != nil {
+		fmt.Println("create course 1 failed")
 		return err
 	}
 
@@ -76,6 +79,7 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		Description: "a short video to introduce students into the topic of pottery",
 	}, uuid.NewString(), ctx)
 	if err != nil {
+		fmt.Println("create course 1 url material 1 failed")
 		return err
 	}
 
@@ -87,6 +91,7 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		Description: "a longer video  going through the history of pottery",
 	}, uuid.NewString(), ctx)
 	if err != nil {
+		fmt.Println("create course 1 url material 2 failed")
 		return err
 	}
 
@@ -114,11 +119,13 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 	}
 	_, err = qs.CreateQuiz(quiz1, course1.Uuid, ctx)
 	if err != nil {
+		fmt.Println("create course 1 quiz failed")
 		return err
 	}
 
 	_, err = fs.CreateAutomaticPost("Pottery Course Has Been Published!", course1.Uuid, ctx)
 	if err != nil {
+		fmt.Println("create course 1 automatic post failed")
 		return err
 	}
 

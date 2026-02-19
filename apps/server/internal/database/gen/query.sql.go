@@ -10,6 +10,29 @@ import (
 	"database/sql"
 )
 
+const changeModuleState = `-- name: ChangeModuleState :one
+UPDATE module
+SET state = ?
+WHERE uuid = ? RETURNING uuid, course_uuid, name, state
+`
+
+type ChangeModuleStateParams struct {
+	State string `json:"state"`
+	Uuid  string `json:"uuid"`
+}
+
+func (q *Queries) ChangeModuleState(ctx context.Context, arg ChangeModuleStateParams) (Module, error) {
+	row := q.db.QueryRowContext(ctx, changeModuleState, arg.State, arg.Uuid)
+	var i Module
+	err := row.Scan(
+		&i.Uuid,
+		&i.CourseUuid,
+		&i.Name,
+		&i.State,
+	)
+	return i, err
+}
+
 const checkCourseExists = `-- name: CheckCourseExists :one
 SELECT EXISTS (SELECT 1 FROM course WHERE uuid = ?) AS course_exists
 `
@@ -65,7 +88,7 @@ const createMaterial = `-- name: CreateMaterial :one
 INSERT INTO material (
     uuid, course_uuid, name, description, url, type, favicon_url, byte_size, mime_type, created_at, updated_at, module_uuid
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?12
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 ) RETURNING uuid, course_uuid, module_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
 `
 
@@ -114,6 +137,33 @@ func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) 
 		&i.ByteSize,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const createModule = `-- name: CreateModule :one
+
+INSERT INTO module (
+    uuid, course_uuid, state
+) VALUES (
+    ?, ?, "preparation"
+) RETURNING uuid, course_uuid, name, state
+`
+
+type CreateModuleParams struct {
+	Uuid       string `json:"uuid"`
+	CourseUuid string `json:"course_uuid"`
+}
+
+// * Module
+func (q *Queries) CreateModule(ctx context.Context, arg CreateModuleParams) (Module, error) {
+	row := q.db.QueryRowContext(ctx, createModule, arg.Uuid, arg.CourseUuid)
+	var i Module
+	err := row.Scan(
+		&i.Uuid,
+		&i.CourseUuid,
+		&i.Name,
+		&i.State,
 	)
 	return i, err
 }
@@ -211,17 +261,18 @@ const createQuizz = `-- name: CreateQuizz :one
 INSERT INTO quizz (
     uuid, course_uuid, title, attempts_count, created_at, updated_at, module_uuid
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, sqc.narg()
+    ?, ?, ?, ?, ?, ?, ?
 ) RETURNING uuid, course_uuid, module_uuid, title, attempts_count, created_at, updated_at
 `
 
 type CreateQuizzParams struct {
-	Uuid          string `json:"uuid"`
-	CourseUuid    string `json:"course_uuid"`
-	Title         string `json:"title"`
-	AttemptsCount int64  `json:"attempts_count"`
-	CreatedAt     int64  `json:"created_at"`
-	UpdatedAt     int64  `json:"updated_at"`
+	Uuid          string         `json:"uuid"`
+	CourseUuid    string         `json:"course_uuid"`
+	Title         string         `json:"title"`
+	AttemptsCount int64          `json:"attempts_count"`
+	CreatedAt     int64          `json:"created_at"`
+	UpdatedAt     int64          `json:"updated_at"`
+	ModuleUuid    sql.NullString `json:"module_uuid"`
 }
 
 // * Quizz
@@ -233,6 +284,7 @@ func (q *Queries) CreateQuizz(ctx context.Context, arg CreateQuizzParams) (Quizz
 		arg.AttemptsCount,
 		arg.CreatedAt,
 		arg.UpdatedAt,
+		arg.ModuleUuid,
 	)
 	var i Quizz
 	err := row.Scan(

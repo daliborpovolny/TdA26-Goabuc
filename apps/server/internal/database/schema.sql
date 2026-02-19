@@ -43,8 +43,11 @@ CREATE TABLE IF NOT EXISTS course (
 
 CREATE TABLE IF NOT EXISTS module (
     uuid TEXT PRIMARY KEY,
+    course_uuid TEXT NOT NULL,
     name TEXT NOT NULL,
-    state TEXT NOT NULL  -- preparation | open | closed
+    state TEXT NOT NULL,  -- preparation | open | closed
+    
+    FOREIGN KEY (course_uuid) REFERENCES course(uuid) ON DELETE CASCADE
 );
 
 

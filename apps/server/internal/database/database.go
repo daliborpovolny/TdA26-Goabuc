@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"fmt"
 	"os"
 
 	gen "tourbackend/internal/database/gen"
@@ -39,6 +40,7 @@ func Initialize(resetDB bool) (*sql.DB, *gen.Queries) {
 		if _, err := db.ExecContext(ctx, ddl); err != nil {
 			panic(err)
 		}
+		fmt.Println("Reseted db")
 	}
 
 	queries := gen.New(db)

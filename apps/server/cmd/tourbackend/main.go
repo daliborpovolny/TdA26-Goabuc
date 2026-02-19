@@ -140,6 +140,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		fmt.Println("seeded")
 	}
 
 	// Create the admin account as described in the 1. phase

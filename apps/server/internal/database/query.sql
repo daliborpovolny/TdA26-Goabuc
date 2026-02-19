@@ -55,13 +55,28 @@ SELECT * FROM course;
 -- name: CheckCourseExists :one
 SELECT EXISTS (SELECT 1 FROM course WHERE uuid = ?) AS course_exists;
 
+--* Module
+
+-- name: CreateModule :one
+INSERT INTO module (
+    uuid, course_uuid, state
+) VALUES (
+    ?, ?, "preparation"
+) RETURNING *;
+
+
+-- name: ChangeModuleState :one
+UPDATE module
+SET state = ?
+WHERE uuid = ? RETURNING *;
+
 --* Material
 
 -- name: CreateMaterial :one
 INSERT INTO material (
     uuid, course_uuid, name, description, url, type, favicon_url, byte_size, mime_type, created_at, updated_at, module_uuid
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, sqlc.narg(module_uuid)
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 ) RETURNING *;
 
 -- name: UpdateMaterial :one
@@ -94,7 +109,7 @@ WHERE uuid = sqlc.arg(uuid) RETURNING *;
 INSERT INTO quizz (
     uuid, course_uuid, title, attempts_count, created_at, updated_at, module_uuid
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, sqc.narg()
+    ?, ?, ?, ?, ?, ?, ?
 ) RETURNING *;
 
 -- name: UpdateQuizz :one

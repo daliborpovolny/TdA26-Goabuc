@@ -130,3 +130,29 @@ func (s *Service) ListAllCourses(ctx context.Context) ([]db.Course, error) {
 	}
 	return courses, nil
 }
+
+func (s *Service) CreateModule(courseId string, moduleId string, ctx context.Context) (db.Module, error) {
+
+	module, err := s.q.CreateModule(ctx, db.CreateModuleParams{
+		Uuid:       moduleId,
+		CourseUuid: courseId,
+	})
+	if err != nil {
+		return db.Module{}, err
+	}
+
+	return module, nil
+}
+
+func (s *Service) ChangeModuleState(courseId string, moduleId string, state string, ctx context.Context) (db.Module, error) {
+
+	module, err := s.q.ChangeModuleState(ctx, db.ChangeModuleStateParams{
+		State: state,
+		Uuid:  moduleId,
+	})
+	if err != nil {
+		return db.Module{}, err
+	}
+
+	return module, err
+}

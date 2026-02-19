@@ -178,7 +178,7 @@ func (h *CourseHandler) ListAllCourses(c echo.Context) error {
 
 	courses, err := h.service.ListAllCourses(r.Ctx)
 	if err != nil {
-		return r.Error(http.StatusInternalServerError, "Failed to fetch courses from the database.")
+		r.ServerError(err)
 	}
 
 	formattedCourses := make([]ListAllCoursesResponse, len(courses))

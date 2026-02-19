@@ -59,9 +59,10 @@ type Material struct {
 }
 
 type Module struct {
-	Uuid  string `json:"uuid"`
-	Name  string `json:"name"`
-	State string `json:"state"`
+	Uuid       string `json:"uuid"`
+	CourseUuid string `json:"course_uuid"`
+	Name       string `json:"name"`
+	State      string `json:"state"`
 }
 
 type Question struct {
