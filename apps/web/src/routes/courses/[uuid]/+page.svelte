@@ -35,89 +35,62 @@
 					</div>
 				</div>
 
-				{#if screen.availWidth <= 1080}
-					<div class="sticky top-2 z-10 flex gap-2 rounded-xl bg-s-black p-1 shadow-md">
-						{#each ['materials', 'quizzes', 'feed'] as tab}
-							<button
-								onclick={() => (activeTab = tab)}
-								class="flex-1 cursor-pointer rounded-lg py-2 text-lg font-bold capitalize transition-all
-								{activeTab === tab ? 'bg-p-green text-s-black' : 'text-s-white hover:bg-p-blue'}"
-							>
-								{tab}
-							</button>
-						{/each}
-					</div>
-				{/if}
+				<div class="sticky top-2 z-10 flex gap-2 rounded-xl bg-s-black p-1 shadow-md lg:hidden">
+					{#each ['materials', 'quizzes', 'feed'] as tab}
+						<button
+							onclick={() => (activeTab = tab)}
+							class="flex-1 cursor-pointer rounded-lg py-2 text-lg font-bold capitalize transition-all
+                            {activeTab === tab
+								? 'bg-p-green text-s-black'
+								: 'text-s-white hover:bg-p-blue'}"
+						>
+							{tab}
+						</button>
+					{/each}
+				</div>
 
-				{#if screen.availWidth > 1080}
-					<div class="mt-2 flex min-h-[400px] justify-center space-x-4">
-						<div class="w-1/3 space-y-3">
-							<h2 class="text-center text-2xl font-bold">Course Materials</h2>
-							{#if course.materials?.length}
-								<div class="space-y-2 rounded-xl bg-p-blue p-2 transition-all">
-									{#each course.materials as material}
-										<ViewMaterial {material} />
-									{/each}
-								</div>
-							{:else}
-								<p class="text-center text-gray-500 italic">No materials available yet.</p>
-							{/if}
-						</div>
-						<div class="w-1/3 space-y-3">
-							<h2 class="text-center text-2xl font-bold">Available Quizzes</h2>
-							{#if course.quizzes?.length}
-								<div class="space-y-2 rounded-xl bg-p-blue p-2">
-									{#each course.quizzes as quiz}
-										<TakeQuiz {quiz} courseId={course.uuid} />
-									{/each}
-								</div>
-							{:else}
-								<p class="text-center text-gray-500 italic">No quizzes assigned to this course.</p>
-							{/if}
-						</div>
-						<div class="w-1/3 space-y-3">
-							<h2 class="text-center text-2xl font-bold">News Feed</h2>
-							<ViewFeed courseId={course.uuid} />
-						</div>
-					</div>
-				{:else}
-					<div class="mt-2 min-h-[400px]">
-						{#if activeTab === 'materials'}
-							<div class="space-y-3">
-								<h2 class="text-2xl font-bold">Course Materials</h2>
-								{#if course.materials?.length}
-									<div class="space-y-2 rounded-xl bg-p-blue p-2 transition-all">
-										{#each course.materials as material}
-											<ViewMaterial {material} />
-										{/each}
-									</div>
-								{:else}
-									<p class="text-gray-500 italic">No materials available yet.</p>
-								{/if}
+				<div class="mt-2 flex min-h-[400px] flex-col lg:flex-row lg:space-x-4">
+					<div
+						class="w-full space-y-3 lg:w-1/3 {activeTab === 'materials'
+							? 'block'
+							: 'hidden lg:block'}"
+					>
+						<h2 class="text-center text-2xl font-bold">Course Materials</h2>
+						{#if course.materials?.length}
+							<div class="space-y-2 rounded-xl bg-p-blue p-2">
+								{#each course.materials as material}
+									<ViewMaterial {material} />
+								{/each}
 							</div>
-						{:else if activeTab === 'quizzes'}
-							<div class="space-y-3">
-								<h2 class="text-2xl font-bold">Available Quizzes</h2>
-								{#if course.quizzes?.length}
-									<div class="space-y-2 rounded-xl bg-p-blue p-2">
-										{#each course.quizzes as quiz}
-											<TakeQuiz {quiz} courseId={course.uuid} />
-										{/each}
-									</div>
-								{:else}
-									<p class="text-gray-500 italic">
-										No quizzes assigned to this course.
-									</p>
-								{/if}
-							</div>
-						{:else if activeTab === 'feed'}
-							<div class="space-y-3">
-								<h2 class="text-2xl font-bold">News Feed</h2>
-								<ViewFeed courseId={course.uuid} />
-							</div>
+						{:else}
+							<p class="text-center text-gray-500 italic">No materials available yet.</p>
 						{/if}
 					</div>
-				{/if}
+
+					<div
+						class="w-full space-y-3 lg:w-1/3 {activeTab === 'quizzes'
+							? 'block'
+							: 'hidden lg:block'}"
+					>
+						<h2 class="text-center text-2xl font-bold">Available Quizzes</h2>
+						{#if course.quizzes?.length}
+							<div class="space-y-2 rounded-xl bg-p-blue p-2">
+								{#each course.quizzes as quiz}
+									<TakeQuiz {quiz} courseId={course.uuid} />
+								{/each}
+							</div>
+						{:else}
+							<p class="text-center text-gray-500 italic">No quizzes assigned.</p>
+						{/if}
+					</div>
+
+					<div
+						class="w-full space-y-3 lg:w-1/3 {activeTab === 'feed' ? 'block' : 'hidden lg:block'}"
+					>
+						<h2 class="text-center text-2xl font-bold">News Feed</h2>
+						<ViewFeed courseId={course.uuid} />
+					</div>
+				</div>
 			</div>
 		</div>
 	{/snippet}
