@@ -27,7 +27,7 @@ INSERT INTO course (
     uuid, name, description, created_at, updated_at
 ) VALUES (
     ?, ?, ?, ?, ?
-) RETURNING uuid, name, description, created_at, updated_at
+) RETURNING uuid, name, description, created_at, updated_at, archived, restricted
 `
 
 type CreateCourseParams struct {
@@ -54,6 +54,8 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Archived,
+		&i.Restricted,
 	)
 	return i, err
 }
@@ -61,10 +63,10 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 const createMaterial = `-- name: CreateMaterial :one
 
 INSERT INTO material (
-    uuid, course_uuid, name, description, url, type, favicon_url, byte_size, mime_type, created_at, updated_at
+    uuid, course_uuid, name, description, url, type, favicon_url, byte_size, mime_type, created_at, updated_at, module_uuid
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-) RETURNING uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?12
+) RETURNING uuid, course_uuid, module_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
 `
 
 type CreateMaterialParams struct {
@@ -79,6 +81,7 @@ type CreateMaterialParams struct {
 	MimeType    sql.NullString `json:"mime_type"`
 	CreatedAt   int64          `json:"created_at"`
 	UpdatedAt   int64          `json:"updated_at"`
+	ModuleUuid  sql.NullString `json:"module_uuid"`
 }
 
 // * Material
@@ -95,11 +98,13 @@ func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) 
 		arg.MimeType,
 		arg.CreatedAt,
 		arg.UpdatedAt,
+		arg.ModuleUuid,
 	)
 	var i Material
 	err := row.Scan(
 		&i.Uuid,
 		&i.CourseUuid,
+		&i.ModuleUuid,
 		&i.Name,
 		&i.Description,
 		&i.Url,
@@ -204,10 +209,10 @@ func (q *Queries) CreateQuestion(ctx context.Context, arg CreateQuestionParams) 
 const createQuizz = `-- name: CreateQuizz :one
 
 INSERT INTO quizz (
-    uuid, course_uuid, title, attempts_count, created_at, updated_at
+    uuid, course_uuid, title, attempts_count, created_at, updated_at, module_uuid
 ) VALUES (
-    ?, ?, ?, ?, ?, ?
-) RETURNING uuid, course_uuid, title, attempts_count, created_at, updated_at
+    ?, ?, ?, ?, ?, ?, sqc.narg()
+) RETURNING uuid, course_uuid, module_uuid, title, attempts_count, created_at, updated_at
 `
 
 type CreateQuizzParams struct {
@@ -233,6 +238,7 @@ func (q *Queries) CreateQuizz(ctx context.Context, arg CreateQuizzParams) (Quizz
 	err := row.Scan(
 		&i.Uuid,
 		&i.CourseUuid,
+		&i.ModuleUuid,
 		&i.Title,
 		&i.AttemptsCount,
 		&i.CreatedAt,
@@ -386,7 +392,7 @@ func (q *Queries) GetAnswersOfQuiz(ctx context.Context, quizUuid string) ([]Answ
 }
 
 const getCourse = `-- name: GetCourse :one
-SELECT uuid, name, description, created_at, updated_at FROM course WHERE course.uuid == ?
+SELECT uuid, name, description, created_at, updated_at, archived, restricted FROM course WHERE course.uuid == ?
 `
 
 func (q *Queries) GetCourse(ctx context.Context, uuid string) (Course, error) {
@@ -398,12 +404,14 @@ func (q *Queries) GetCourse(ctx context.Context, uuid string) (Course, error) {
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Archived,
+		&i.Restricted,
 	)
 	return i, err
 }
 
 const getMaterial = `-- name: GetMaterial :one
-SELECT uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at FROM material WHERE material.uuid = ?
+SELECT uuid, course_uuid, module_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at FROM material WHERE material.uuid = ?
 `
 
 func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error) {
@@ -412,6 +420,7 @@ func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error
 	err := row.Scan(
 		&i.Uuid,
 		&i.CourseUuid,
+		&i.ModuleUuid,
 		&i.Name,
 		&i.Description,
 		&i.Url,
@@ -523,6 +532,8 @@ const getQuiz = `-- name: GetQuiz :many
 SELECT
     qz.uuid AS quiz_uuid,
     qz.course_uuid AS course_uuid,
+    qz.module_uuid AS module_uuid,
+
     qz.title AS quiz_title,
     qz.attempts_count AS quiz_attempts_count,
     qz.created_at AS quiz_created_at,
@@ -544,6 +555,7 @@ ORDER BY qs.question_order
 type GetQuizRow struct {
 	QuizUuid               string         `json:"quiz_uuid"`
 	CourseUuid             string         `json:"course_uuid"`
+	ModuleUuid             sql.NullString `json:"module_uuid"`
 	QuizTitle              string         `json:"quiz_title"`
 	QuizAttemptsCount      int64          `json:"quiz_attempts_count"`
 	QuizCreatedAt          int64          `json:"quiz_created_at"`
@@ -568,6 +580,7 @@ func (q *Queries) GetQuiz(ctx context.Context, uuid string) ([]GetQuizRow, error
 		if err := rows.Scan(
 			&i.QuizUuid,
 			&i.CourseUuid,
+			&i.ModuleUuid,
 			&i.QuizTitle,
 			&i.QuizAttemptsCount,
 			&i.QuizCreatedAt,
@@ -745,7 +758,7 @@ func (q *Queries) InvalidateSession(ctx context.Context, token string) error {
 }
 
 const listAllCourses = `-- name: ListAllCourses :many
-SELECT uuid, name, description, created_at, updated_at FROM course
+SELECT uuid, name, description, created_at, updated_at, archived, restricted FROM course
 `
 
 func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
@@ -763,6 +776,8 @@ func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
 			&i.Description,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Archived,
+			&i.Restricted,
 		); err != nil {
 			return nil, err
 		}
@@ -778,7 +793,7 @@ func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
 }
 
 const listAllMaterialsOfCourse = `-- name: ListAllMaterialsOfCourse :many
-SELECT uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at FROM material WHERE material.course_uuid = ? ORDER BY created_at DESC
+SELECT uuid, course_uuid, module_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at FROM material WHERE material.course_uuid = ? ORDER BY created_at DESC
 `
 
 func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid string) ([]Material, error) {
@@ -793,6 +808,7 @@ func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid strin
 		if err := rows.Scan(
 			&i.Uuid,
 			&i.CourseUuid,
+			&i.ModuleUuid,
 			&i.Name,
 			&i.Description,
 			&i.Url,
@@ -820,6 +836,8 @@ const listQuizzes = `-- name: ListQuizzes :many
 SELECT
     qz.uuid AS quiz_uuid,
     qz.course_uuid AS course_uuid,
+    qz.module_uuid AS module_uuid,
+
     qz.title AS quiz_title,
     qz.attempts_count AS quiz_attempts_count,
     qz.created_at AS quiz_created_at,
@@ -841,6 +859,7 @@ ORDER BY qz.uuid ASC, qs.question_order ASC
 type ListQuizzesRow struct {
 	QuizUuid               string         `json:"quiz_uuid"`
 	CourseUuid             string         `json:"course_uuid"`
+	ModuleUuid             sql.NullString `json:"module_uuid"`
 	QuizTitle              string         `json:"quiz_title"`
 	QuizAttemptsCount      int64          `json:"quiz_attempts_count"`
 	QuizCreatedAt          int64          `json:"quiz_created_at"`
@@ -865,6 +884,7 @@ func (q *Queries) ListQuizzes(ctx context.Context, courseUuid string) ([]ListQui
 		if err := rows.Scan(
 			&i.QuizUuid,
 			&i.CourseUuid,
+			&i.ModuleUuid,
 			&i.QuizTitle,
 			&i.QuizAttemptsCount,
 			&i.QuizCreatedAt,
@@ -901,7 +921,7 @@ func (q *Queries) MakeUserAdmin(ctx context.Context, userID int64) error {
 }
 
 const updateCourse = `-- name: UpdateCourse :one
-UPDATE course SET name = ?, description = ?, updated_at = ? WHERE course.uuid = ? RETURNING uuid, name, description, created_at, updated_at
+UPDATE course SET name = ?, description = ?, updated_at = ? WHERE course.uuid = ? RETURNING uuid, name, description, created_at, updated_at, archived, restricted
 `
 
 type UpdateCourseParams struct {
@@ -925,12 +945,14 @@ func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) (Cou
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Archived,
+		&i.Restricted,
 	)
 	return i, err
 }
 
 const updateMaterial = `-- name: UpdateMaterial :one
-UPDATE material SET name = ?, description = ?, url = ? WHERE material.uuid = ? RETURNING uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
+UPDATE material SET name = ?, description = ?, url = ? WHERE material.uuid = ? RETURNING uuid, course_uuid, module_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
 `
 
 type UpdateMaterialParams struct {
@@ -951,6 +973,7 @@ func (q *Queries) UpdateMaterial(ctx context.Context, arg UpdateMaterialParams) 
 	err := row.Scan(
 		&i.Uuid,
 		&i.CourseUuid,
+		&i.ModuleUuid,
 		&i.Name,
 		&i.Description,
 		&i.Url,
@@ -974,7 +997,7 @@ SET
     byte_size   = COALESCE(?5, byte_size),
     mime_type   = COALESCE(?6, mime_type),
     updated_at  = ?7
-WHERE uuid = ?8 RETURNING uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
+WHERE uuid = ?8 RETURNING uuid, course_uuid, module_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
 `
 
 type UpdateMaterialPartialParams struct {
@@ -1003,6 +1026,7 @@ func (q *Queries) UpdateMaterialPartial(ctx context.Context, arg UpdateMaterialP
 	err := row.Scan(
 		&i.Uuid,
 		&i.CourseUuid,
+		&i.ModuleUuid,
 		&i.Name,
 		&i.Description,
 		&i.Url,
@@ -1081,7 +1105,7 @@ SET
     attempts_count =    COALESCE(?2, attempts_count),
     updated_at =        COALESCE(?3, updated_at)
 WHERE uuid = ?4
-RETURNING uuid, course_uuid, title, attempts_count, created_at, updated_at
+RETURNING uuid, course_uuid, module_uuid, title, attempts_count, created_at, updated_at
 `
 
 type UpdateQuizzParams struct {
@@ -1102,6 +1126,7 @@ func (q *Queries) UpdateQuizz(ctx context.Context, arg UpdateQuizzParams) (Quizz
 	err := row.Scan(
 		&i.Uuid,
 		&i.CourseUuid,
+		&i.ModuleUuid,
 		&i.Title,
 		&i.AttemptsCount,
 		&i.CreatedAt,

@@ -34,12 +34,24 @@ CREATE TABLE IF NOT EXISTS course (
     description TEXT NOT NULL,
 
     created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL
+    updated_at INTEGER NOT NULL,
+
+    archived INTEGER NOT NULL DEFAULT 0,
+    restricted INTEGER NOT NULL DEFAULT 0
+
 );
+
+CREATE TABLE IF NOT EXISTS module (
+    uuid TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    state TEXT NOT NULL  -- preparation | open | closed
+);
+
 
 CREATE TABLE IF NOT EXISTS material (
     uuid TEXT PRIMARY KEY,
     course_uuid TEXT NOT NULL,
+    module_uuid TEXT DEFAULT NULL,
     
     name TEXT NOT NULL,
     description TEXT NOT NULL,
@@ -54,12 +66,15 @@ CREATE TABLE IF NOT EXISTS material (
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     
+    FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE,
     FOREIGN KEY (course_uuid) REFERENCES course(uuid) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS quizz (
     uuid TEXT PRIMARY KEY,
     course_uuid TEXT NOT NULL,
+    module_uuid TEXT DEFAULT NULL,
+
 
     title TEXT NOT NULL,
     attempts_count INTEGER NOT NULL,
@@ -67,6 +82,7 @@ CREATE TABLE IF NOT EXISTS quizz (
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     
+    FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE,
     FOREIGN KEY (course_uuid) REFERENCES course(uuid) ON DELETE CASCADE
 );
 

@@ -47,10 +47,10 @@ UPDATE course SET name = ?, description = ?, updated_at = ? WHERE course.uuid = 
 DELETE FROM course WHERE course.uuid = ?;
 
 -- name: GetCourse :one
-SELECT uuid, name, description, created_at, updated_at FROM course WHERE course.uuid == ?;
+SELECT * FROM course WHERE course.uuid == ?;
 
 -- name: ListAllCourses :many
-SELECT uuid, name, description, created_at, updated_at FROM course;
+SELECT * FROM course;
 
 -- name: CheckCourseExists :one
 SELECT EXISTS (SELECT 1 FROM course WHERE uuid = ?) AS course_exists;
@@ -59,9 +59,9 @@ SELECT EXISTS (SELECT 1 FROM course WHERE uuid = ?) AS course_exists;
 
 -- name: CreateMaterial :one
 INSERT INTO material (
-    uuid, course_uuid, name, description, url, type, favicon_url, byte_size, mime_type, created_at, updated_at
+    uuid, course_uuid, name, description, url, type, favicon_url, byte_size, mime_type, created_at, updated_at, module_uuid
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, sqlc.narg(module_uuid)
 ) RETURNING *;
 
 -- name: UpdateMaterial :one
@@ -92,9 +92,9 @@ WHERE uuid = sqlc.arg(uuid) RETURNING *;
 
 -- name: CreateQuizz :one
 INSERT INTO quizz (
-    uuid, course_uuid, title, attempts_count, created_at, updated_at
+    uuid, course_uuid, title, attempts_count, created_at, updated_at, module_uuid
 ) VALUES (
-    ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, sqc.narg()
 ) RETURNING *;
 
 -- name: UpdateQuizz :one
@@ -119,6 +119,8 @@ DELETE FROM quizz WHERE uuid = ?;
 SELECT
     qz.uuid AS quiz_uuid,
     qz.course_uuid AS course_uuid,
+    qz.module_uuid AS module_uuid,
+
     qz.title AS quiz_title,
     qz.attempts_count AS quiz_attempts_count,
     qz.created_at AS quiz_created_at,
@@ -140,6 +142,8 @@ ORDER BY qs.question_order;
 SELECT
     qz.uuid AS quiz_uuid,
     qz.course_uuid AS course_uuid,
+    qz.module_uuid AS module_uuid,
+
     qz.title AS quiz_title,
     qz.attempts_count AS quiz_attempts_count,
     qz.created_at AS quiz_created_at,

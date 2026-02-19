@@ -29,6 +29,8 @@ type Course struct {
 	Description string `json:"description"`
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
+	Archived    int64  `json:"archived"`
+	Restricted  int64  `json:"restricted"`
 }
 
 type FeedPost struct {
@@ -44,6 +46,7 @@ type FeedPost struct {
 type Material struct {
 	Uuid        string         `json:"uuid"`
 	CourseUuid  string         `json:"course_uuid"`
+	ModuleUuid  sql.NullString `json:"module_uuid"`
 	Name        string         `json:"name"`
 	Description string         `json:"description"`
 	Url         string         `json:"url"`
@@ -53,6 +56,12 @@ type Material struct {
 	ByteSize    sql.NullInt64  `json:"byte_size"`
 	CreatedAt   int64          `json:"created_at"`
 	UpdatedAt   int64          `json:"updated_at"`
+}
+
+type Module struct {
+	Uuid  string `json:"uuid"`
+	Name  string `json:"name"`
+	State string `json:"state"`
 }
 
 type Question struct {
@@ -66,12 +75,13 @@ type Question struct {
 }
 
 type Quizz struct {
-	Uuid          string `json:"uuid"`
-	CourseUuid    string `json:"course_uuid"`
-	Title         string `json:"title"`
-	AttemptsCount int64  `json:"attempts_count"`
-	CreatedAt     int64  `json:"created_at"`
-	UpdatedAt     int64  `json:"updated_at"`
+	Uuid          string         `json:"uuid"`
+	CourseUuid    string         `json:"course_uuid"`
+	ModuleUuid    sql.NullString `json:"module_uuid"`
+	Title         string         `json:"title"`
+	AttemptsCount int64          `json:"attempts_count"`
+	CreatedAt     int64          `json:"created_at"`
+	UpdatedAt     int64          `json:"updated_at"`
 }
 
 type Session struct {

@@ -64,9 +64,10 @@ type FileMaterial struct {
 	Type        string `json:"type"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	FileUrl     string `json:"fileUrl"`
-	MimeType    string `json:"mimeType"`
-	SizeBytes   int    `json:"sizeBytes"`
+
+	FileUrl   string `json:"fileUrl"`
+	MimeType  string `json:"mimeType"`
+	SizeBytes int    `json:"sizeBytes"`
 }
 
 func (f FileMaterial) GetType() string {
@@ -75,11 +76,13 @@ func (f FileMaterial) GetType() string {
 
 type UrlMaterial struct {
 	Uuid        string `json:"uuid"`
+	ModuleUuid  string `json:"module_uuid"`
 	Type        string `json:"type"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Url         string `json:"url"`
-	FaviconUrl  string `json:"faviconUrl"`
+
+	Url        string `json:"url"`
+	FaviconUrl string `json:"faviconUrl"`
 }
 
 func (f UrlMaterial) GetType() string {
@@ -323,6 +326,7 @@ func (s *Service) CreateFileMaterial(req *CreateFileMaterialRequest, materialId 
 	dbMat, err := s.q.CreateMaterial(ctx, db.CreateMaterialParams{
 		Uuid:        materialId,
 		CourseUuid:  req.CourseId,
+		ModuleUuid:  sql.NullString{String: req.ModuleId, Valid: req.ModuleId != ""},
 		Name:        req.Name,
 		Description: req.Description,
 		Url:         url,
@@ -364,6 +368,7 @@ func (s *Service) CreateUrlMaterial(req CreateUrlMaterialRequest, materialId str
 	dbMat, err := s.q.CreateMaterial(ctx, db.CreateMaterialParams{
 		Uuid:        materialId,
 		CourseUuid:  req.CourseId,
+		ModuleUuid:  sql.NullString{String: req.ModuleId, Valid: req.ModuleId != ""},
 		Name:        req.Name,
 		Description: req.Description,
 		Url:         req.Url,

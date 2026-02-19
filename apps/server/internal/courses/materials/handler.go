@@ -63,6 +63,8 @@ func (h *Handler) CreateMaterial(c echo.Context) error {
 type CreateFileMaterialRequest struct {
 	CourseId string `param:"courseId"`
 
+	ModuleId string `param:"moduleId"`
+
 	MatType string `form:"type"`
 	Name    string `form:"name"`
 
@@ -106,6 +108,8 @@ func (h *Handler) createFileMaterial(r *handlers.RequestCtx) error {
 
 type CreateUrlMaterialRequest struct {
 	CourseId string `param:"courseId"`
+
+	ModuleId string `param:"moduleId"`
 
 	MatType string `json:"type"`
 	Name    string `json:"name"`
