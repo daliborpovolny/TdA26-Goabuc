@@ -24,13 +24,13 @@ type Answer struct {
 }
 
 type Course struct {
-	Uuid        string `json:"uuid"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	CreatedAt   int64  `json:"created_at"`
-	UpdatedAt   int64  `json:"updated_at"`
-	Archived    int64  `json:"archived"`
-	Restricted  int64  `json:"restricted"`
+	Uuid        string      `json:"uuid"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	CreatedAt   int64       `json:"created_at"`
+	UpdatedAt   int64       `json:"updated_at"`
+	Archived    int64       `json:"archived"`
+	State       interface{} `json:"state"`
 }
 
 type FeedPost struct {
@@ -59,10 +59,12 @@ type Material struct {
 }
 
 type Module struct {
-	Uuid       string `json:"uuid"`
-	CourseUuid string `json:"course_uuid"`
-	Name       string `json:"name"`
-	State      string `json:"state"`
+	Uuid       string      `json:"uuid"`
+	CourseUuid string      `json:"course_uuid"`
+	Name       string      `json:"name"`
+	State      interface{} `json:"state"`
+	CreatedAt  int64       `json:"created_at"`
+	UpdatedAt  int64       `json:"updated_at"`
 }
 
 type Question struct {

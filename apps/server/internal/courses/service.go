@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
+	"time"
 
 	materials "tourbackend/internal/courses/materials"
 	"tourbackend/internal/courses/quizzes"
@@ -11,6 +13,18 @@ import (
 	"tourbackend/internal/feeds"
 	"tourbackend/internal/utils"
 )
+
+var ALLOWED_COURSE_STATES []string = []string{
+	"preparation",
+	"open",
+	"closed",
+}
+
+var ALLOWED_MODULE_STATES []string = []string{
+	"preparation",
+	"open",
+	"closed",
+}
 
 type Service struct {
 	q                *db.Queries
@@ -131,11 +145,38 @@ func (s *Service) ListAllCourses(ctx context.Context) ([]db.Course, error) {
 	return courses, nil
 }
 
-func (s *Service) CreateModule(courseId string, moduleId string, ctx context.Context) (db.Module, error) {
+func (s *Service) ChangeCourseState(courseId string, state string, ctx context.Context) (db.Course, error) {
+
+	if !slices.Contains(ALLOWED_COURSE_STATES, state) {
+		return db.Course{}, ErrBadCourseState
+	}
+
+	now := time.Now().Unix()
+
+	course, err := s.q.ChangeCourseState(ctx, db.ChangeCourseStateParams{
+		State:     state,
+		Uuid:      courseId,
+		UpdatedAt: now,
+	})
+	if err != nil {
+		return db.Course{}, err
+	}
+
+	return course, err
+}
+
+// modules
+
+func (s *Service) CreateModule(courseId string, moduleId string, name string, ctx context.Context) (db.Module, error) {
+
+	now := time.Now().Unix()
 
 	module, err := s.q.CreateModule(ctx, db.CreateModuleParams{
 		Uuid:       moduleId,
 		CourseUuid: courseId,
+		Name:       name,
+		CreatedAt:  now,
+		UpdatedAt:  now,
 	})
 	if err != nil {
 		return db.Module{}, err
@@ -146,13 +187,47 @@ func (s *Service) CreateModule(courseId string, moduleId string, ctx context.Con
 
 func (s *Service) ChangeModuleState(courseId string, moduleId string, state string, ctx context.Context) (db.Module, error) {
 
+	if !slices.Contains(ALLOWED_MODULE_STATES, state) {
+		return db.Module{}, ErrBadModuleState
+	}
+
+	now := time.Now().Unix()
+
 	module, err := s.q.ChangeModuleState(ctx, db.ChangeModuleStateParams{
-		State: state,
-		Uuid:  moduleId,
+		State:     state,
+		Uuid:      moduleId,
+		UpdatedAt: now,
 	})
 	if err != nil {
 		return db.Module{}, err
 	}
 
 	return module, err
+}
+
+func (s *Service) GetModule(courseId string, moduleId string, ctx context.Context) (db.Module, error) {
+
+	module, err := s.q.GetModule(ctx, db.GetModuleParams{
+		Uuid:       moduleId,
+		CourseUuid: courseId,
+	})
+	if err != nil {
+		return db.Module{}, err
+	}
+
+	return module, nil
+}
+
+func (s *Service) UpdateModule(courseId string, moduleId string, name string, ctx context.Context) (db.Module, error) {
+
+	newModule, err := s.q.UpdateModule(ctx, db.UpdateModuleParams{
+		Uuid:       moduleId,
+		CourseUuid: courseId,
+		Name:       name,
+	})
+	if err != nil {
+		return db.Module{}, err
+	}
+
+	return newModule, nil
 }

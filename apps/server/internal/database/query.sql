@@ -55,20 +55,54 @@ SELECT * FROM course;
 -- name: CheckCourseExists :one
 SELECT EXISTS (SELECT 1 FROM course WHERE uuid = ?) AS course_exists;
 
+-- name: ChangeCourseState :one
+UPDATE course
+SET
+    state = ?,
+    updated_at = ?
+WHERE uuid = ? RETURNING *;
+
+
 --* Module
 
 -- name: CreateModule :one
 INSERT INTO module (
-    uuid, course_uuid, state
+    uuid, course_uuid, name, description, created_at, updated_at
 ) VALUES (
-    ?, ?, "preparation"
+    ?, ?, ?, ?, ?, ?
 ) RETURNING *;
 
 
 -- name: ChangeModuleState :one
 UPDATE module
-SET state = ?
+SET
+    state = ?,
+    updated_at = ?
 WHERE uuid = ? RETURNING *;
+
+-- name: CheckModuleExists :one
+SELECT EXISTS (SELECT 1 FROM module WHERE uuid = ?) AS module_exists;
+
+-- name: GetModule :one
+SELECT * FROM module WHERE uuid = ? AND course_uuid = ?;
+
+-- name: UpdateModule :one
+UPDATE module
+SET
+    name = ?,
+    description = ?
+WHERE
+    uuid = ? and course_uuid = ?
+RETURNING *;
+
+--* Heading
+
+--TODO create, read, update, delete
+
+--* Module to Others Pairings
+
+--TODO must be able to both create and delete pairings
+
 
 --* Material
 

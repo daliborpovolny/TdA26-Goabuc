@@ -10,25 +10,59 @@ import (
 	"database/sql"
 )
 
+const changeCourseState = `-- name: ChangeCourseState :one
+UPDATE course
+SET
+    state = ?,
+    updated_at = ?
+WHERE uuid = ? RETURNING uuid, name, description, created_at, updated_at, archived, state
+`
+
+type ChangeCourseStateParams struct {
+	State     interface{} `json:"state"`
+	UpdatedAt int64       `json:"updated_at"`
+	Uuid      string      `json:"uuid"`
+}
+
+func (q *Queries) ChangeCourseState(ctx context.Context, arg ChangeCourseStateParams) (Course, error) {
+	row := q.db.QueryRowContext(ctx, changeCourseState, arg.State, arg.UpdatedAt, arg.Uuid)
+	var i Course
+	err := row.Scan(
+		&i.Uuid,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Archived,
+		&i.State,
+	)
+	return i, err
+}
+
 const changeModuleState = `-- name: ChangeModuleState :one
 UPDATE module
-SET state = ?
-WHERE uuid = ? RETURNING uuid, course_uuid, name, state
+SET
+    state = ?,
+    updated_at = ?
+WHERE uuid = ? RETURNING uuid, course_uuid, name, state, created_at, updated_at
 `
 
 type ChangeModuleStateParams struct {
-	State string `json:"state"`
-	Uuid  string `json:"uuid"`
+	State     interface{} `json:"state"`
+	UpdatedAt int64       `json:"updated_at"`
+	Uuid      string      `json:"uuid"`
 }
 
 func (q *Queries) ChangeModuleState(ctx context.Context, arg ChangeModuleStateParams) (Module, error) {
-	row := q.db.QueryRowContext(ctx, changeModuleState, arg.State, arg.Uuid)
+	row := q.db.QueryRowContext(ctx, changeModuleState, arg.State, arg.UpdatedAt, arg.Uuid)
 	var i Module
 	err := row.Scan(
 		&i.Uuid,
 		&i.CourseUuid,
 		&i.Name,
 		&i.State,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -44,13 +78,24 @@ func (q *Queries) CheckCourseExists(ctx context.Context, uuid string) (int64, er
 	return course_exists, err
 }
 
+const checkModuleExists = `-- name: CheckModuleExists :one
+SELECT EXISTS (SELECT 1 FROM module WHERE uuid = ?) AS module_exists
+`
+
+func (q *Queries) CheckModuleExists(ctx context.Context, uuid string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, checkModuleExists, uuid)
+	var module_exists int64
+	err := row.Scan(&module_exists)
+	return module_exists, err
+}
+
 const createCourse = `-- name: CreateCourse :one
 
 INSERT INTO course (
     uuid, name, description, created_at, updated_at
 ) VALUES (
     ?, ?, ?, ?, ?
-) RETURNING uuid, name, description, created_at, updated_at, archived, restricted
+) RETURNING uuid, name, description, created_at, updated_at, archived, state
 `
 
 type CreateCourseParams struct {
@@ -78,7 +123,7 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Archived,
-		&i.Restricted,
+		&i.State,
 	)
 	return i, err
 }
@@ -144,26 +189,37 @@ func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) 
 const createModule = `-- name: CreateModule :one
 
 INSERT INTO module (
-    uuid, course_uuid, state
+    uuid, course_uuid, name, created_at, updated_at
 ) VALUES (
-    ?, ?, "preparation"
-) RETURNING uuid, course_uuid, name, state
+    ?, ?, ?, ?, ?
+) RETURNING uuid, course_uuid, name, state, created_at, updated_at
 `
 
 type CreateModuleParams struct {
 	Uuid       string `json:"uuid"`
 	CourseUuid string `json:"course_uuid"`
+	Name       string `json:"name"`
+	CreatedAt  int64  `json:"created_at"`
+	UpdatedAt  int64  `json:"updated_at"`
 }
 
 // * Module
 func (q *Queries) CreateModule(ctx context.Context, arg CreateModuleParams) (Module, error) {
-	row := q.db.QueryRowContext(ctx, createModule, arg.Uuid, arg.CourseUuid)
+	row := q.db.QueryRowContext(ctx, createModule,
+		arg.Uuid,
+		arg.CourseUuid,
+		arg.Name,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
 	var i Module
 	err := row.Scan(
 		&i.Uuid,
 		&i.CourseUuid,
 		&i.Name,
 		&i.State,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -444,7 +500,7 @@ func (q *Queries) GetAnswersOfQuiz(ctx context.Context, quizUuid string) ([]Answ
 }
 
 const getCourse = `-- name: GetCourse :one
-SELECT uuid, name, description, created_at, updated_at, archived, restricted FROM course WHERE course.uuid == ?
+SELECT uuid, name, description, created_at, updated_at, archived, state FROM course WHERE course.uuid == ?
 `
 
 func (q *Queries) GetCourse(ctx context.Context, uuid string) (Course, error) {
@@ -457,7 +513,7 @@ func (q *Queries) GetCourse(ctx context.Context, uuid string) (Course, error) {
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Archived,
-		&i.Restricted,
+		&i.State,
 	)
 	return i, err
 }
@@ -480,6 +536,29 @@ func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error
 		&i.FaviconUrl,
 		&i.MimeType,
 		&i.ByteSize,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getModule = `-- name: GetModule :one
+SELECT uuid, course_uuid, name, state, created_at, updated_at FROM module WHERE uuid = ? AND course_uuid = ?
+`
+
+type GetModuleParams struct {
+	Uuid       string `json:"uuid"`
+	CourseUuid string `json:"course_uuid"`
+}
+
+func (q *Queries) GetModule(ctx context.Context, arg GetModuleParams) (Module, error) {
+	row := q.db.QueryRowContext(ctx, getModule, arg.Uuid, arg.CourseUuid)
+	var i Module
+	err := row.Scan(
+		&i.Uuid,
+		&i.CourseUuid,
+		&i.Name,
+		&i.State,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -810,7 +889,7 @@ func (q *Queries) InvalidateSession(ctx context.Context, token string) error {
 }
 
 const listAllCourses = `-- name: ListAllCourses :many
-SELECT uuid, name, description, created_at, updated_at, archived, restricted FROM course
+SELECT uuid, name, description, created_at, updated_at, archived, state FROM course
 `
 
 func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
@@ -829,7 +908,7 @@ func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Archived,
-			&i.Restricted,
+			&i.State,
 		); err != nil {
 			return nil, err
 		}
@@ -973,7 +1052,7 @@ func (q *Queries) MakeUserAdmin(ctx context.Context, userID int64) error {
 }
 
 const updateCourse = `-- name: UpdateCourse :one
-UPDATE course SET name = ?, description = ?, updated_at = ? WHERE course.uuid = ? RETURNING uuid, name, description, created_at, updated_at, archived, restricted
+UPDATE course SET name = ?, description = ?, updated_at = ? WHERE course.uuid = ? RETURNING uuid, name, description, created_at, updated_at, archived, state
 `
 
 type UpdateCourseParams struct {
@@ -998,7 +1077,7 @@ func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) (Cou
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Archived,
-		&i.Restricted,
+		&i.State,
 	)
 	return i, err
 }
@@ -1086,6 +1165,35 @@ func (q *Queries) UpdateMaterialPartial(ctx context.Context, arg UpdateMaterialP
 		&i.FaviconUrl,
 		&i.MimeType,
 		&i.ByteSize,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateModule = `-- name: UpdateModule :one
+UPDATE module
+SET
+    name = ?
+WHERE
+    uuid = ? and course_uuid = ?
+RETURNING uuid, course_uuid, name, state, created_at, updated_at
+`
+
+type UpdateModuleParams struct {
+	Name       string `json:"name"`
+	Uuid       string `json:"uuid"`
+	CourseUuid string `json:"course_uuid"`
+}
+
+func (q *Queries) UpdateModule(ctx context.Context, arg UpdateModuleParams) (Module, error) {
+	row := q.db.QueryRowContext(ctx, updateModule, arg.Name, arg.Uuid, arg.CourseUuid)
+	var i Module
+	err := row.Scan(
+		&i.Uuid,
+		&i.CourseUuid,
+		&i.Name,
+		&i.State,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

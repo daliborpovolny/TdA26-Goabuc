@@ -37,18 +37,59 @@ CREATE TABLE IF NOT EXISTS course (
     updated_at INTEGER NOT NULL,
 
     archived INTEGER NOT NULL DEFAULT 0,
-    restricted INTEGER NOT NULL DEFAULT 0
+    state TEXT NOT NULL DEFAULT "preparation" -- preparation | open | closed
+
 
 );
 
 CREATE TABLE IF NOT EXISTS module (
     uuid TEXT PRIMARY KEY,
     course_uuid TEXT NOT NULL,
+
     name TEXT NOT NULL,
-    state TEXT NOT NULL,  -- preparation | open | closed
+    description TEXT NOT NULL,
+    state TEXT NOT NULL DEFAULT "preparation",  -- preparation | open | closed
     
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
     FOREIGN KEY (course_uuid) REFERENCES course(uuid) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS material_to_module (
+    module_uuid TEXT NOT NULL,
+    material_uuid TEXT NOT NULL,
+
+    order INTEGER NOT NULL,
+
+    FOREIGN KEY (material_uuid) REFERENCES material(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE
+)
+
+CREATE TABLE IF NOT EXISTS quiz_to_module (
+    module_uuid TEXT NOT NULL,
+    quiz_uuid TEXT NOT NULL,
+
+    order INTEGER NOT NULL,
+
+    FOREIGN KEY (quiz_uuid) REFERENCES quizz(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE
+)
+
+CREATE TABLE IF NOT EXISTS heading (
+    uuid TEXT NOT NULL,
+    content TEXT NOT NULL
+)
+
+CREATE TABLE IF NOT EXITS heading_to_module (
+    module_uuid TEXT NOT NULL,
+    heading_uuid TEXT NOT NULL,
+
+    order INTEGER NOT NULL,
+
+    FOREIGN KEY (heading_uuid) REFERENCES heading(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE
+)
 
 
 CREATE TABLE IF NOT EXISTS material (
