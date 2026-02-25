@@ -116,6 +116,8 @@ func main() {
 	materials.PUT("/:materialId", materialsHandler.UpdateMaterial)
 	materials.DELETE("/:materialId", materialsHandler.DeleteMaterial)
 
+	materials.POST("/:materialId/:moduleId/:order", materialsHandler.ChangeMaterialInModuleOrder)
+
 	//* Course Quizes
 	quizzesHandler := quizzes.NewHandler(STATIC_PATH, quizzesService, queries, IS_DEPLOYED)
 
@@ -130,6 +132,8 @@ func main() {
 	quizzes.DELETE("/:quizId", quizzesHandler.DeleteQuiz)
 
 	quizzes.POST("/:quizId/submit", quizzesHandler.SubmitQuizAnswers)
+
+	quizzes.POST("/:quizId/:moduleId/:order", quizzesHandler.ChangeQuizInModuleOrder)
 
 	//* Static
 	e.Static("/static", STATIC_PATH)
