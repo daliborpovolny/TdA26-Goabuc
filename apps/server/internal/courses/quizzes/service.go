@@ -580,11 +580,11 @@ func (s *Service) GetAnswersOfQuiz(quizId string, ctx context.Context) ([]Outcom
 	return outcomes, nil
 }
 
-func (s *Service) AssignQuizToModule(QuizId string, moduleId string, order int, ctx context.Context) (db.QuizToModule, error) {
+func (s *Service) AssignQuizToModule(quizId string, moduleId string, order int, ctx context.Context) (db.QuizToModule, error) {
 
 	mm, err := s.q.AssignQuizToModule(ctx, db.AssignQuizToModuleParams{
 		ModuleUuid: moduleId,
-		QuizUuid:   QuizId,
+		QuizUuid:   quizId,
 		Order:      int64(order),
 	})
 	if err != nil {
@@ -594,11 +594,11 @@ func (s *Service) AssignQuizToModule(QuizId string, moduleId string, order int, 
 	return mm, nil
 }
 
-func (s *Service) ChangeQuizInModuleOrder(QuizId string, moduleId string, order int, ctx context.Context) (db.QuizToModule, error) {
+func (s *Service) ChangeQuizInModuleOrder(quizId string, moduleId string, order int, ctx context.Context) (db.QuizToModule, error) {
 
 	mm, err := s.q.ChangeQuizInModuleOrder(ctx, db.ChangeQuizInModuleOrderParams{
 		ModuleUuid: moduleId,
-		QuizUuid:   QuizId,
+		QuizUuid:   quizId,
 		Order:      int64(order),
 	})
 	if err != nil {
@@ -608,11 +608,11 @@ func (s *Service) ChangeQuizInModuleOrder(QuizId string, moduleId string, order 
 	return mm, nil
 }
 
-func (s *Service) RemoveQuizToModule(QuizId string, moduleId string, order int, ctx context.Context) error {
+func (s *Service) RemoveQuizToModule(quizId string, moduleId string, order int, ctx context.Context) error {
 
 	err := s.q.RemoveQuizFromModule(ctx, db.RemoveQuizFromModuleParams{
 		ModuleUuid: moduleId,
-		QuizUuid:   QuizId,
+		QuizUuid:   quizId,
 	})
 	if err != nil {
 		return err
