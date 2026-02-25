@@ -126,14 +126,14 @@ DELETE FROM heading WHERE uuid = ?;
 
 -- name: AssignHeadingToModule :one
 INSERT INTO heading_to_module (
-    module_uuid, heading_uuid, order
+    module_uuid, heading_uuid, "order"
 ) VALUES (
     ?, ?, ?
 ) RETURNING *;
 
 -- name: ChangeHeadingInModuleOrder :one
 UPDATE heading_to_module
-SET order = ?
+SET "order" = ?
 WHERE heading_uuid = ? AND module_uuid = ?
 RETURNING *;
 
@@ -145,14 +145,14 @@ DELETE FROM heading_to_module WHERE heading_uuid = ? AND module_uuid = ?;
 
 -- name: AssignMaterialToModule :one
 INSERT INTO material_to_module (
-    module_uuid, material_uuid, order
+    module_uuid, material_uuid, "order"
 ) VALUES (
     ?, ?, ?
 ) RETURNING *;
 
 -- name: ChangeMaterialInModuleOrder :one
 UPDATE material_to_module
-SET order = ?
+SET "order" = ?
 WHERE material_uuid = ? AND module_uuid = ?
 RETURNING *;
 
@@ -164,14 +164,14 @@ DELETE FROM material_to_module WHERE material_uuid = ? AND module_uuid = ?;
 
 -- name: AssignQuizToModule :one
 INSERT INTO quiz_to_module (
-    module_uuid, quiz_uuid, order
+    module_uuid, quiz_uuid, "order"
 ) VALUES (
     ?, ?, ?
 ) RETURNING *;
 
 -- name: ChangeQuizInModuleOrder :one
 UPDATE quiz_to_module
-SET order = ?
+SET "order" = ?
 WHERE quiz_uuid = ? AND module_uuid = ?
 RETURNING *;
 

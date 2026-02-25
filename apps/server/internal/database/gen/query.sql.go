@@ -14,7 +14,7 @@ const assignHeadingToModule = `-- name: AssignHeadingToModule :one
 
 
 INSERT INTO heading_to_module (
-    module_uuid, heading_uuid, order
+    module_uuid, heading_uuid, "order"
 ) VALUES (
     ?, ?, ?
 ) RETURNING module_uuid, heading_uuid, "order"
@@ -38,7 +38,7 @@ func (q *Queries) AssignHeadingToModule(ctx context.Context, arg AssignHeadingTo
 const assignMaterialToModule = `-- name: AssignMaterialToModule :one
 
 INSERT INTO material_to_module (
-    module_uuid, material_uuid, order
+    module_uuid, material_uuid, "order"
 ) VALUES (
     ?, ?, ?
 ) RETURNING module_uuid, material_uuid, "order"
@@ -61,7 +61,7 @@ func (q *Queries) AssignMaterialToModule(ctx context.Context, arg AssignMaterial
 const assignQuizToModule = `-- name: AssignQuizToModule :one
 
 INSERT INTO quiz_to_module (
-    module_uuid, quiz_uuid, order
+    module_uuid, quiz_uuid, "order"
 ) VALUES (
     ?, ?, ?
 ) RETURNING module_uuid, quiz_uuid, "order"
@@ -112,7 +112,7 @@ func (q *Queries) ChangeCourseState(ctx context.Context, arg ChangeCourseStatePa
 
 const changeHeadingInModuleOrder = `-- name: ChangeHeadingInModuleOrder :one
 UPDATE heading_to_module
-SET order = ?
+SET "order" = ?
 WHERE heading_uuid = ? AND module_uuid = ?
 RETURNING module_uuid, heading_uuid, "order"
 `
@@ -132,7 +132,7 @@ func (q *Queries) ChangeHeadingInModuleOrder(ctx context.Context, arg ChangeHead
 
 const changeMaterialInModuleOrder = `-- name: ChangeMaterialInModuleOrder :one
 UPDATE material_to_module
-SET order = ?
+SET "order" = ?
 WHERE material_uuid = ? AND module_uuid = ?
 RETURNING module_uuid, material_uuid, "order"
 `
@@ -181,7 +181,7 @@ func (q *Queries) ChangeModuleState(ctx context.Context, arg ChangeModuleStatePa
 
 const changeQuizInModuleOrder = `-- name: ChangeQuizInModuleOrder :one
 UPDATE quiz_to_module
-SET order = ?
+SET "order" = ?
 WHERE quiz_uuid = ? AND module_uuid = ?
 RETURNING module_uuid, quiz_uuid, "order"
 `
@@ -753,99 +753,6 @@ func (q *Queries) GetModule(ctx context.Context, arg GetModuleParams) (Module, e
 		&i.UpdatedAt,
 	)
 	return i, err
-}
-
-const getModuleContents = `-- name: GetModuleContents :many
-
-SELECT 
-    'material' AS item_type,
-    m.uuid,
-    m.name AS display_name,
-    m.description,
-    mtm."order"
-FROM material_to_module mtm
-JOIN material m ON mtm.material_uuid = m.uuid
-WHERE mtm.module_uuid = ? AND m.course_uuid = ?
-
-UNION ALL
-
-SELECT 
-    'quiz' AS item_type,
-    q.uuid,
-    q.title AS display_name,
-    '' AS description,
-    qtm."order"
-FROM quiz_to_module qtm
-JOIN quiz q ON qtm.quiz_uuid = q.uuid
-WHERE qtm.module_uuid = ? AND q.course_uuid = ?
-
-UNION ALL
-
-SELECT 
-    'heading' AS item_type,
-    h.uuid,
-    h.content AS display_name,
-    '' AS description,
-    htm."order"
-FROM heading_to_module htm
-JOIN heading h ON htm.heading_uuid = h.uuid
-WHERE htm.module_uuid = ? AND h.course_uuid = ?
-
-ORDER BY "order" ASC
-`
-
-type GetModuleContentsParams struct {
-	ModuleUuid   string `json:"module_uuid"`
-	CourseUuid   string `json:"course_uuid"`
-	ModuleUuid_2 string `json:"module_uuid_2"`
-	CourseUuid_2 string `json:"course_uuid_2"`
-	ModuleUuid_3 string `json:"module_uuid_3"`
-	CourseUuid_3 string `json:"course_uuid_3"`
-}
-
-type GetModuleContentsRow struct {
-	ItemType    string `json:"item_type"`
-	Uuid        string `json:"uuid"`
-	DisplayName string `json:"display_name"`
-	Description string `json:"description"`
-	Order       int64  `json:"order"`
-}
-
-// * ModuleContents
-func (q *Queries) GetModuleContents(ctx context.Context, arg GetModuleContentsParams) ([]GetModuleContentsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getModuleContents,
-		arg.ModuleUuid,
-		arg.CourseUuid,
-		arg.ModuleUuid_2,
-		arg.CourseUuid_2,
-		arg.ModuleUuid_3,
-		arg.CourseUuid_3,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetModuleContentsRow
-	for rows.Next() {
-		var i GetModuleContentsRow
-		if err := rows.Scan(
-			&i.ItemType,
-			&i.Uuid,
-			&i.DisplayName,
-			&i.Description,
-			&i.Order,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const getPost = `-- name: GetPost :one

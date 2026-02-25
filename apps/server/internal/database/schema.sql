@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS material_to_module (
     module_uuid TEXT NOT NULL,
     material_uuid TEXT NOT NULL,
 
-    order INTEGER NOT NULL,
+    "order" INTEGER NOT NULL,
 
     FOREIGN KEY (material_uuid) REFERENCES material(uuid) ON DELETE CASCADE,
     FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS quiz_to_module (
     module_uuid TEXT NOT NULL,
     quiz_uuid TEXT NOT NULL,
 
-    order INTEGER NOT NULL,
+    "order" INTEGER NOT NULL,
 
     FOREIGN KEY (quiz_uuid) REFERENCES quiz(uuid) ON DELETE CASCADE,
     FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS heading_to_module (
     module_uuid TEXT NOT NULL,
     heading_uuid TEXT NOT NULL,
 
-    order INTEGER NOT NULL,
+    "order" INTEGER NOT NULL,
 
     FOREIGN KEY (heading_uuid) REFERENCES heading(uuid) ON DELETE CASCADE,
     FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE
