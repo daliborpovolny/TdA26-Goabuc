@@ -97,24 +97,145 @@ RETURNING *;
 
 --* Heading
 
---TODO create, read, update, delete
+-- name: CreateHeading :one
+INSERT INTO heading (
+    uuid, content, created_at, updated_at
+) VALUES (
+    ?, ?, ?, ?
+) RETURNING *;
+
+-- name: GetHeading :one
+SELECT * FROM heading WHERE uuid = ?;
+
+-- name: UpdateHeading :one
+UPDATE heading
+SET
+    content = ?,
+    updated_at = ?
+WHERE uuid = ?
+RETURNING *;
+
+-- name: DeleteHeading :exec
+DELETE FROM heading WHERE uuid = ?;
+
+
 
 --* Module to Others Pairings
 
---TODO must be able to both create and delete pairings
+-- HeadingToModule:
+
+-- name: AssignHeadingToModule :one
+INSERT INTO heading_to_module (
+    module_uuid, heading_uuid, order
+) VALUES (
+    ?, ?, ?
+) RETURNING *;
+
+-- name: ChangeHeadingInModuleOrder :one
+UPDATE heading_to_module
+SET order = ?
+WHERE heading_uuid = ? AND module_uuid = ?
+RETURNING *;
+
+-- name: RemoveHeadingFromModule :exec
+DELETE FROM heading_to_module WHERE heading_uuid = ? AND module_uuid = ?;
+
+
+-- MaterialToModule
+
+-- name: AssignMaterialToModule :one
+INSERT INTO material_to_module (
+    module_uuid, material_uuid, order
+) VALUES (
+    ?, ?, ?
+) RETURNING *;
+
+-- name: ChangeMaterialInModuleOrder :one
+UPDATE material_to_module
+SET order = ?
+WHERE material_uuid = ? AND module_uuid = ?
+RETURNING *;
+
+-- name: RemoveMaterialFromModule :exec
+DELETE FROM material_to_module WHERE material_uuid = ? AND module_uuid = ?;
+
+
+-- QuizToModule
+
+-- name: AssignQuizToModule :one
+INSERT INTO quiz_to_module (
+    module_uuid, quiz_uuid, order
+) VALUES (
+    ?, ?, ?
+) RETURNING *;
+
+-- name: ChangeQuizInModuleOrder :one
+UPDATE quiz_to_module
+SET order = ?
+WHERE quiz_uuid = ? AND module_uuid = ?
+RETURNING *;
+
+-- name: RemoveQuizFromModule :exec
+DELETE FROM quiz_to_module WHERE quiz_uuid = ? AND module_uuid = ?;
+
+
+--* ModuleContents
+
+-- name: GetModuleContents :many
+SELECT 
+    'material' AS item_type,
+    m.uuid,
+    m.name AS display_name,
+    m.description,
+    mtm."order"
+FROM material_to_module mtm
+JOIN material m ON mtm.material_uuid = m.uuid
+WHERE mtm.module_uuid = ? AND m.course_uuid = ?
+
+UNION ALL
+
+SELECT 
+    'quiz' AS item_type,
+    q.uuid,
+    q.title AS display_name,
+    '' AS description,
+    qtm."order"
+FROM quiz_to_module qtm
+JOIN quiz q ON qtm.quiz_uuid = q.uuid
+WHERE qtm.module_uuid = ? AND q.course_uuid = ?
+
+UNION ALL
+
+SELECT 
+    'heading' AS item_type,
+    h.uuid,
+    h.content AS display_name,
+    '' AS description,
+    htm."order"
+FROM heading_to_module htm
+JOIN heading h ON htm.heading_uuid = h.uuid
+WHERE htm.module_uuid = ? AND h.course_uuid = ?
+
+ORDER BY "order" ASC;
+
 
 
 --* Material
 
 -- name: CreateMaterial :one
 INSERT INTO material (
-    uuid, course_uuid, name, description, url, type, favicon_url, byte_size, mime_type, created_at, updated_at, module_uuid
+    uuid, course_uuid, name, description, url, type, favicon_url, byte_size, mime_type, created_at, updated_at
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 ) RETURNING *;
 
 -- name: UpdateMaterial :one
-UPDATE material SET name = ?, description = ?, url = ? WHERE material.uuid = ? RETURNING *;
+UPDATE material
+SET 
+    name = ?,
+    description = ?,
+    url = ?
+WHERE material.uuid = ? RETURNING *;
 
 -- name: DeleteMaterial :execresult
 DELETE FROM material WHERE material.uuid = ?;
@@ -137,17 +258,17 @@ SET
     updated_at  = sqlc.arg(updated_at)
 WHERE uuid = sqlc.arg(uuid) RETURNING *;
 
---* Quizz
+--* Quiz
 
--- name: CreateQuizz :one
-INSERT INTO quizz (
-    uuid, course_uuid, title, attempts_count, created_at, updated_at, module_uuid
+-- name: CreateQuiz :one
+INSERT INTO quiz (
+    uuid, course_uuid, title, attempts_count, created_at, updated_at
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?
 ) RETURNING *;
 
--- name: UpdateQuizz :one
-UPDATE quizz
+-- name: UpdateQuiz :one
+UPDATE quiz
 SET
     title =             COALESCE(sqlc.narg(title), title),
     attempts_count =    COALESCE(sqlc.narg(attempts_count), attempts_count),
@@ -156,19 +277,18 @@ WHERE uuid = sqlc.arg(uuid)
 RETURNING *;
 
 -- name: IncrementQuizAttemptsCount :exec
-UPDATE quizz
+UPDATE quiz
 SET
     attempts_count = attempts_count + 1
 WHERE uuid = ?;
 
--- name: DeleteQuizz :execresult
-DELETE FROM quizz WHERE uuid = ?;
+-- name: DeleteQuiz :execresult
+DELETE FROM quiz WHERE uuid = ?;
 
 -- name: GetQuiz :many
 SELECT
     qz.uuid AS quiz_uuid,
     qz.course_uuid AS course_uuid,
-    qz.module_uuid AS module_uuid,
 
     qz.title AS quiz_title,
     qz.attempts_count AS quiz_attempts_count,
@@ -181,17 +301,16 @@ SELECT
     qs.question_text AS question_text,
     qs.options AS question_options,
     qs.correct_indices AS question_correct_indices
-FROM quizz qz
+FROM quiz qz
 LEFT JOIN question qs
-    ON qs.quizz_uuid = qz.uuid
+    ON qs.quiz_uuid = qz.uuid
 WHERE qz.uuid = ?
 ORDER BY qs.question_order;
 
--- name: ListQuizzes :many
+-- name: ListQuizes :many
 SELECT
     qz.uuid AS quiz_uuid,
     qz.course_uuid AS course_uuid,
-    qz.module_uuid AS module_uuid,
 
     qz.title AS quiz_title,
     qz.attempts_count AS quiz_attempts_count,
@@ -204,16 +323,18 @@ SELECT
     qs.question_text AS question_text,
     qs.options AS question_options,
     qs.correct_indices AS question_correct_indices
-FROM quizz qz
+FROM quiz qz
 LEFT JOIN question qs
-    ON qs.quizz_uuid = qz.uuid
+    ON qs.quiz_uuid = qz.uuid
 WHERE qz.course_uuid = ?
 ORDER BY qz.uuid ASC, qs.question_order ASC;
+
+
 --* Question
 
 -- name: CreateQuestion :one
 INSERT INTO question (
-    uuid, quizz_uuid, question_order, type, question_text, options, correct_indices
+    uuid, quiz_uuid, question_order, type, question_text, options, correct_indices
 ) SELECT 
     sqlc.arg(uuid),
     sqlc.arg(quiz_uuid),
@@ -223,7 +344,7 @@ INSERT INTO question (
     sqlc.arg(options),
     sqlc.arg(correct_indices)
 FROM question
-WHERE quizz_uuid = sqlc.arg(quiz_uuid)
+WHERE quiz_uuid = sqlc.arg(quiz_uuid)
 RETURNING *;
 
 -- name: UpdateQuestion :one
@@ -235,10 +356,10 @@ SET
 RETURNING *;
 
 -- name: GetQuestionsOfQuiz :many
-SELECT * FROM question WHERE quizz_uuid = ?;
+SELECT * FROM question WHERE quiz_uuid = ?;
 
 -- name: DeleteQuestionsOfQuiz :execresult
-DELETE FROM question WHERE quizz_uuid = ?;
+DELETE FROM question WHERE quiz_uuid = ?;
 
 --* Answers
 
