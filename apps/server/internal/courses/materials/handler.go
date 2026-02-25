@@ -2,6 +2,7 @@ package materials
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
@@ -263,4 +264,23 @@ func (h *Handler) DeleteMaterial(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusNoContent)
+}
+
+func (h *Handler) ChangeMaterialInModuleOrder(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	materialId := c.Param("materialId")
+	moduleId := c.Param("moduleId")
+
+	orderStr := c.Param("order")
+	order, err := strconv.Atoi(orderStr)
+	if err != nil {
+		return r.Error(http.StatusBadRequest, "order must be a number")
+	}
+
+	_, err = h.service.ChangeMaterialInModuleOrder(materialId, moduleId, order, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+	return r.JSONMsg(http.StatusCreated, "changed the order")
 }

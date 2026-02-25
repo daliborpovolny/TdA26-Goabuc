@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
 
@@ -236,4 +237,23 @@ func (h *Handler) GetAnswersOfQuiz(c echo.Context) error {
 	fmt.Println(answers)
 
 	return c.JSON(http.StatusOK, answers)
+}
+
+func (h *Handler) ChangeQuizInModuleOrder(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	quizId := c.Param("quizId")
+	moduleId := c.Param("moduleId")
+
+	orderStr := c.Param("order")
+	order, err := strconv.Atoi(orderStr)
+	if err != nil {
+		return r.Error(http.StatusBadRequest, "order must be a number")
+	}
+
+	_, err = h.service.ChangeQuizInModuleOrder(quizId, moduleId, order, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+	return r.JSONMsg(http.StatusCreated, "changed the order")
 }
