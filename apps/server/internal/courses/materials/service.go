@@ -557,11 +557,11 @@ func (s *Service) DeleteMaterial(materialId string, ctx context.Context) error {
 
 // Material to Module
 
-func (s *Service) AssignMaterialToModule(MaterialId string, moduleId string, order int, ctx context.Context) (db.MaterialToModule, error) {
+func (s *Service) AssignMaterialToModule(materialId string, moduleId string, order int, ctx context.Context) (db.MaterialToModule, error) {
 
 	mm, err := s.q.AssignMaterialToModule(ctx, db.AssignMaterialToModuleParams{
 		ModuleUuid:   moduleId,
-		MaterialUuid: MaterialId,
+		MaterialUuid: materialId,
 		Order:        int64(order),
 	})
 	if err != nil {
@@ -571,11 +571,11 @@ func (s *Service) AssignMaterialToModule(MaterialId string, moduleId string, ord
 	return mm, nil
 }
 
-func (s *Service) ChangeMaterialInModuleOrder(MaterialId string, moduleId string, order int, ctx context.Context) (db.MaterialToModule, error) {
+func (s *Service) ChangeMaterialInModuleOrder(materialId string, moduleId string, order int, ctx context.Context) (db.MaterialToModule, error) {
 
 	mm, err := s.q.ChangeMaterialInModuleOrder(ctx, db.ChangeMaterialInModuleOrderParams{
 		ModuleUuid:   moduleId,
-		MaterialUuid: MaterialId,
+		MaterialUuid: materialId,
 		Order:        int64(order),
 	})
 	if err != nil {
@@ -585,11 +585,11 @@ func (s *Service) ChangeMaterialInModuleOrder(MaterialId string, moduleId string
 	return mm, nil
 }
 
-func (s *Service) RemoveMaterialToModule(MaterialId string, moduleId string, order int, ctx context.Context) error {
+func (s *Service) RemoveMaterialToModule(materialId string, moduleId string, order int, ctx context.Context) error {
 
 	err := s.q.RemoveMaterialFromModule(ctx, db.RemoveMaterialFromModuleParams{
 		ModuleUuid:   moduleId,
-		MaterialUuid: MaterialId,
+		MaterialUuid: materialId,
 	})
 	if err != nil {
 		return err
