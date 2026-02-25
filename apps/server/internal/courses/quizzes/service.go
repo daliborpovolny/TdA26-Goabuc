@@ -95,7 +95,7 @@ func (s *Service) CreateQuiz(quiz Quiz, courseId string, ctx context.Context) (*
 
 	now := time.Now().Unix()
 
-	dbQuiz, err := s.q.CreateQuizz(ctx, db.CreateQuizzParams{
+	dbQuiz, err := s.q.CreateQuiz(ctx, db.CreateQuizParams{
 		Uuid:          quiz.Uuid,
 		CourseUuid:    courseId,
 		Title:         quiz.Title,
@@ -141,7 +141,7 @@ func (s *Service) CreateQuiz(quiz Quiz, courseId string, ctx context.Context) (*
 
 }
 
-func (s *Service) dbQuizToQuiz(dbQuiz db.Quizz, questions []db.Question) (*Quiz, error) {
+func (s *Service) dbQuizToQuiz(dbQuiz db.Quiz, questions []db.Question) (*Quiz, error) {
 	quiz := &Quiz{
 		Uuid:          dbQuiz.Uuid,
 		Title:         dbQuiz.Title,
@@ -204,7 +204,7 @@ func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 		return nil, err
 	}
 
-	dbQuiz, err := s.q.UpdateQuizz(ctx, db.UpdateQuizzParams{
+	dbQuiz, err := s.q.UpdateQuiz(ctx, db.UpdateQuizParams{
 		Title:         utils.ToSqlNullString(&quiz.Title),
 		AttemptsCount: sql.NullInt64{Int64: 0, Valid: false},
 		UpdatedAt:     sql.NullInt64{Int64: time.Now().Unix(), Valid: true},
@@ -326,7 +326,7 @@ func (s *Service) GetQuiz(quizId string, ctx context.Context) (*Quiz, error) {
 	return quiz, nil
 }
 
-func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizzesRow) ([]Quiz, error) {
+func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizesRow) ([]Quiz, error) {
 	if len(rows) < 1 {
 		return []Quiz{}, nil
 	}
@@ -386,7 +386,7 @@ func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizzesRow) ([]Quiz
 
 func (s *Service) ListQuizes(courseId string, ctx context.Context) ([]Quiz, error) {
 
-	rows, err := s.q.ListQuizzes(ctx, courseId)
+	rows, err := s.q.ListQuizes(ctx, courseId)
 	if err != nil {
 		return nil, err
 	}
@@ -406,7 +406,7 @@ func (s *Service) ListQuizes(courseId string, ctx context.Context) ([]Quiz, erro
 
 func (s *Service) DeleteQuiz(quizId string, ctx context.Context) error {
 
-	res, err := s.q.DeleteQuizz(ctx, quizId)
+	res, err := s.q.DeleteQuiz(ctx, quizId)
 	if err != nil {
 		fmt.Println("error deleting", err)
 		return err

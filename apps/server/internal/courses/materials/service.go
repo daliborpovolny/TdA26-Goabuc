@@ -326,7 +326,6 @@ func (s *Service) CreateFileMaterial(req *CreateFileMaterialRequest, materialId 
 	dbMat, err := s.q.CreateMaterial(ctx, db.CreateMaterialParams{
 		Uuid:        materialId,
 		CourseUuid:  req.CourseId,
-		ModuleUuid:  sql.NullString{String: req.ModuleId, Valid: req.ModuleId != ""},
 		Name:        req.Name,
 		Description: req.Description,
 		Url:         url,
@@ -368,7 +367,6 @@ func (s *Service) CreateUrlMaterial(req CreateUrlMaterialRequest, materialId str
 	dbMat, err := s.q.CreateMaterial(ctx, db.CreateMaterialParams{
 		Uuid:        materialId,
 		CourseUuid:  req.CourseId,
-		ModuleUuid:  sql.NullString{String: req.ModuleId, Valid: req.ModuleId != ""},
 		Name:        req.Name,
 		Description: req.Description,
 		Url:         req.Url,
