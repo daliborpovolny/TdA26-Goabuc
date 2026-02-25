@@ -18,6 +18,9 @@ import (
 	"github.com/google/uuid"
 )
 
+// this variable controls whether quiz can exist withouth being part of a module
+var QUIZ_CAN_EXIST_ALONE = true
+
 type Service struct {
 	q            *db.Queries
 	staticPath   string
@@ -34,6 +37,9 @@ type Quiz struct {
 	AttemptsCount int        `json:"attemptsCount"`
 	Questions     []Question `json:"questions"`
 	CreatedAt     string     `json:"createdAt"`
+
+	ModuleId    *string `json:"moduleId"`
+	ModuleOrder *int    `json:"moduleOrder"`
 }
 
 type Question struct {
@@ -309,6 +315,15 @@ func (s *Service) convertGetQuizRowsToQuiz(rows []db.GetQuizRow) (*Quiz, error) 
 	return quiz, nil
 }
 
+func (s *Service) CheckQuizExists(quizId string, ctx context.Context) bool {
+	rows, err := s.q.GetQuiz(ctx, quizId)
+	if err != nil {
+		fmt.Println("Check if quiz exists failed, uuid: ", quizId)
+		return false
+	}
+	return len(rows) != 0
+}
+
 func (s *Service) GetQuiz(quizId string, ctx context.Context) (*Quiz, error) {
 
 	rows, err := s.q.GetQuiz(ctx, quizId)
@@ -563,4 +578,44 @@ func (s *Service) GetAnswersOfQuiz(quizId string, ctx context.Context) ([]Outcom
 	}
 
 	return outcomes, nil
+}
+
+func (s *Service) AssignQuizToModule(QuizId string, moduleId string, order int, ctx context.Context) (db.QuizToModule, error) {
+
+	mm, err := s.q.AssignQuizToModule(ctx, db.AssignQuizToModuleParams{
+		ModuleUuid: moduleId,
+		QuizUuid:   QuizId,
+		Order:      int64(order),
+	})
+	if err != nil {
+		return db.QuizToModule{}, err
+	}
+
+	return mm, nil
+}
+
+func (s *Service) ChangeQuizInModuleOrder(QuizId string, moduleId string, order int, ctx context.Context) (db.QuizToModule, error) {
+
+	mm, err := s.q.ChangeQuizInModuleOrder(ctx, db.ChangeQuizInModuleOrderParams{
+		ModuleUuid: moduleId,
+		QuizUuid:   QuizId,
+		Order:      int64(order),
+	})
+	if err != nil {
+		return db.QuizToModule{}, err
+	}
+
+	return mm, nil
+}
+
+func (s *Service) RemoveQuizToModule(QuizId string, moduleId string, order int, ctx context.Context) error {
+
+	err := s.q.RemoveQuizFromModule(ctx, db.RemoveQuizFromModuleParams{
+		ModuleUuid: moduleId,
+		QuizUuid:   QuizId,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

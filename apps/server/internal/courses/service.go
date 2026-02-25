@@ -165,7 +165,7 @@ func (s *Service) ChangeCourseState(courseId string, state string, ctx context.C
 	return course, err
 }
 
-// modules
+//* Modules
 
 func (s *Service) CreateModule(courseId string, moduleId string, name string, ctx context.Context) (db.Module, error) {
 

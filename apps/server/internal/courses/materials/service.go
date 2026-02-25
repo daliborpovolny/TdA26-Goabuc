@@ -19,6 +19,10 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 )
 
+// this variable controls whether a material can exist withouth being part of a module
+var MATERIAL_CAN_EXIST_ALONE = true
+
+// max file size in bytes
 var MAX_SIZE = int64(30 * 1024 * 1024)
 
 var ALLOWED_FILES = map[string]bool{
@@ -57,6 +61,7 @@ var EXT_TO_MIME = map[string]string{
 
 type Material interface {
 	GetType() string
+	GetUuid() string
 }
 
 type FileMaterial struct {
@@ -74,6 +79,10 @@ func (f FileMaterial) GetType() string {
 	return f.Type
 }
 
+func (f FileMaterial) GetUuid() string {
+	return f.Uuid
+}
+
 type UrlMaterial struct {
 	Uuid        string `json:"uuid"`
 	ModuleUuid  string `json:"module_uuid"`
@@ -87,6 +96,10 @@ type UrlMaterial struct {
 
 func (f UrlMaterial) GetType() string {
 	return f.Type
+}
+
+func (f UrlMaterial) GetUuid() string {
+	return f.Uuid
 }
 
 type Service struct {
@@ -115,6 +128,18 @@ func (s *Service) deriveFaviconUrl(url string) string {
 	urlParts := strings.Split(url, "/")
 	faviconUrl := urlParts[0] + "/favicon.ico"
 	return faviconUrl
+}
+
+func (s *Service) CheckMaterialExists(materialId string, ctx context.Context) bool {
+	_, err := s.q.GetMaterial(ctx, materialId)
+	if err != nil {
+		if utils.IsNoRowsError(err) {
+			return false
+		}
+		fmt.Println("Check if material exists failed, uuid:", materialId)
+		return false
+	}
+	return true
 }
 
 func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx context.Context) ([]Material, error) {
@@ -527,5 +552,47 @@ func (s *Service) DeleteMaterial(materialId string, ctx context.Context) error {
 		return ErrCourseNotFound
 	}
 
+	return nil
+}
+
+// Material to Module
+
+func (s *Service) AssignMaterialToModule(MaterialId string, moduleId string, order int, ctx context.Context) (db.MaterialToModule, error) {
+
+	mm, err := s.q.AssignMaterialToModule(ctx, db.AssignMaterialToModuleParams{
+		ModuleUuid:   moduleId,
+		MaterialUuid: MaterialId,
+		Order:        int64(order),
+	})
+	if err != nil {
+		return db.MaterialToModule{}, err
+	}
+
+	return mm, nil
+}
+
+func (s *Service) ChangeMaterialInModuleOrder(MaterialId string, moduleId string, order int, ctx context.Context) (db.MaterialToModule, error) {
+
+	mm, err := s.q.ChangeMaterialInModuleOrder(ctx, db.ChangeMaterialInModuleOrderParams{
+		ModuleUuid:   moduleId,
+		MaterialUuid: MaterialId,
+		Order:        int64(order),
+	})
+	if err != nil {
+		return db.MaterialToModule{}, err
+	}
+
+	return mm, nil
+}
+
+func (s *Service) RemoveMaterialToModule(MaterialId string, moduleId string, order int, ctx context.Context) error {
+
+	err := s.q.RemoveMaterialFromModule(ctx, db.RemoveMaterialFromModuleParams{
+		ModuleUuid:   moduleId,
+		MaterialUuid: MaterialId,
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }

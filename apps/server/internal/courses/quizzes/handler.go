@@ -71,6 +71,24 @@ func (h *Handler) CreateQuiz(c echo.Context) error {
 
 		return r.ServerError(err)
 	}
+
+	// for now modules are optional
+	if quiz.ModuleId != nil {
+		if quiz.ModuleOrder == nil {
+			return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
+		}
+
+		moduleId := *quiz.ModuleId
+		order := *quiz.ModuleOrder
+
+		_, err := h.service.AssignQuizToModule(dbQuiz.Uuid, moduleId, order, r.Ctx)
+		if err != nil {
+			return r.ServerError(err)
+		}
+	} else if !QUIZ_CAN_EXIST_ALONE {
+		return r.Error(http.StatusBadRequest, "quiz must always be part of a module")
+	}
+
 	return r.Echo.JSON(http.StatusCreated, dbQuiz)
 }
 

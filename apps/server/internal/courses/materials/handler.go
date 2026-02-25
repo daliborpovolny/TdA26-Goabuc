@@ -63,12 +63,13 @@ func (h *Handler) CreateMaterial(c echo.Context) error {
 type CreateFileMaterialRequest struct {
 	CourseId string `param:"courseId"`
 
-	ModuleId string `param:"moduleId"`
-
 	MatType string `form:"type"`
 	Name    string `form:"name"`
 
 	Description string `form:"description"`
+
+	ModuleId    *string `form:"moduleId"`
+	ModuleOrder *int    `form:"moduleOrder"`
 }
 
 func (h *Handler) createFileMaterial(r *handlers.RequestCtx) error {
@@ -103,19 +104,36 @@ func (h *Handler) createFileMaterial(r *handlers.RequestCtx) error {
 		return r.ServerError(err)
 	}
 
+	if req.ModuleId != nil {
+		if req.ModuleOrder == nil {
+			return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
+		}
+
+		moduleId := *req.ModuleId
+		order := *req.ModuleOrder
+
+		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), moduleId, order, r.Ctx)
+		if err != nil {
+			return r.ServerError(err)
+		}
+	} else if !MATERIAL_CAN_EXIST_ALONE {
+		return r.Error(http.StatusBadRequest, "material must always be part of a module")
+	}
+
 	return r.Echo.JSON(http.StatusCreated, mat)
 }
 
 type CreateUrlMaterialRequest struct {
 	CourseId string `param:"courseId"`
 
-	ModuleId string `param:"moduleId"`
-
 	MatType string `json:"type"`
 	Name    string `json:"name"`
 	Url     string `json:"url"`
 
 	Description string `json:"description"`
+
+	ModuleId    *string `json:"moduleId"`
+	ModuleOrder *int    `json:"moduleOrder"`
 }
 
 func (h *Handler) createUrlMaterial(r *handlers.RequestCtx) error {
@@ -135,6 +153,22 @@ func (h *Handler) createUrlMaterial(r *handlers.RequestCtx) error {
 	mat, err := h.service.CreateUrlMaterial(req, uuid.NewString(), r.Ctx)
 	if err != nil {
 		return r.ServerError(err)
+	}
+
+	if req.ModuleId != nil {
+		if req.ModuleOrder == nil {
+			return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
+		}
+
+		moduleId := *req.ModuleId
+		order := *req.ModuleOrder
+
+		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), moduleId, order, r.Ctx)
+		if err != nil {
+			return r.ServerError(err)
+		}
+	} else if !MATERIAL_CAN_EXIST_ALONE {
+		return r.Error(http.StatusBadRequest, "material must always be part of a module")
 	}
 
 	return r.Echo.JSON(http.StatusCreated, mat)
