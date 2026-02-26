@@ -67,11 +67,10 @@ WHERE uuid = ? RETURNING *;
 
 -- name: CreateModule :one
 INSERT INTO module (
-    uuid, course_uuid, name, description, created_at, updated_at
+    uuid, course_uuid, name, description,state, created_at, updated_at
 ) VALUES (
-    ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?
 ) RETURNING *;
-
 
 -- name: ChangeModuleState :one
 UPDATE module
@@ -85,6 +84,9 @@ SELECT EXISTS (SELECT 1 FROM module WHERE uuid = ?) AS module_exists;
 
 -- name: GetModule :one
 SELECT * FROM module WHERE uuid = ? AND course_uuid = ?;
+
+-- name: ListCourseModules :many
+SELECT * FROM module WHERE course_uuid = ?;
 
 -- name: UpdateModule :one
 UPDATE module
@@ -247,7 +249,13 @@ DELETE FROM material WHERE material.uuid = ?;
 SELECT * FROM material WHERE material.uuid = ?;
 
 -- name: ListAllMaterialsOfCourse :many
-SELECT * FROM material WHERE material.course_uuid = ? ORDER BY created_at DESC;
+SELECT
+    *
+    -- material_to_module."order"
+FROM material
+JOIN material_to_module ON material_to_module.material_uuid = material.uuid
+WHERE material.course_uuid = ? 
+ORDER BY created_at DESC;
 
 -- name: UpdateMaterialPartial :one
 UPDATE material
@@ -307,6 +315,7 @@ SELECT
 FROM quiz qz
 LEFT JOIN question qs
     ON qs.quiz_uuid = qz.uuid
+-- JOIN quiz_to_module ON quiz_to_module.quiz_uuid = qz.uuid
 WHERE qz.uuid = ?
 ORDER BY qs.question_order;
 
@@ -325,10 +334,16 @@ SELECT
     qs.type AS question_type,
     qs.question_text AS question_text,
     qs.options AS question_options,
-    qs.correct_indices AS question_correct_indices
+    qs.correct_indices AS question_correct_indices,
+
+    qm."order" AS module_order,
+    qm.module_uuid
+
 FROM quiz qz
-LEFT JOIN question qs
+JOIN question qs
     ON qs.quiz_uuid = qz.uuid
+JOIN quiz_to_module as qm
+    ON qm.quiz_uuid = qz.uuid
 WHERE qz.course_uuid = ?
 ORDER BY qz.uuid ASC, qs.question_order ASC;
 

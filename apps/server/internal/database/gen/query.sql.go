@@ -90,9 +90,9 @@ WHERE uuid = ? RETURNING uuid, name, description, created_at, updated_at, archiv
 `
 
 type ChangeCourseStateParams struct {
-	State     interface{} `json:"state"`
-	UpdatedAt int64       `json:"updated_at"`
-	Uuid      string      `json:"uuid"`
+	State     string `json:"state"`
+	UpdatedAt int64  `json:"updated_at"`
+	Uuid      string `json:"uuid"`
 }
 
 func (q *Queries) ChangeCourseState(ctx context.Context, arg ChangeCourseStateParams) (Course, error) {
@@ -159,9 +159,9 @@ WHERE uuid = ? RETURNING uuid, course_uuid, name, description, state, created_at
 `
 
 type ChangeModuleStateParams struct {
-	State     interface{} `json:"state"`
-	UpdatedAt int64       `json:"updated_at"`
-	Uuid      string      `json:"uuid"`
+	State     string `json:"state"`
+	UpdatedAt int64  `json:"updated_at"`
+	Uuid      string `json:"uuid"`
 }
 
 func (q *Queries) ChangeModuleState(ctx context.Context, arg ChangeModuleStateParams) (Module, error) {
@@ -266,7 +266,7 @@ INSERT INTO heading (
     uuid, content, created_at, updated_at
 ) VALUES (
     ?, ?, ?, ?
-) RETURNING uuid, course_uuid, content, created_at, updated_at
+) RETURNING uuid, course_uuid, content, variant, created_at, updated_at
 `
 
 type CreateHeadingParams struct {
@@ -289,6 +289,7 @@ func (q *Queries) CreateHeading(ctx context.Context, arg CreateHeadingParams) (H
 		&i.Uuid,
 		&i.CourseUuid,
 		&i.Content,
+		&i.Variant,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -353,9 +354,9 @@ func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) 
 const createModule = `-- name: CreateModule :one
 
 INSERT INTO module (
-    uuid, course_uuid, name, description, created_at, updated_at
+    uuid, course_uuid, name, description,state, created_at, updated_at
 ) VALUES (
-    ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?
 ) RETURNING uuid, course_uuid, name, description, state, created_at, updated_at
 `
 
@@ -364,6 +365,7 @@ type CreateModuleParams struct {
 	CourseUuid  string `json:"course_uuid"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	State       string `json:"state"`
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
 }
@@ -375,6 +377,7 @@ func (q *Queries) CreateModule(ctx context.Context, arg CreateModuleParams) (Mod
 		arg.CourseUuid,
 		arg.Name,
 		arg.Description,
+		arg.State,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
@@ -706,7 +709,7 @@ func (q *Queries) GetCourse(ctx context.Context, uuid string) (Course, error) {
 }
 
 const getHeading = `-- name: GetHeading :one
-SELECT uuid, course_uuid, content, created_at, updated_at FROM heading WHERE uuid = ?
+SELECT uuid, course_uuid, content, variant, created_at, updated_at FROM heading WHERE uuid = ?
 `
 
 func (q *Queries) GetHeading(ctx context.Context, uuid string) (Heading, error) {
@@ -716,6 +719,7 @@ func (q *Queries) GetHeading(ctx context.Context, uuid string) (Heading, error) 
 		&i.Uuid,
 		&i.CourseUuid,
 		&i.Content,
+		&i.Variant,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -994,6 +998,7 @@ type GetQuizRow struct {
 	QuestionCorrectIndices sql.NullString `json:"question_correct_indices"`
 }
 
+// JOIN quiz_to_module ON quiz_to_module.quiz_uuid = qz.uuid
 func (q *Queries) GetQuiz(ctx context.Context, uuid string) ([]GetQuizRow, error) {
 	rows, err := q.db.QueryContext(ctx, getQuiz, uuid)
 	if err != nil {
@@ -1218,18 +1223,41 @@ func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
 }
 
 const listAllMaterialsOfCourse = `-- name: ListAllMaterialsOfCourse :many
-SELECT uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at FROM material WHERE material.course_uuid = ? ORDER BY created_at DESC
+SELECT
+    uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at, module_uuid, material_uuid, "order"
+    -- material_to_module."order"
+FROM material
+JOIN material_to_module ON material_to_module.material_uuid = material.uuid
+WHERE material.course_uuid = ? 
+ORDER BY created_at DESC
 `
 
-func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid string) ([]Material, error) {
+type ListAllMaterialsOfCourseRow struct {
+	Uuid         string         `json:"uuid"`
+	CourseUuid   string         `json:"course_uuid"`
+	Name         string         `json:"name"`
+	Description  string         `json:"description"`
+	Url          string         `json:"url"`
+	Type         string         `json:"type"`
+	FaviconUrl   sql.NullString `json:"favicon_url"`
+	MimeType     sql.NullString `json:"mime_type"`
+	ByteSize     sql.NullInt64  `json:"byte_size"`
+	CreatedAt    int64          `json:"created_at"`
+	UpdatedAt    int64          `json:"updated_at"`
+	ModuleUuid   string         `json:"module_uuid"`
+	MaterialUuid string         `json:"material_uuid"`
+	Order        int64          `json:"order"`
+}
+
+func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid string) ([]ListAllMaterialsOfCourseRow, error) {
 	rows, err := q.db.QueryContext(ctx, listAllMaterialsOfCourse, courseUuid)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Material
+	var items []ListAllMaterialsOfCourseRow
 	for rows.Next() {
-		var i Material
+		var i ListAllMaterialsOfCourseRow
 		if err := rows.Scan(
 			&i.Uuid,
 			&i.CourseUuid,
@@ -1240,6 +1268,44 @@ func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid strin
 			&i.FaviconUrl,
 			&i.MimeType,
 			&i.ByteSize,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ModuleUuid,
+			&i.MaterialUuid,
+			&i.Order,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCourseModules = `-- name: ListCourseModules :many
+SELECT uuid, course_uuid, name, description, state, created_at, updated_at FROM module WHERE course_uuid = ?
+`
+
+func (q *Queries) ListCourseModules(ctx context.Context, courseUuid string) ([]Module, error) {
+	rows, err := q.db.QueryContext(ctx, listCourseModules, courseUuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Module
+	for rows.Next() {
+		var i Module
+		if err := rows.Scan(
+			&i.Uuid,
+			&i.CourseUuid,
+			&i.Name,
+			&i.Description,
+			&i.State,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -1271,27 +1337,35 @@ SELECT
     qs.type AS question_type,
     qs.question_text AS question_text,
     qs.options AS question_options,
-    qs.correct_indices AS question_correct_indices
+    qs.correct_indices AS question_correct_indices,
+
+    qm."order" AS module_order,
+    qm.module_uuid
+
 FROM quiz qz
-LEFT JOIN question qs
+JOIN question qs
     ON qs.quiz_uuid = qz.uuid
+JOIN quiz_to_module as qm
+    ON qm.quiz_uuid = qz.uuid
 WHERE qz.course_uuid = ?
 ORDER BY qz.uuid ASC, qs.question_order ASC
 `
 
 type ListQuizesRow struct {
-	QuizUuid               string         `json:"quiz_uuid"`
-	CourseUuid             string         `json:"course_uuid"`
-	QuizTitle              string         `json:"quiz_title"`
-	QuizAttemptsCount      int64          `json:"quiz_attempts_count"`
-	QuizCreatedAt          int64          `json:"quiz_created_at"`
-	QuizUpdatedAt          int64          `json:"quiz_updated_at"`
-	QuestionUuid           sql.NullString `json:"question_uuid"`
-	QuestionOrder          sql.NullInt64  `json:"question_order"`
-	QuestionType           sql.NullString `json:"question_type"`
-	QuestionText           sql.NullString `json:"question_text"`
-	QuestionOptions        sql.NullString `json:"question_options"`
-	QuestionCorrectIndices sql.NullString `json:"question_correct_indices"`
+	QuizUuid               string `json:"quiz_uuid"`
+	CourseUuid             string `json:"course_uuid"`
+	QuizTitle              string `json:"quiz_title"`
+	QuizAttemptsCount      int64  `json:"quiz_attempts_count"`
+	QuizCreatedAt          int64  `json:"quiz_created_at"`
+	QuizUpdatedAt          int64  `json:"quiz_updated_at"`
+	QuestionUuid           string `json:"question_uuid"`
+	QuestionOrder          int64  `json:"question_order"`
+	QuestionType           string `json:"question_type"`
+	QuestionText           string `json:"question_text"`
+	QuestionOptions        string `json:"question_options"`
+	QuestionCorrectIndices string `json:"question_correct_indices"`
+	ModuleOrder            int64  `json:"module_order"`
+	ModuleUuid             string `json:"module_uuid"`
 }
 
 func (q *Queries) ListQuizes(ctx context.Context, courseUuid string) ([]ListQuizesRow, error) {
@@ -1316,6 +1390,8 @@ func (q *Queries) ListQuizes(ctx context.Context, courseUuid string) ([]ListQuiz
 			&i.QuestionText,
 			&i.QuestionOptions,
 			&i.QuestionCorrectIndices,
+			&i.ModuleOrder,
+			&i.ModuleUuid,
 		); err != nil {
 			return nil, err
 		}
@@ -1420,7 +1496,7 @@ SET
     content = ?,
     updated_at = ?
 WHERE uuid = ?
-RETURNING uuid, course_uuid, content, created_at, updated_at
+RETURNING uuid, course_uuid, content, variant, created_at, updated_at
 `
 
 type UpdateHeadingParams struct {
@@ -1436,6 +1512,7 @@ func (q *Queries) UpdateHeading(ctx context.Context, arg UpdateHeadingParams) (H
 		&i.Uuid,
 		&i.CourseUuid,
 		&i.Content,
+		&i.Variant,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

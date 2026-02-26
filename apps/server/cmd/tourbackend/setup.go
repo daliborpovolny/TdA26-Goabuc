@@ -71,7 +71,12 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		return err
 	}
 
-	_, err = ms.CreateUrlMaterial(materials.CreateUrlMaterialRequest{
+	module, err := cs.CreateModule(course1.Uuid, uuid.NewString(), "Module 1", "light introduction to the course", ctx)
+	if err != nil {
+		fmt.Println("create course 1 module failed")
+	}
+
+	m1, err := ms.CreateUrlMaterial(materials.CreateUrlMaterialRequest{
 		CourseId:    course1.Uuid,
 		MatType:     "url",
 		Url:         "https://www.youtube.com/watch?v=FtES7Gd5gHE",
@@ -83,7 +88,13 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		return err
 	}
 
-	_, err = ms.CreateUrlMaterial(materials.CreateUrlMaterialRequest{
+	_, err = ms.AssignMaterialToModule(m1.GetUuid(), module.Uuid, 1, ctx)
+	if err != nil {
+		fmt.Println("assign material 1 to course 1 module 1 failed")
+		return err
+	}
+
+	m2, err := ms.CreateUrlMaterial(materials.CreateUrlMaterialRequest{
 		CourseId:    course1.Uuid,
 		MatType:     "url",
 		Url:         "https://www.youtube.com/watch?v=2taUjbCb3N8",
@@ -92,6 +103,12 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 	}, uuid.NewString(), ctx)
 	if err != nil {
 		fmt.Println("create course 1 url material 2 failed")
+		return err
+	}
+
+	_, err = ms.AssignMaterialToModule(m2.GetUuid(), module.Uuid, 2, ctx)
+	if err != nil {
+		fmt.Println("assign material 2 to course 1 module 1 failed")
 		return err
 	}
 
@@ -117,17 +134,24 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 			},
 		},
 	}
-	_, err = qs.CreateQuiz(quiz1, course1.Uuid, ctx)
+	quizSaved, err := qs.CreateQuiz(quiz1, course1.Uuid, ctx)
 	if err != nil {
 		fmt.Println("create course 1 quiz failed")
 		return err
 	}
 
-	_, err = fs.CreateAutomaticPost("Pottery Course Has Been Published!", course1.Uuid, ctx)
+	_, err = fs.CreateManualPost(ctx, course1.Uuid, "Pottery Course Has Been Published!")
 	if err != nil {
-		fmt.Println("create course 1 automatic post failed")
+		fmt.Println("create course 1 manual post failed")
 		return err
 	}
+
+	_, err = qs.AssignQuizToModule(quizSaved.Uuid, module.Uuid, 3, ctx)
+	if err != nil {
+		fmt.Println("assign quiz to course 1 module 1 failed")
+	}
+
+	return nil
 
 	//* Course 2
 

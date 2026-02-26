@@ -32,14 +32,25 @@ func NewService(queries *db.Queries, staticPath string, feedsService *feeds.Serv
 }
 
 type Quiz struct {
-	Uuid          string     `json:"uuid"`
+	Uuid string `json:"uuid"`
+
 	Title         string     `json:"title"`
 	AttemptsCount int        `json:"attemptsCount"`
 	Questions     []Question `json:"questions"`
-	CreatedAt     string     `json:"createdAt"`
 
-	ModuleId    *string `json:"moduleId"`
-	ModuleOrder *int    `json:"moduleOrder"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+
+	ModuleId    string `json:"moduleId"`
+	ModuleOrder int    `json:"moduleOrder"`
+}
+
+func (q Quiz) GetModuleOrder() int {
+	return q.ModuleOrder
+}
+
+func (q Quiz) GetModuleId() string {
+	return q.ModuleId
 }
 
 type Question struct {
@@ -263,6 +274,7 @@ func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 	return s.dbQuizToQuiz(dbQuiz, dbQuestions)
 }
 
+// TODO CONVERT TO GIVE OUT MODULE DATA TOO
 func (s *Service) convertGetQuizRowsToQuiz(rows []db.GetQuizRow) (*Quiz, error) {
 	if len(rows) < 1 {
 		return nil, ErrQuizNotFound
@@ -351,7 +363,7 @@ func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizesRow) ([]Quiz,
 	currentQuizIndex := -1
 
 	for _, qr := range rows {
-		if qr.QuestionUuid.String == "" {
+		if qr.QuestionUuid == "" {
 			continue
 		}
 
@@ -364,12 +376,18 @@ func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizesRow) ([]Quiz,
 				Title:         qr.QuizTitle,
 				AttemptsCount: int(qr.QuizAttemptsCount),
 				Questions:     make([]Question, 0, len(rows)),
+
+				CreatedAt: utils.UnixToIso(qr.QuizCreatedAt),
+				UpdatedAt: utils.UnixToIso(qr.QuizUpdatedAt),
+
+				ModuleId:    qr.ModuleUuid,
+				ModuleOrder: int(qr.ModuleOrder),
 			})
 		}
 
-		options := strings.Split(qr.QuestionOptions.String, "|")
+		options := strings.Split(qr.QuestionOptions, "|")
 
-		correctStringIndices := strings.Split(qr.QuestionCorrectIndices.String, "|")
+		correctStringIndices := strings.Split(qr.QuestionCorrectIndices, "|")
 		correctIndices := make([]int, 0, len(correctStringIndices))
 		for _, stringIndex := range correctStringIndices {
 			index, err := strconv.Atoi(stringIndex)
@@ -379,9 +397,9 @@ func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizesRow) ([]Quiz,
 			correctIndices = append(correctIndices, index)
 		}
 		qs := Question{
-			Uuid:     qr.QuestionUuid.String,
-			QueType:  qr.QuestionType.String,
-			Question: qr.QuestionText.String,
+			Uuid:     qr.QuestionUuid,
+			QueType:  qr.QuestionType,
+			Question: qr.QuestionText,
 			Options:  options,
 		}
 

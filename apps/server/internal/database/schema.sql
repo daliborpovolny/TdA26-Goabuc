@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS course (
     updated_at INTEGER NOT NULL,
 
     archived INTEGER NOT NULL DEFAULT 0,
-    state TEXT NOT NULL DEFAULT "preparation" -- preparation | open | closed
+    state TEXT NOT NULL DEFAULT 'preparation' -- preparation | open | closed
 
 
 );
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS module (
 
     name TEXT NOT NULL,
     description TEXT NOT NULL,
-    state TEXT NOT NULL DEFAULT "preparation",  -- preparation | open | closed
+    state TEXT NOT NULL DEFAULT 'preparation',  -- preparation | open | closed
     
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
@@ -76,11 +76,16 @@ CREATE TABLE IF NOT EXISTS quiz_to_module (
     FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE
 );
 
+
+-- heading could be in the future used as a general styling unit - 
+-- ei variant of X means title, variant of Y means longer text, varint Z horizontal line etc...
+-- variant Y red warning text balh blah so on, endless options....
 CREATE TABLE IF NOT EXISTS heading (
     uuid TEXT NOT NULL,
     course_uuid TEXT NOT NULL,
 
     content TEXT NOT NULL,
+    variant TEXT NOT NULL, -- "heading" | ..... - this is just an idea for the future 
 
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,

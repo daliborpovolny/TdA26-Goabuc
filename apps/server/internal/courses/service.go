@@ -1,6 +1,7 @@
 package courses
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -42,6 +43,25 @@ func NewService(queries *db.Queries, materialsService *materials.Service, quizze
 	}
 }
 
+type Module struct {
+	Uuid       string `json:"uuid"`
+	CourseUuid string `json:"courseUuid"`
+
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	State       string `json:"state"`
+
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+
+	Items []Item `json:"items"`
+}
+
+type Item interface {
+	GetModuleOrder() int
+	GetModuleId() string
+}
+
 func (s *Service) CreateCourse(params db.CreateCourseParams, ctx context.Context) (*db.Course, error) {
 	course, err := s.q.CreateCourse(ctx, params)
 	if err != nil {
@@ -52,12 +72,16 @@ func (s *Service) CreateCourse(params db.CreateCourseParams, ctx context.Context
 }
 
 type GetCourseResponse struct {
-	Uuid        string                   `json:"uuid"`
-	Name        string                   `json:"name"`
-	Description string                   `json:"description"`
-	Materials   []materials.Material     `json:"materials"`
-	Quizzes     []quizzes.Quiz           `json:"quizzes"`
-	Feed        []feeds.FeedPostResponse `json:"feed"`
+	Uuid        string `json:"uuid"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+
+	Materials []materials.Material `json:"materials"`
+	Quizzes   []quizzes.Quiz       `json:"quizzes"`
+
+	Feed []feeds.FeedPostResponse `json:"feed"`
+
+	Modules []Module `json:"modules"`
 }
 
 func (s *Service) GetCourse(courseId string, host string, scheme string, ctx context.Context) (*GetCourseResponse, error) {
@@ -87,17 +111,65 @@ func (s *Service) GetCourse(courseId string, host string, scheme string, ctx con
 		return nil, err
 	}
 
+	dbModules, err := s.q.ListCourseModules(ctx, courseId)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	modules := make([]Module, 0, len(dbModules))
+
+	for _, dbModule := range dbModules {
+		items := make([]Item, 0, 10)
+
+		for _, quiz := range quizzes {
+			if quiz.ModuleId == dbModule.Uuid {
+				items = append(items, quiz)
+			}
+		}
+
+		for _, mat := range mats {
+			if mat.GetModuleId() == dbModule.Uuid {
+				items = append(items, mat)
+			}
+		}
+
+		slices.SortFunc(items, func(a, b Item) int {
+			return cmp.Compare(a.GetModuleOrder(), b.GetModuleOrder())
+		})
+
+		modules = append(modules, Module{
+			Uuid:       dbModule.Uuid,
+			CourseUuid: dbModule.CourseUuid,
+
+			Name:        dbModule.Name,
+			Description: dbModule.Description,
+			State:       dbModule.State,
+
+			CreatedAt: utils.UnixToIso(dbModule.CreatedAt),
+			UpdatedAt: utils.UnixToIso(dbModule.UpdatedAt),
+
+			Items: items,
+		})
+
+	}
+
 	if feed == nil {
 		feed = []feeds.FeedPostResponse{}
 	}
 
 	courseDetail := GetCourseResponse{
-		Uuid:        course.Uuid,
+		Uuid: course.Uuid,
+
 		Name:        course.Name,
 		Description: course.Description,
-		Materials:   mats,
-		Quizzes:     quizzes,
-		Feed:        feed,
+
+		Materials: mats,
+		Quizzes:   quizzes,
+
+		Feed: feed,
+
+		Modules: modules,
 	}
 
 	return &courseDetail, nil

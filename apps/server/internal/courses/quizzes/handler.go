@@ -74,15 +74,12 @@ func (h *Handler) CreateQuiz(c echo.Context) error {
 	}
 
 	// for now modules are optional
-	if quiz.ModuleId != nil {
-		if quiz.ModuleOrder == nil {
-			return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
-		}
+	if quiz.ModuleId != "" {
+		// if quiz.ModuleOrder == nil {
+		// return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
+		// }
 
-		moduleId := *quiz.ModuleId
-		order := *quiz.ModuleOrder
-
-		_, err := h.service.AssignQuizToModule(dbQuiz.Uuid, moduleId, order, r.Ctx)
+		_, err := h.service.AssignQuizToModule(dbQuiz.Uuid, quiz.ModuleId, quiz.ModuleOrder, r.Ctx)
 		if err != nil {
 			return r.ServerError(err)
 		}

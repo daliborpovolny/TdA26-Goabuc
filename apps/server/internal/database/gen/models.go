@@ -24,13 +24,13 @@ type Answer struct {
 }
 
 type Course struct {
-	Uuid        string      `json:"uuid"`
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	CreatedAt   int64       `json:"created_at"`
-	UpdatedAt   int64       `json:"updated_at"`
-	Archived    int64       `json:"archived"`
-	State       interface{} `json:"state"`
+	Uuid        string `json:"uuid"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+	Archived    int64  `json:"archived"`
+	State       string `json:"state"`
 }
 
 type FeedPost struct {
@@ -47,6 +47,7 @@ type Heading struct {
 	Uuid       string `json:"uuid"`
 	CourseUuid string `json:"course_uuid"`
 	Content    string `json:"content"`
+	Variant    string `json:"variant"`
 	CreatedAt  int64  `json:"created_at"`
 	UpdatedAt  int64  `json:"updated_at"`
 }
@@ -78,13 +79,13 @@ type MaterialToModule struct {
 }
 
 type Module struct {
-	Uuid        string      `json:"uuid"`
-	CourseUuid  string      `json:"course_uuid"`
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	State       interface{} `json:"state"`
-	CreatedAt   int64       `json:"created_at"`
-	UpdatedAt   int64       `json:"updated_at"`
+	Uuid        string `json:"uuid"`
+	CourseUuid  string `json:"course_uuid"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	State       string `json:"state"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
 }
 
 type Question struct {

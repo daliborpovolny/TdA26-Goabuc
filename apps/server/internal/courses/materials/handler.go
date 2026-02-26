@@ -69,8 +69,8 @@ type CreateFileMaterialRequest struct {
 
 	Description string `form:"description"`
 
-	ModuleId    *string `form:"moduleId"`
-	ModuleOrder *int    `form:"moduleOrder"`
+	ModuleId    string `param:"moduleId"`
+	ModuleOrder int    `json:"moduleOrder"`
 }
 
 func (h *Handler) createFileMaterial(r *handlers.RequestCtx) error {
@@ -105,15 +105,12 @@ func (h *Handler) createFileMaterial(r *handlers.RequestCtx) error {
 		return r.ServerError(err)
 	}
 
-	if req.ModuleId != nil {
-		if req.ModuleOrder == nil {
-			return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
-		}
+	if req.ModuleId != "" {
+		// if req.ModuleOrder == nil {
+		// 	return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
+		// }
 
-		moduleId := *req.ModuleId
-		order := *req.ModuleOrder
-
-		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), moduleId, order, r.Ctx)
+		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), req.ModuleId, req.ModuleOrder, r.Ctx)
 		if err != nil {
 			return r.ServerError(err)
 		}
@@ -133,8 +130,8 @@ type CreateUrlMaterialRequest struct {
 
 	Description string `json:"description"`
 
-	ModuleId    *string `json:"moduleId"`
-	ModuleOrder *int    `json:"moduleOrder"`
+	ModuleId    string `param:"moduleId"`
+	ModuleOrder int    `json:"moduleOrder"`
 }
 
 func (h *Handler) createUrlMaterial(r *handlers.RequestCtx) error {
@@ -156,15 +153,12 @@ func (h *Handler) createUrlMaterial(r *handlers.RequestCtx) error {
 		return r.ServerError(err)
 	}
 
-	if req.ModuleId != nil {
-		if req.ModuleOrder == nil {
-			return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
-		}
+	if req.ModuleId != "" {
+		// if req.ModuleOrder == 0 {
+		// 	return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
+		// }
 
-		moduleId := *req.ModuleId
-		order := *req.ModuleOrder
-
-		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), moduleId, order, r.Ctx)
+		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), req.ModuleId, req.ModuleOrder, r.Ctx)
 		if err != nil {
 			return r.ServerError(err)
 		}

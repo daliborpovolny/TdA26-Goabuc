@@ -1,0 +1,13 @@
+FINISH quiz move to module stuff
+
+Add more module endpoint stuff -- somethings missing don't know now what
+- i think i've remembered - endpoint state doesn't do shit now
+
+- add a flip variable for deciding wheather course detail should return the data in just the module format or also the individual lists
+
+to items in the 'items' field of each module add a type property?? - so that frontend knows what items it's looking at
+
+
+
+
+Prep for auth

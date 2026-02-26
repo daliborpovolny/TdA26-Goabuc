@@ -107,10 +107,10 @@ func main() {
 	e.DELETE("/courses/:courseId", coursesHandler.DeleteCourse)
 
 	// modules
-	e.POST("/courses/modules/:moduleId", coursesHandler.CreateModule)
-	e.GET("/courses/modules/:moduleId", coursesHandler.GetModule)
-	e.PUT("/courses/modules/:moduleId", coursesHandler.UpdateModule)
-	e.DELETE("/courses/modules/:moduleId", coursesHandler.DeleteModule)
+	e.POST("/courses/:courseId/modules/:moduleId", coursesHandler.CreateModule)
+	e.GET("/courses/:courseId/modules/:moduleId", coursesHandler.GetModule)
+	e.PUT("/courses/:courseId/modules/:moduleId", coursesHandler.UpdateModule)
+	e.DELETE("/courses/:courseId/modules/:moduleId", coursesHandler.DeleteModule)
 
 	//* Course materials
 	materialsHandler := materials.NewHandler(STATIC_PATH, matsService, queries, IS_DEPLOYED)

@@ -62,6 +62,8 @@ var EXT_TO_MIME = map[string]string{
 type Material interface {
 	GetType() string
 	GetUuid() string
+	GetModuleOrder() int
+	GetModuleId() string
 }
 
 type FileMaterial struct {
@@ -73,6 +75,9 @@ type FileMaterial struct {
 	FileUrl   string `json:"fileUrl"`
 	MimeType  string `json:"mimeType"`
 	SizeBytes int    `json:"sizeBytes"`
+
+	ModuleId    string `json:"moduleId"`
+	ModuleOrder int    `json:"moduleOrder"`
 }
 
 func (f FileMaterial) GetType() string {
@@ -83,23 +88,41 @@ func (f FileMaterial) GetUuid() string {
 	return f.Uuid
 }
 
+func (f FileMaterial) GetModuleOrder() int {
+	return f.ModuleOrder
+}
+
+func (f FileMaterial) GetModuleId() string {
+	return f.ModuleId
+}
+
 type UrlMaterial struct {
 	Uuid        string `json:"uuid"`
-	ModuleUuid  string `json:"module_uuid"`
 	Type        string `json:"type"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 
 	Url        string `json:"url"`
 	FaviconUrl string `json:"faviconUrl"`
+
+	ModuleId    string `json:"moduleId"`
+	ModuleOrder int    `json:"moduleOrder"`
 }
 
-func (f UrlMaterial) GetType() string {
-	return f.Type
+func (u UrlMaterial) GetType() string {
+	return u.Type
 }
 
-func (f UrlMaterial) GetUuid() string {
-	return f.Uuid
+func (u UrlMaterial) GetUuid() string {
+	return u.Uuid
+}
+
+func (u UrlMaterial) GetModuleOrder() int {
+	return u.ModuleOrder
+}
+
+func (u UrlMaterial) GetModuleId() string {
+	return u.ModuleId
 }
 
 type Service struct {
@@ -171,9 +194,13 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 				Type:        "file",
 				Name:        material.Name,
 				Description: material.Description,
-				FileUrl:     material.Url,
-				MimeType:    material.MimeType.String,
-				SizeBytes:   int(material.ByteSize.Int64),
+
+				FileUrl:   material.Url,
+				MimeType:  material.MimeType.String,
+				SizeBytes: int(material.ByteSize.Int64),
+
+				ModuleId:    material.ModuleUuid,
+				ModuleOrder: int(material.Order),
 			})
 		} else {
 
@@ -182,8 +209,12 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 				Type:        "url",
 				Name:        material.Name,
 				Description: material.Description,
-				Url:         material.Url,
-				FaviconUrl:  material.FaviconUrl.String,
+
+				Url:        material.Url,
+				FaviconUrl: material.FaviconUrl.String,
+
+				ModuleId:    material.ModuleUuid,
+				ModuleOrder: int(material.Order),
 			})
 		}
 	}
