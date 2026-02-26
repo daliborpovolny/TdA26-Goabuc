@@ -95,6 +95,9 @@ WHERE
     uuid = ? and course_uuid = ?
 RETURNING *;
 
+-- name: DeleteModule :exec
+DELETE FROM module WHERE uuid = ? AND course_uuid = ?;
+
 --* Heading
 
 -- name: CreateHeading :one

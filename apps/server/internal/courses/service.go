@@ -167,16 +167,17 @@ func (s *Service) ChangeCourseState(courseId string, state string, ctx context.C
 
 //* Modules
 
-func (s *Service) CreateModule(courseId string, moduleId string, name string, ctx context.Context) (db.Module, error) {
+func (s *Service) CreateModule(courseId string, moduleId string, name string, description string, ctx context.Context) (db.Module, error) {
 
 	now := time.Now().Unix()
 
 	module, err := s.q.CreateModule(ctx, db.CreateModuleParams{
-		Uuid:       moduleId,
-		CourseUuid: courseId,
-		Name:       name,
-		CreatedAt:  now,
-		UpdatedAt:  now,
+		Uuid:        moduleId,
+		CourseUuid:  courseId,
+		Name:        name,
+		Description: description,
+		CreatedAt:   now,
+		UpdatedAt:   now,
 	})
 	if err != nil {
 		return db.Module{}, err
@@ -218,16 +219,29 @@ func (s *Service) GetModule(courseId string, moduleId string, ctx context.Contex
 	return module, nil
 }
 
-func (s *Service) UpdateModule(courseId string, moduleId string, name string, ctx context.Context) (db.Module, error) {
+func (s *Service) UpdateModule(courseId string, moduleId string, name string, description string, ctx context.Context) (db.Module, error) {
 
 	newModule, err := s.q.UpdateModule(ctx, db.UpdateModuleParams{
-		Uuid:       moduleId,
-		CourseUuid: courseId,
-		Name:       name,
+		Uuid:        moduleId,
+		CourseUuid:  courseId,
+		Name:        name,
+		Description: description,
 	})
 	if err != nil {
 		return db.Module{}, err
 	}
 
 	return newModule, nil
+}
+
+func (s *Service) DeleteModule(courseId string, moduleId string, ctx context.Context) error {
+
+	err := s.q.DeleteModule(ctx, db.DeleteModuleParams{
+		CourseUuid: courseId,
+		Uuid:       moduleId,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

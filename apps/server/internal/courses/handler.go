@@ -248,14 +248,15 @@ func (h *CourseHandler) ChangeModuleState(c echo.Context) error {
 	return r.JSONMsg(http.StatusCreated, "New module state set")
 }
 
-type CreateNewModuleRequest struct {
-	Name string `json:"name"`
+type CreateModuleRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
-func (h *CourseHandler) CreateNewModule(c echo.Context) error {
+func (h *CourseHandler) CreateModule(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
-	var req CreateNewModuleRequest
+	var req CreateModuleRequest
 	if err := c.Bind(&req); err != nil {
 		return r.Error(http.StatusBadRequest, "invalid request, must provide name")
 	}
@@ -263,7 +264,7 @@ func (h *CourseHandler) CreateNewModule(c echo.Context) error {
 	courseId := r.Echo.Param("courseId")
 	moduleId := uuid.NewString()
 
-	_, err := h.service.CreateModule(courseId, moduleId, req.Name, r.Ctx)
+	_, err := h.service.CreateModule(courseId, moduleId, req.Name, req.Description, r.Ctx)
 	if err != nil {
 		return r.ServerError(err)
 	}
@@ -283,4 +284,42 @@ func (h *CourseHandler) GetModule(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, module)
+}
+
+type UpdateModuleRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+func (h *CourseHandler) UpdateModule(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	var req UpdateModuleRequest
+	if err := c.Bind(&req); err != nil {
+		return r.Error(http.StatusBadRequest, "invalid request, must provide name")
+	}
+
+	courseId := r.Echo.Param("courseId")
+	moduleId := uuid.NewString()
+
+	_, err := h.service.UpdateModule(courseId, moduleId, req.Name, req.Description, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+
+	return r.JSONMsg(http.StatusCreated, "module updated")
+}
+
+func (h *CourseHandler) DeleteModule(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	courseId := r.Echo.Param("courseId")
+	moduleId := r.Echo.Param("moduleId")
+
+	err := h.service.DeleteModule(courseId, moduleId, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+
+	return r.Echo.NoContent(http.StatusNoContent)
 }
