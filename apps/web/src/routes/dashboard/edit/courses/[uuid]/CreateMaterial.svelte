@@ -1,11 +1,20 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
 
-	let { courseUuid, onchange }: { courseUuid: string; onchange: () => void } = $props();
+	import type { Module } from '$lib/types';
+	import ModuleSelector from './ModuleSelector.svelte';
+
+	let {
+		courseUuid,
+		onchange,
+		modules
+	}: { courseUuid: string; onchange: () => void; modules: Module[] } = $props();
 
 	let materialType: 'file' | '' | 'url' = $state('');
 	let isSaving = $state(false);
 	let showSuccess = $state(false);
+
+	let selectedModuleUuid = $state('');
 
 	async function handleUpload(e: Event, type: 'file' | 'url') {
 		e.preventDefault();
@@ -14,7 +23,7 @@
 		let form = e.target as HTMLFormElement;
 		let formData = new FormData(form);
 
-		let requestBody = type === 'url' ? JSON.stringify(Object.fromEntries(formData)) : formData
+		let requestBody = type === 'url' ? JSON.stringify(Object.fromEntries(formData)) : formData;
 
 		const options: RequestInit = {
 			method: 'POST',
@@ -60,6 +69,8 @@
 		>
 			<span>🔗</span> Link
 		</button>
+
+		<ModuleSelector {modules} bind:selectedId={selectedModuleUuid} />
 
 		{#if showSuccess}
 			<div

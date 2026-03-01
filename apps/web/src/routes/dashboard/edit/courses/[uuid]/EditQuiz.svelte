@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import type { Quiz, Question } from '$lib/types';
+	import type { Quiz, Question, Module } from '$lib/types';
 	import { fade, slide } from 'svelte/transition';
+	import ModuleSelector from './ModuleSelector.svelte';
 
 	const props = $props<{
 		edit: boolean;
 		quiz?: Quiz;
 		courseId: string;
 		onchange?: (quiz: Quiz) => void;
+		modules: Module[];
 	}>();
 
 	const quiz = $state<Quiz>(
@@ -23,6 +25,8 @@
 	let isSaving = $state(false);
 	let showSuccess = $state(false);
 	let savedTitle = $state(quiz.title);
+
+	let selectedModuleUuid = $state('');
 
 	async function updateQuiz(e: Event) {
 		e.preventDefault();
@@ -140,6 +144,8 @@
 						bind:value={quiz.title}
 						class="w-full rounded-xl border-4 border-s-black p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
 					/>
+
+					<ModuleSelector modules={props.modules} selectedId={selectedModuleUuid} />
 				</div>
 
 				<div class="space-y-6">
