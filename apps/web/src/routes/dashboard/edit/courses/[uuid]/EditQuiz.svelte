@@ -21,6 +21,8 @@
 		}
 	);
 
+	$inspect(quiz);
+
 	let collapsed = $state(props.edit); // Default open for new quizzes, collapsed for existing
 	let isSaving = $state(false);
 	let showSuccess = $state(false);
@@ -121,6 +123,9 @@
 				<span class="text-xl font-black tracking-tight uppercase"
 					>{savedTitle || 'Untitled Quiz'}</span
 				>
+				<span>
+					📦: {props.modules.find((x: Module) => x.uuid === quiz.moduleId)?.name}
+				</span>
 			</div>
 			<div class="flex items-center gap-4">
 				{#if showSuccess}
