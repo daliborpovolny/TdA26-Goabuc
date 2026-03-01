@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS quiz_to_module (
 -- ei variant of X means title, variant of Y means longer text, varint Z horizontal line etc...
 -- variant Y red warning text balh blah so on, endless options....
 CREATE TABLE IF NOT EXISTS heading (
-    uuid TEXT NOT NULL,
+    uuid TEXT PRIMARY KEY,
     course_uuid TEXT NOT NULL,
 
     content TEXT NOT NULL,
