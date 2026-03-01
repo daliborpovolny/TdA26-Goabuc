@@ -11,12 +11,14 @@
 		e.preventDefault();
 		isSaving = true;
 
-		const form = e.target as HTMLFormElement;
-		const formData = new FormData(form);
+		let form = e.target as HTMLFormElement;
+		let formData = new FormData(form);
+
+		let requestBody = type === 'url' ? JSON.stringify(Object.fromEntries(formData)) : formData
 
 		const options: RequestInit = {
 			method: 'POST',
-			body: type === 'url' ? JSON.stringify(Object.fromEntries(formData)) : formData
+			body: requestBody
 		};
 
 		if (type === 'url') {
@@ -24,7 +26,7 @@
 		}
 
 		try {
-			const res = await fetch(`/api/courses/${courseUuid}/materials`, options);
+			const res = await fetch(`/api/courses/${courseUuid}/modules/${formData}/materials`, options);
 			if (res.ok) {
 				materialType = '';
 				showSuccess = true;
