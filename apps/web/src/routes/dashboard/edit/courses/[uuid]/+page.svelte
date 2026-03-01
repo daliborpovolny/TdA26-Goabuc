@@ -153,7 +153,12 @@
 											Existing Materials ({course.materials.length})
 										</h3>
 										{#each course.materials as material (material.uuid)}
-											<EditMaterial {material} courseUuid={courseId} onchange={loadCourse} />
+											<EditMaterial
+												{material}
+												modules={course.modules}
+												courseUuid={courseId}
+												onchange={loadCourse}
+											/>
 										{/each}
 									</div>
 								{/if}

@@ -1,15 +1,17 @@
 <script lang="ts">
-	import type { Material } from '$lib/types';
+	import type { Material, Module } from '$lib/types';
 	import { fade, slide } from 'svelte/transition';
 
 	let {
 		material,
 		courseUuid,
-		onchange
+		onchange,
+		modules
 	}: {
 		material: Material;
 		courseUuid: string;
 		onchange: () => void;
+		modules: Module[];
 	} = $props();
 
 	let collapsed = $state(true);
@@ -64,6 +66,9 @@
 		<div class="flex items-center gap-3">
 			<span class="text-xl">{material.type === 'file' ? '📁' : '🔗'}</span>
 			<span class="text-xl font-black tracking-tight text-s-black uppercase">{material.name}</span>
+			<span>
+				📦: {modules.find((x: Module) => x.uuid === material.moduleId)?.name}
+			</span>
 		</div>
 
 		<div class="flex items-center gap-4">
