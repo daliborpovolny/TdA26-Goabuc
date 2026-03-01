@@ -123,14 +123,14 @@
 				<span class="text-xl font-black tracking-tight uppercase"
 					>{savedTitle || 'Untitled Quiz'}</span
 				>
-				<span>
-					📦: {props.modules.find((x: Module) => x.uuid === quiz.moduleId)?.name}
-				</span>
 			</div>
 			<div class="flex items-center gap-4">
 				{#if showSuccess}
 					<span transition:fade class="text-xs font-bold text-p-green uppercase">✓ Saved</span>
 				{/if}
+				<span>
+					📦: {props.modules.find((x: Module) => x.uuid === quiz.moduleId)?.name}
+				</span>
 				<span class="transition-transform {collapsed ? '' : 'rotate-180'}">▼</span>
 			</div>
 		</button>
@@ -149,8 +149,9 @@
 						bind:value={quiz.title}
 						class="w-full rounded-xl border-4 border-s-black p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
 					/>
-
-					<ModuleSelector modules={props.modules} selectedId={selectedModuleUuid} />
+					{#if !props.edit}
+						<ModuleSelector modules={props.modules} selectedId={selectedModuleUuid} />
+					{/if}
 				</div>
 
 				<div class="space-y-6">

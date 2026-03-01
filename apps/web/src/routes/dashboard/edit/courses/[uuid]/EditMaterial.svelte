@@ -66,15 +66,15 @@
 		<div class="flex items-center gap-3">
 			<span class="text-xl">{material.type === 'file' ? '📁' : '🔗'}</span>
 			<span class="text-xl font-black tracking-tight text-s-black uppercase">{material.name}</span>
-			<span>
-				📦: {modules.find((x: Module) => x.uuid === material.moduleId)?.name}
-			</span>
 		</div>
 
 		<div class="flex items-center gap-4">
 			{#if showSuccess}
 				<span transition:fade class="text-xs font-bold text-p-green uppercase">✓ Saved</span>
 			{/if}
+			<span class="items-end">
+				📦: {modules.find((x: Module) => x.uuid === material.moduleId)?.name}
+			</span>
 			<span class="text-xl transition-transform duration-300 {collapsed ? '' : 'rotate-180'}"
 				>▼</span
 			>
