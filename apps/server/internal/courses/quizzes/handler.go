@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
 
@@ -71,6 +72,21 @@ func (h *Handler) CreateQuiz(c echo.Context) error {
 
 		return r.ServerError(err)
 	}
+
+	// for now modules are optional
+	if quiz.ModuleId != "" {
+		// if quiz.ModuleOrder == nil {
+		// return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
+		// }
+
+		_, err := h.service.AssignQuizToModule(dbQuiz.Uuid, quiz.ModuleId, quiz.ModuleOrder, r.Ctx)
+		if err != nil {
+			return r.ServerError(err)
+		}
+	} else if !QUIZ_CAN_EXIST_ALONE {
+		return r.Error(http.StatusBadRequest, "quiz must always be part of a module")
+	}
+
 	return r.Echo.JSON(http.StatusCreated, dbQuiz)
 }
 
@@ -218,4 +234,23 @@ func (h *Handler) GetAnswersOfQuiz(c echo.Context) error {
 	fmt.Println(answers)
 
 	return c.JSON(http.StatusOK, answers)
+}
+
+func (h *Handler) ChangeQuizInModuleOrder(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	quizId := c.Param("quizId")
+	moduleId := c.Param("moduleId")
+
+	orderStr := c.Param("order")
+	order, err := strconv.Atoi(orderStr)
+	if err != nil {
+		return r.Error(http.StatusBadRequest, "order must be a number")
+	}
+
+	_, err = h.service.ChangeQuizInModuleOrder(quizId, moduleId, order, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+	return r.JSONMsg(http.StatusCreated, "changed the order")
 }

@@ -4,11 +4,21 @@
 
 export interface Course {
 	uuid: string;
-	type: string;
+
+	type: string; // what's this property????
+
 	name: string;
 	description: string;
+	state: string; // 'preparation' | 'closed' | 'open'
+
+	archived: boolean;
+	
 	materials: Material[];
 	quizzes: Quiz[];
+
+	feed: FeedPost[];
+
+	modules: FullModule[];
 }
 
 // Materials
@@ -18,6 +28,9 @@ export interface BaseMaterial {
 	name: string;
 	description: string;
 	type: 'file' | 'url';
+
+	moduleId: string;
+	moduleOrder: number;
 }
 
 export interface FileMaterial extends BaseMaterial {
@@ -61,6 +74,9 @@ export interface Quiz {
 	title: string;
 	attemptsCount: number;
 	questions: Question[];
+
+	moduleId: string;
+	moduleOrder: number;
 }
 
 export interface Answer {
@@ -120,4 +136,41 @@ export interface QuizOutcome {
 	attempt_number: number;
 
 	submitted_at: string;
+}
+
+// Heading
+
+export interface Heading {
+	uuid: string
+	courseUuid: string;
+
+	content: string;
+	variant: string;
+
+	createdAt: string;
+	updatedAt: string;
+
+	moduleId: string;
+	moduleOrder: number;
+}
+
+
+// Module
+
+export interface Module {
+	uuid: string;
+	courseUuid: string;
+	
+	name: string;
+	description: string;
+	state: 'preparation' | 'open' | 'closed';
+
+	createdAt: string;
+	updatedAt: string;
+}
+
+// full module is like a module, except it contains all the materials and quizzes of the module, as well as the next ModuleOrder of a new item
+export interface FullModule extends Module {
+	items: (Quiz | Material | Heading)[];
+	newItemOrder: number;
 }

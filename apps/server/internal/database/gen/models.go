@@ -30,7 +30,7 @@ type Course struct {
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
 	Archived    int64  `json:"archived"`
-	Restricted  int64  `json:"restricted"`
+	State       string `json:"state"`
 }
 
 type FeedPost struct {
@@ -43,10 +43,24 @@ type FeedPost struct {
 	UpdatedAt  int64  `json:"updated_at"`
 }
 
+type Heading struct {
+	Uuid       string `json:"uuid"`
+	CourseUuid string `json:"course_uuid"`
+	Content    string `json:"content"`
+	Variant    string `json:"variant"`
+	CreatedAt  int64  `json:"created_at"`
+	UpdatedAt  int64  `json:"updated_at"`
+}
+
+type HeadingToModule struct {
+	ModuleUuid  string `json:"module_uuid"`
+	HeadingUuid string `json:"heading_uuid"`
+	Order       int64  `json:"order"`
+}
+
 type Material struct {
 	Uuid        string         `json:"uuid"`
 	CourseUuid  string         `json:"course_uuid"`
-	ModuleUuid  sql.NullString `json:"module_uuid"`
 	Name        string         `json:"name"`
 	Description string         `json:"description"`
 	Url         string         `json:"url"`
@@ -58,16 +72,25 @@ type Material struct {
 	UpdatedAt   int64          `json:"updated_at"`
 }
 
+type MaterialToModule struct {
+	ModuleUuid   string `json:"module_uuid"`
+	MaterialUuid string `json:"material_uuid"`
+	Order        int64  `json:"order"`
+}
+
 type Module struct {
-	Uuid       string `json:"uuid"`
-	CourseUuid string `json:"course_uuid"`
-	Name       string `json:"name"`
-	State      string `json:"state"`
+	Uuid        string `json:"uuid"`
+	CourseUuid  string `json:"course_uuid"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	State       string `json:"state"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
 }
 
 type Question struct {
 	Uuid           string `json:"uuid"`
-	QuizzUuid      string `json:"quizz_uuid"`
+	QuizUuid       string `json:"quiz_uuid"`
 	QuestionOrder  int64  `json:"question_order"`
 	Type           string `json:"type"`
 	QuestionText   string `json:"question_text"`
@@ -75,14 +98,19 @@ type Question struct {
 	CorrectIndices string `json:"correct_indices"`
 }
 
-type Quizz struct {
-	Uuid          string         `json:"uuid"`
-	CourseUuid    string         `json:"course_uuid"`
-	ModuleUuid    sql.NullString `json:"module_uuid"`
-	Title         string         `json:"title"`
-	AttemptsCount int64          `json:"attempts_count"`
-	CreatedAt     int64          `json:"created_at"`
-	UpdatedAt     int64          `json:"updated_at"`
+type Quiz struct {
+	Uuid          string `json:"uuid"`
+	CourseUuid    string `json:"course_uuid"`
+	Title         string `json:"title"`
+	AttemptsCount int64  `json:"attempts_count"`
+	CreatedAt     int64  `json:"created_at"`
+	UpdatedAt     int64  `json:"updated_at"`
+}
+
+type QuizToModule struct {
+	ModuleUuid string `json:"module_uuid"`
+	QuizUuid   string `json:"quiz_uuid"`
+	Order      int64  `json:"order"`
 }
 
 type Session struct {

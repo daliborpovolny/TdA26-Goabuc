@@ -5,7 +5,7 @@
 	import EditFeedPost from './EditFeedPost.svelte';
 
 	let { courseId }: { courseId: string } = $props();
-	let collapsed = $state(true);
+	let collapsed = $state(false);
 	let posts: FeedPost[] = $state([]);
 	let isConnected = $state(false);
 

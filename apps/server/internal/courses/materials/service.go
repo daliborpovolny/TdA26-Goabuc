@@ -19,6 +19,10 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 )
 
+// this variable controls whether a material can exist withouth being part of a module
+var MATERIAL_CAN_EXIST_ALONE = true
+
+// max file size in bytes
 var MAX_SIZE = int64(30 * 1024 * 1024)
 
 var ALLOWED_FILES = map[string]bool{
@@ -57,6 +61,9 @@ var EXT_TO_MIME = map[string]string{
 
 type Material interface {
 	GetType() string
+	GetUuid() string
+	GetModuleOrder() int
+	GetModuleId() string
 }
 
 type FileMaterial struct {
@@ -68,25 +75,54 @@ type FileMaterial struct {
 	FileUrl   string `json:"fileUrl"`
 	MimeType  string `json:"mimeType"`
 	SizeBytes int    `json:"sizeBytes"`
+
+	ModuleId    string `json:"moduleId"`
+	ModuleOrder int    `json:"moduleOrder"`
 }
 
 func (f FileMaterial) GetType() string {
 	return f.Type
 }
 
+func (f FileMaterial) GetUuid() string {
+	return f.Uuid
+}
+
+func (f FileMaterial) GetModuleOrder() int {
+	return f.ModuleOrder
+}
+
+func (f FileMaterial) GetModuleId() string {
+	return f.ModuleId
+}
+
 type UrlMaterial struct {
 	Uuid        string `json:"uuid"`
-	ModuleUuid  string `json:"module_uuid"`
 	Type        string `json:"type"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 
 	Url        string `json:"url"`
 	FaviconUrl string `json:"faviconUrl"`
+
+	ModuleId    string `json:"moduleId"`
+	ModuleOrder int    `json:"moduleOrder"`
 }
 
-func (f UrlMaterial) GetType() string {
-	return f.Type
+func (u UrlMaterial) GetType() string {
+	return u.Type
+}
+
+func (u UrlMaterial) GetUuid() string {
+	return u.Uuid
+}
+
+func (u UrlMaterial) GetModuleOrder() int {
+	return u.ModuleOrder
+}
+
+func (u UrlMaterial) GetModuleId() string {
+	return u.ModuleId
 }
 
 type Service struct {
@@ -115,6 +151,18 @@ func (s *Service) deriveFaviconUrl(url string) string {
 	urlParts := strings.Split(url, "/")
 	faviconUrl := urlParts[0] + "/favicon.ico"
 	return faviconUrl
+}
+
+func (s *Service) CheckMaterialExists(materialId string, ctx context.Context) bool {
+	_, err := s.q.GetMaterial(ctx, materialId)
+	if err != nil {
+		if utils.IsNoRowsError(err) {
+			return false
+		}
+		fmt.Println("Check if material exists failed, uuid:", materialId)
+		return false
+	}
+	return true
 }
 
 func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx context.Context) ([]Material, error) {
@@ -146,9 +194,13 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 				Type:        "file",
 				Name:        material.Name,
 				Description: material.Description,
-				FileUrl:     material.Url,
-				MimeType:    material.MimeType.String,
-				SizeBytes:   int(material.ByteSize.Int64),
+
+				FileUrl:   material.Url,
+				MimeType:  material.MimeType.String,
+				SizeBytes: int(material.ByteSize.Int64),
+
+				ModuleId:    material.ModuleUuid,
+				ModuleOrder: int(material.Order),
 			})
 		} else {
 
@@ -157,8 +209,12 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 				Type:        "url",
 				Name:        material.Name,
 				Description: material.Description,
-				Url:         material.Url,
-				FaviconUrl:  material.FaviconUrl.String,
+
+				Url:        material.Url,
+				FaviconUrl: material.FaviconUrl.String,
+
+				ModuleId:    material.ModuleUuid,
+				ModuleOrder: int(material.Order),
 			})
 		}
 	}
@@ -326,7 +382,6 @@ func (s *Service) CreateFileMaterial(req *CreateFileMaterialRequest, materialId 
 	dbMat, err := s.q.CreateMaterial(ctx, db.CreateMaterialParams{
 		Uuid:        materialId,
 		CourseUuid:  req.CourseId,
-		ModuleUuid:  sql.NullString{String: req.ModuleId, Valid: req.ModuleId != ""},
 		Name:        req.Name,
 		Description: req.Description,
 		Url:         url,
@@ -368,7 +423,6 @@ func (s *Service) CreateUrlMaterial(req CreateUrlMaterialRequest, materialId str
 	dbMat, err := s.q.CreateMaterial(ctx, db.CreateMaterialParams{
 		Uuid:        materialId,
 		CourseUuid:  req.CourseId,
-		ModuleUuid:  sql.NullString{String: req.ModuleId, Valid: req.ModuleId != ""},
 		Name:        req.Name,
 		Description: req.Description,
 		Url:         req.Url,
@@ -529,5 +583,47 @@ func (s *Service) DeleteMaterial(materialId string, ctx context.Context) error {
 		return ErrCourseNotFound
 	}
 
+	return nil
+}
+
+// Material to Module
+
+func (s *Service) AssignMaterialToModule(materialId string, moduleId string, order int, ctx context.Context) (db.MaterialToModule, error) {
+
+	mm, err := s.q.AssignMaterialToModule(ctx, db.AssignMaterialToModuleParams{
+		ModuleUuid:   moduleId,
+		MaterialUuid: materialId,
+		Order:        int64(order),
+	})
+	if err != nil {
+		return db.MaterialToModule{}, err
+	}
+
+	return mm, nil
+}
+
+func (s *Service) ChangeMaterialInModuleOrder(materialId string, moduleId string, order int, ctx context.Context) (db.MaterialToModule, error) {
+
+	mm, err := s.q.ChangeMaterialInModuleOrder(ctx, db.ChangeMaterialInModuleOrderParams{
+		ModuleUuid:   moduleId,
+		MaterialUuid: materialId,
+		Order:        int64(order),
+	})
+	if err != nil {
+		return db.MaterialToModule{}, err
+	}
+
+	return mm, nil
+}
+
+func (s *Service) RemoveMaterialToModule(materialId string, moduleId string, order int, ctx context.Context) error {
+
+	err := s.q.RemoveMaterialFromModule(ctx, db.RemoveMaterialFromModuleParams{
+		ModuleUuid:   moduleId,
+		MaterialUuid: materialId,
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }

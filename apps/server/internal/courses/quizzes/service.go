@@ -18,6 +18,9 @@ import (
 	"github.com/google/uuid"
 )
 
+// this variable controls whether quiz can exist withouth being part of a module
+var QUIZ_CAN_EXIST_ALONE = true
+
 type Service struct {
 	q            *db.Queries
 	staticPath   string
@@ -29,11 +32,25 @@ func NewService(queries *db.Queries, staticPath string, feedsService *feeds.Serv
 }
 
 type Quiz struct {
-	Uuid          string     `json:"uuid"`
+	Uuid string `json:"uuid"`
+
 	Title         string     `json:"title"`
 	AttemptsCount int        `json:"attemptsCount"`
 	Questions     []Question `json:"questions"`
-	CreatedAt     string     `json:"createdAt"`
+
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+
+	ModuleId    string `json:"moduleId"`
+	ModuleOrder int    `json:"moduleOrder"`
+}
+
+func (q Quiz) GetModuleOrder() int {
+	return q.ModuleOrder
+}
+
+func (q Quiz) GetModuleId() string {
+	return q.ModuleId
 }
 
 type Question struct {
@@ -95,7 +112,7 @@ func (s *Service) CreateQuiz(quiz Quiz, courseId string, ctx context.Context) (*
 
 	now := time.Now().Unix()
 
-	dbQuiz, err := s.q.CreateQuizz(ctx, db.CreateQuizzParams{
+	dbQuiz, err := s.q.CreateQuiz(ctx, db.CreateQuizParams{
 		Uuid:          quiz.Uuid,
 		CourseUuid:    courseId,
 		Title:         quiz.Title,
@@ -141,7 +158,7 @@ func (s *Service) CreateQuiz(quiz Quiz, courseId string, ctx context.Context) (*
 
 }
 
-func (s *Service) dbQuizToQuiz(dbQuiz db.Quizz, questions []db.Question) (*Quiz, error) {
+func (s *Service) dbQuizToQuiz(dbQuiz db.Quiz, questions []db.Question) (*Quiz, error) {
 	quiz := &Quiz{
 		Uuid:          dbQuiz.Uuid,
 		Title:         dbQuiz.Title,
@@ -204,7 +221,7 @@ func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 		return nil, err
 	}
 
-	dbQuiz, err := s.q.UpdateQuizz(ctx, db.UpdateQuizzParams{
+	dbQuiz, err := s.q.UpdateQuiz(ctx, db.UpdateQuizParams{
 		Title:         utils.ToSqlNullString(&quiz.Title),
 		AttemptsCount: sql.NullInt64{Int64: 0, Valid: false},
 		UpdatedAt:     sql.NullInt64{Int64: time.Now().Unix(), Valid: true},
@@ -257,6 +274,7 @@ func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 	return s.dbQuizToQuiz(dbQuiz, dbQuestions)
 }
 
+// TODO CONVERT TO GIVE OUT MODULE DATA TOO
 func (s *Service) convertGetQuizRowsToQuiz(rows []db.GetQuizRow) (*Quiz, error) {
 	if len(rows) < 1 {
 		return nil, ErrQuizNotFound
@@ -309,6 +327,15 @@ func (s *Service) convertGetQuizRowsToQuiz(rows []db.GetQuizRow) (*Quiz, error) 
 	return quiz, nil
 }
 
+func (s *Service) CheckQuizExists(quizId string, ctx context.Context) bool {
+	rows, err := s.q.GetQuiz(ctx, quizId)
+	if err != nil {
+		fmt.Println("Check if quiz exists failed, uuid: ", quizId)
+		return false
+	}
+	return len(rows) != 0
+}
+
 func (s *Service) GetQuiz(quizId string, ctx context.Context) (*Quiz, error) {
 
 	rows, err := s.q.GetQuiz(ctx, quizId)
@@ -326,7 +353,7 @@ func (s *Service) GetQuiz(quizId string, ctx context.Context) (*Quiz, error) {
 	return quiz, nil
 }
 
-func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizzesRow) ([]Quiz, error) {
+func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizesRow) ([]Quiz, error) {
 	if len(rows) < 1 {
 		return []Quiz{}, nil
 	}
@@ -336,7 +363,7 @@ func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizzesRow) ([]Quiz
 	currentQuizIndex := -1
 
 	for _, qr := range rows {
-		if qr.QuestionUuid.String == "" {
+		if qr.QuestionUuid == "" {
 			continue
 		}
 
@@ -349,12 +376,18 @@ func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizzesRow) ([]Quiz
 				Title:         qr.QuizTitle,
 				AttemptsCount: int(qr.QuizAttemptsCount),
 				Questions:     make([]Question, 0, len(rows)),
+
+				CreatedAt: utils.UnixToIso(qr.QuizCreatedAt),
+				UpdatedAt: utils.UnixToIso(qr.QuizUpdatedAt),
+
+				ModuleId:    qr.ModuleUuid,
+				ModuleOrder: int(qr.ModuleOrder),
 			})
 		}
 
-		options := strings.Split(qr.QuestionOptions.String, "|")
+		options := strings.Split(qr.QuestionOptions, "|")
 
-		correctStringIndices := strings.Split(qr.QuestionCorrectIndices.String, "|")
+		correctStringIndices := strings.Split(qr.QuestionCorrectIndices, "|")
 		correctIndices := make([]int, 0, len(correctStringIndices))
 		for _, stringIndex := range correctStringIndices {
 			index, err := strconv.Atoi(stringIndex)
@@ -364,9 +397,9 @@ func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizzesRow) ([]Quiz
 			correctIndices = append(correctIndices, index)
 		}
 		qs := Question{
-			Uuid:     qr.QuestionUuid.String,
-			QueType:  qr.QuestionType.String,
-			Question: qr.QuestionText.String,
+			Uuid:     qr.QuestionUuid,
+			QueType:  qr.QuestionType,
+			Question: qr.QuestionText,
 			Options:  options,
 		}
 
@@ -386,7 +419,7 @@ func (s *Service) convertListQuizRowsToQuizzes(rows []db.ListQuizzesRow) ([]Quiz
 
 func (s *Service) ListQuizes(courseId string, ctx context.Context) ([]Quiz, error) {
 
-	rows, err := s.q.ListQuizzes(ctx, courseId)
+	rows, err := s.q.ListQuizes(ctx, courseId)
 	if err != nil {
 		return nil, err
 	}
@@ -406,7 +439,7 @@ func (s *Service) ListQuizes(courseId string, ctx context.Context) ([]Quiz, erro
 
 func (s *Service) DeleteQuiz(quizId string, ctx context.Context) error {
 
-	res, err := s.q.DeleteQuizz(ctx, quizId)
+	res, err := s.q.DeleteQuiz(ctx, quizId)
 	if err != nil {
 		fmt.Println("error deleting", err)
 		return err
@@ -563,4 +596,44 @@ func (s *Service) GetAnswersOfQuiz(quizId string, ctx context.Context) ([]Outcom
 	}
 
 	return outcomes, nil
+}
+
+func (s *Service) AssignQuizToModule(quizId string, moduleId string, order int, ctx context.Context) (db.QuizToModule, error) {
+
+	mm, err := s.q.AssignQuizToModule(ctx, db.AssignQuizToModuleParams{
+		ModuleUuid: moduleId,
+		QuizUuid:   quizId,
+		Order:      int64(order),
+	})
+	if err != nil {
+		return db.QuizToModule{}, err
+	}
+
+	return mm, nil
+}
+
+func (s *Service) ChangeQuizInModuleOrder(quizId string, moduleId string, order int, ctx context.Context) (db.QuizToModule, error) {
+
+	mm, err := s.q.ChangeQuizInModuleOrder(ctx, db.ChangeQuizInModuleOrderParams{
+		ModuleUuid: moduleId,
+		QuizUuid:   quizId,
+		Order:      int64(order),
+	})
+	if err != nil {
+		return db.QuizToModule{}, err
+	}
+
+	return mm, nil
+}
+
+func (s *Service) RemoveQuizToModule(quizId string, moduleId string, order int, ctx context.Context) error {
+
+	err := s.q.RemoveQuizFromModule(ctx, db.RemoveQuizFromModuleParams{
+		ModuleUuid: moduleId,
+		QuizUuid:   quizId,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

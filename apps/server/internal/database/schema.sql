@@ -37,24 +37,77 @@ CREATE TABLE IF NOT EXISTS course (
     updated_at INTEGER NOT NULL,
 
     archived INTEGER NOT NULL DEFAULT 0,
-    restricted INTEGER NOT NULL DEFAULT 0
+    state TEXT NOT NULL DEFAULT 'preparation' -- preparation | open | closed
+
 
 );
 
 CREATE TABLE IF NOT EXISTS module (
     uuid TEXT PRIMARY KEY,
     course_uuid TEXT NOT NULL,
+
     name TEXT NOT NULL,
-    state TEXT NOT NULL,  -- preparation | open | closed
+    description TEXT NOT NULL,
+    state TEXT NOT NULL DEFAULT 'preparation',  -- preparation | open | closed
     
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
     FOREIGN KEY (course_uuid) REFERENCES course(uuid) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS material_to_module (
+    module_uuid TEXT NOT NULL,
+    material_uuid TEXT NOT NULL,
+
+    "order" INTEGER NOT NULL,
+
+    FOREIGN KEY (material_uuid) REFERENCES material(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS quiz_to_module (
+    module_uuid TEXT NOT NULL,
+    quiz_uuid TEXT NOT NULL,
+
+    "order" INTEGER NOT NULL,
+
+    FOREIGN KEY (quiz_uuid) REFERENCES quiz(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE
+);
+
+
+-- heading could be in the future used as a general styling unit - 
+-- ei variant of X means title, variant of Y means longer text, varint Z horizontal line etc...
+-- variant Y red warning text balh blah so on, endless options....
+CREATE TABLE IF NOT EXISTS heading (
+    uuid TEXT NOT NULL,
+    course_uuid TEXT NOT NULL,
+
+    content TEXT NOT NULL,
+    variant TEXT NOT NULL, -- "heading" | ..... - this is just an idea for the future 
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (course_uuid) REFERENCES course(uuid) ON DELETE CASCADE
+
+);
+
+CREATE TABLE IF NOT EXISTS heading_to_module (
+    module_uuid TEXT NOT NULL,
+    heading_uuid TEXT NOT NULL,
+
+    "order" INTEGER NOT NULL,
+
+    FOREIGN KEY (heading_uuid) REFERENCES heading(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE
 );
 
 
 CREATE TABLE IF NOT EXISTS material (
     uuid TEXT PRIMARY KEY,
     course_uuid TEXT NOT NULL,
-    module_uuid TEXT DEFAULT NULL,
     
     name TEXT NOT NULL,
     description TEXT NOT NULL,
@@ -69,14 +122,12 @@ CREATE TABLE IF NOT EXISTS material (
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     
-    FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE,
     FOREIGN KEY (course_uuid) REFERENCES course(uuid) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS quizz (
+CREATE TABLE IF NOT EXISTS quiz (
     uuid TEXT PRIMARY KEY,
     course_uuid TEXT NOT NULL,
-    module_uuid TEXT DEFAULT NULL,
 
 
     title TEXT NOT NULL,
@@ -85,13 +136,12 @@ CREATE TABLE IF NOT EXISTS quizz (
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     
-    FOREIGN KEY (module_uuid) REFERENCES module(uuid) ON DELETE CASCADE,
     FOREIGN KEY (course_uuid) REFERENCES course(uuid) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS question (
     uuid TEXT PRIMARY KEY,
-    quizz_uuid TEXT NOT NULL,
+    quiz_uuid TEXT NOT NULL,
 
     question_order INTEGER NOT NULL,
 
@@ -100,7 +150,7 @@ CREATE TABLE IF NOT EXISTS question (
     options TEXT NOT NULL,
     correct_indices TEXT NOT NULL,
     
-    FOREIGN KEY (quizz_uuid) REFERENCES quizz(uuid) ON DELETE CASCADE
+    FOREIGN KEY (quiz_uuid) REFERENCES quiz(uuid) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS answer (
@@ -116,7 +166,7 @@ CREATE TABLE IF NOT EXISTS answer (
     submitted_at INTEGER NOT NULL,
 
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
-    FOREIGN KEY (quiz_uuid) REFERENCES quizz(uuid) ON DELETE CASCADE
+    FOREIGN KEY (quiz_uuid) REFERENCES quiz(uuid) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS feed_posts (

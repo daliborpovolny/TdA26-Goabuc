@@ -2,6 +2,7 @@ package materials
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/handlers"
@@ -63,12 +64,13 @@ func (h *Handler) CreateMaterial(c echo.Context) error {
 type CreateFileMaterialRequest struct {
 	CourseId string `param:"courseId"`
 
-	ModuleId string `param:"moduleId"`
-
 	MatType string `form:"type"`
 	Name    string `form:"name"`
 
 	Description string `form:"description"`
+
+	ModuleId    string `param:"moduleId"`
+	ModuleOrder int    `json:"moduleOrder"`
 }
 
 func (h *Handler) createFileMaterial(r *handlers.RequestCtx) error {
@@ -103,19 +105,33 @@ func (h *Handler) createFileMaterial(r *handlers.RequestCtx) error {
 		return r.ServerError(err)
 	}
 
+	if req.ModuleId != "" {
+		// if req.ModuleOrder == nil {
+		// 	return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
+		// }
+
+		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), req.ModuleId, req.ModuleOrder, r.Ctx)
+		if err != nil {
+			return r.ServerError(err)
+		}
+	} else if !MATERIAL_CAN_EXIST_ALONE {
+		return r.Error(http.StatusBadRequest, "material must always be part of a module")
+	}
+
 	return r.Echo.JSON(http.StatusCreated, mat)
 }
 
 type CreateUrlMaterialRequest struct {
 	CourseId string `param:"courseId"`
 
-	ModuleId string `param:"moduleId"`
-
 	MatType string `json:"type"`
 	Name    string `json:"name"`
 	Url     string `json:"url"`
 
 	Description string `json:"description"`
+
+	ModuleId    string `param:"moduleId"`
+	ModuleOrder int    `json:"moduleOrder"`
 }
 
 func (h *Handler) createUrlMaterial(r *handlers.RequestCtx) error {
@@ -135,6 +151,19 @@ func (h *Handler) createUrlMaterial(r *handlers.RequestCtx) error {
 	mat, err := h.service.CreateUrlMaterial(req, uuid.NewString(), r.Ctx)
 	if err != nil {
 		return r.ServerError(err)
+	}
+
+	if req.ModuleId != "" {
+		// if req.ModuleOrder == 0 {
+		// 	return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
+		// }
+
+		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), req.ModuleId, req.ModuleOrder, r.Ctx)
+		if err != nil {
+			return r.ServerError(err)
+		}
+	} else if !MATERIAL_CAN_EXIST_ALONE {
+		return r.Error(http.StatusBadRequest, "material must always be part of a module")
 	}
 
 	return r.Echo.JSON(http.StatusCreated, mat)
@@ -229,4 +258,23 @@ func (h *Handler) DeleteMaterial(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusNoContent)
+}
+
+func (h *Handler) ChangeMaterialInModuleOrder(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	materialId := c.Param("materialId")
+	moduleId := c.Param("moduleId")
+
+	orderStr := c.Param("order")
+	order, err := strconv.Atoi(orderStr)
+	if err != nil {
+		return r.Error(http.StatusBadRequest, "order must be a number")
+	}
+
+	_, err = h.service.ChangeMaterialInModuleOrder(materialId, moduleId, order, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+	return r.JSONMsg(http.StatusCreated, "changed the order")
 }

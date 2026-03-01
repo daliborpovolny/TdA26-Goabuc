@@ -32,7 +32,7 @@
 
 		if (missingAnswers.length > 0) return;
 
-		let res = await fetch(`/api/courses/${courseId}/quizzes/${quiz.uuid}/submit`, {
+		let res = await fetch(`/api/courses/${courseId}/modules/${quiz.moduleId}/quizzes/${quiz.uuid}/submit`, {
 			method: 'POST',
 			headers: { 'Content-type': 'application/json' },
 			body: JSON.stringify(quizSubmit)

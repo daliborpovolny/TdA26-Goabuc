@@ -106,20 +106,30 @@ func main() {
 	e.PUT("/courses/:courseId", coursesHandler.UpdateCourse)
 	e.DELETE("/courses/:courseId", coursesHandler.DeleteCourse)
 
+	// modules
+	e.POST("/courses/:courseId/modules/:moduleId", coursesHandler.CreateModule)
+	e.GET("/courses/:courseId/modules/:moduleId", coursesHandler.GetModule)
+	e.PUT("/courses/:courseId/modules/:moduleId", coursesHandler.UpdateModule)
+	e.DELETE("/courses/:courseId/modules/:moduleId", coursesHandler.DeleteModule)
+
+	e.GET("/courses/:courseId/modules/:moduleId", coursesHandler.ListAllModules)
+
 	//* Course materials
 	materialsHandler := materials.NewHandler(STATIC_PATH, matsService, queries, IS_DEPLOYED)
 
-	materials := e.Group("/courses/:courseId/materials")
+	materials := e.Group("/courses/:courseId/modules/:moduleId/materials")
 	materials.GET("", materialsHandler.ListMaterials)
 	materials.POST("", materialsHandler.CreateMaterial)
 
 	materials.PUT("/:materialId", materialsHandler.UpdateMaterial)
 	materials.DELETE("/:materialId", materialsHandler.DeleteMaterial)
 
+	materials.POST("/:materialId/:order", materialsHandler.ChangeMaterialInModuleOrder)
+
 	//* Course Quizes
 	quizzesHandler := quizzes.NewHandler(STATIC_PATH, quizzesService, queries, IS_DEPLOYED)
 
-	quizzes := e.Group("/courses/:courseId/quizzes")
+	quizzes := e.Group("/courses/modules/:moduleId/:courseId/quizzes")
 	quizzes.GET("", quizzesHandler.ListQuizzes)
 	quizzes.POST("", quizzesHandler.CreateQuiz)
 
@@ -130,6 +140,8 @@ func main() {
 	quizzes.DELETE("/:quizId", quizzesHandler.DeleteQuiz)
 
 	quizzes.POST("/:quizId/submit", quizzesHandler.SubmitQuizAnswers)
+
+	quizzes.POST("/:quizId/modules/:moduleId/:order", quizzesHandler.ChangeQuizInModuleOrder)
 
 	//* Static
 	e.Static("/static", STATIC_PATH)
