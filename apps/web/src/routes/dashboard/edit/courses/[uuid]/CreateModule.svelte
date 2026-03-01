@@ -8,7 +8,13 @@
 	let isSaving = $state(false);
 	let errorMsg = $state('');
 
+	let forbidden = 'Unassigned';
+
 	async function handleCreate(e: Event) {
+		if (name === forbidden) {
+			return;
+		}
+
 		e.preventDefault();
 		isSaving = true;
 		errorMsg = '';
@@ -50,6 +56,10 @@
 				placeholder="e.g., Week 1: Introduction"
 				class="w-full rounded-xl border-4 border-s-black bg-white p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
 			/>
+
+			{#if name === forbidden}
+				<p class="text-red-500">The name {forbidden} is not allowed</p>
+			{/if}
 		</div>
 
 		<div class="space-y-1">
