@@ -1287,12 +1287,12 @@ func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid strin
 	return items, nil
 }
 
-const listCourseModules = `-- name: ListCourseModules :many
+const listAllModules = `-- name: ListAllModules :many
 SELECT uuid, course_uuid, name, description, state, created_at, updated_at FROM module WHERE course_uuid = ?
 `
 
-func (q *Queries) ListCourseModules(ctx context.Context, courseUuid string) ([]Module, error) {
-	rows, err := q.db.QueryContext(ctx, listCourseModules, courseUuid)
+func (q *Queries) ListAllModules(ctx context.Context, courseUuid string) ([]Module, error) {
+	rows, err := q.db.QueryContext(ctx, listAllModules, courseUuid)
 	if err != nil {
 		return nil, err
 	}

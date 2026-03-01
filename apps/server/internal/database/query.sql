@@ -85,7 +85,7 @@ SELECT EXISTS (SELECT 1 FROM module WHERE uuid = ?) AS module_exists;
 -- name: GetModule :one
 SELECT * FROM module WHERE uuid = ? AND course_uuid = ?;
 
--- name: ListCourseModules :many
+-- name: ListAllModules :many
 SELECT * FROM module WHERE course_uuid = ?;
 
 -- name: UpdateModule :one

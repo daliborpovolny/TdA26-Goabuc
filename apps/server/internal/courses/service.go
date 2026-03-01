@@ -49,12 +49,41 @@ type Module struct {
 
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	State       string `json:"state"`
+	State       string `json:"state"` // one of ALLOWED_MODULE_STATES
 
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
 
-	Items []Item `json:"items"`
+	// Items        []Item `json:"items"`
+	// NewItemOrder int    `json:"newItemOrder"`
+}
+
+type FullModule struct {
+	Module
+	Items        []Item `json:"items"`
+	NewItemOrder int    `json:"newItemOrder"`
+}
+
+func (s *Service) dbModuleToModule(dbM db.Module) Module {
+	return Module{
+		Uuid:       dbM.Uuid,
+		CourseUuid: dbM.CourseUuid,
+
+		Name:        dbM.Name,
+		Description: dbM.Description,
+		State:       dbM.State,
+
+		CreatedAt: utils.UnixToIso(dbM.CreatedAt),
+		UpdatedAt: utils.UnixToIso(dbM.UpdatedAt),
+	}
+}
+
+func (s *Service) moduleToFullModule(m Module, items []Item, newItemOrder int) FullModule {
+	return FullModule{
+		Module:       m,
+		Items:        items,
+		NewItemOrder: newItemOrder,
+	}
 }
 
 type Item interface {
@@ -72,16 +101,19 @@ func (s *Service) CreateCourse(params db.CreateCourseParams, ctx context.Context
 }
 
 type GetCourseResponse struct {
-	Uuid        string `json:"uuid"`
+	Uuid string `json:"uuid"`
+
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	State       string `json:"state"`
+	Archived    bool   `json:"archived"`
 
 	Materials []materials.Material `json:"materials"`
 	Quizzes   []quizzes.Quiz       `json:"quizzes"`
 
 	Feed []feeds.FeedPostResponse `json:"feed"`
 
-	Modules []Module `json:"modules"`
+	Modules []FullModule `json:"modules"`
 }
 
 func (s *Service) GetCourse(courseId string, host string, scheme string, ctx context.Context) (*GetCourseResponse, error) {
@@ -111,26 +143,30 @@ func (s *Service) GetCourse(courseId string, host string, scheme string, ctx con
 		return nil, err
 	}
 
-	dbModules, err := s.q.ListCourseModules(ctx, courseId)
+	modules, err := s.ListAllModules(courseId, ctx)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 
-	modules := make([]Module, 0, len(dbModules))
+	fullModules := make([]FullModule, 0, len(modules))
 
-	for _, dbModule := range dbModules {
+	for _, module := range modules {
 		items := make([]Item, 0, 10)
+		maxItemOrder := 0
 
 		for _, quiz := range quizzes {
-			if quiz.ModuleId == dbModule.Uuid {
+			if quiz.ModuleId == module.Uuid {
 				items = append(items, quiz)
+				maxItemOrder = max(quiz.GetModuleOrder(), maxItemOrder)
 			}
 		}
 
 		for _, mat := range mats {
-			if mat.GetModuleId() == dbModule.Uuid {
+			if mat.GetModuleId() == module.Uuid {
 				items = append(items, mat)
+				maxItemOrder = max(mat.GetModuleOrder(), maxItemOrder)
+
 			}
 		}
 
@@ -138,19 +174,7 @@ func (s *Service) GetCourse(courseId string, host string, scheme string, ctx con
 			return cmp.Compare(a.GetModuleOrder(), b.GetModuleOrder())
 		})
 
-		modules = append(modules, Module{
-			Uuid:       dbModule.Uuid,
-			CourseUuid: dbModule.CourseUuid,
-
-			Name:        dbModule.Name,
-			Description: dbModule.Description,
-			State:       dbModule.State,
-
-			CreatedAt: utils.UnixToIso(dbModule.CreatedAt),
-			UpdatedAt: utils.UnixToIso(dbModule.UpdatedAt),
-
-			Items: items,
-		})
+		fullModules = append(fullModules, s.moduleToFullModule(module, items, maxItemOrder+1))
 
 	}
 
@@ -163,13 +187,15 @@ func (s *Service) GetCourse(courseId string, host string, scheme string, ctx con
 
 		Name:        course.Name,
 		Description: course.Description,
+		State:       course.State,
+		Archived:    course.Archived == 1,
 
 		Materials: mats,
 		Quizzes:   quizzes,
 
 		Feed: feed,
 
-		Modules: modules,
+		Modules: fullModules,
 	}
 
 	return &courseDetail, nil
@@ -239,11 +265,11 @@ func (s *Service) ChangeCourseState(courseId string, state string, ctx context.C
 
 //* Modules
 
-func (s *Service) CreateModule(courseId string, moduleId string, name string, description string, ctx context.Context) (db.Module, error) {
+func (s *Service) CreateModule(courseId string, moduleId string, name string, description string, ctx context.Context) (Module, error) {
 
 	now := time.Now().Unix()
 
-	module, err := s.q.CreateModule(ctx, db.CreateModuleParams{
+	dbModule, err := s.q.CreateModule(ctx, db.CreateModuleParams{
 		Uuid:        moduleId,
 		CourseUuid:  courseId,
 		Name:        name,
@@ -252,46 +278,61 @@ func (s *Service) CreateModule(courseId string, moduleId string, name string, de
 		UpdatedAt:   now,
 	})
 	if err != nil {
-		return db.Module{}, err
+		return Module{}, err
 	}
 
-	return module, nil
+	return s.dbModuleToModule(dbModule), nil
 }
 
-func (s *Service) ChangeModuleState(courseId string, moduleId string, state string, ctx context.Context) (db.Module, error) {
+func (s *Service) ChangeModuleState(courseId string, moduleId string, state string, ctx context.Context) (Module, error) {
 
 	if !slices.Contains(ALLOWED_MODULE_STATES, state) {
-		return db.Module{}, ErrBadModuleState
+		return Module{}, ErrBadModuleState
 	}
 
 	now := time.Now().Unix()
 
-	module, err := s.q.ChangeModuleState(ctx, db.ChangeModuleStateParams{
+	dbModule, err := s.q.ChangeModuleState(ctx, db.ChangeModuleStateParams{
 		State:     state,
 		Uuid:      moduleId,
 		UpdatedAt: now,
 	})
 	if err != nil {
-		return db.Module{}, err
+		return Module{}, err
 	}
 
-	return module, err
+	return s.dbModuleToModule(dbModule), err
 }
 
-func (s *Service) GetModule(courseId string, moduleId string, ctx context.Context) (db.Module, error) {
+func (s *Service) GetModule(courseId string, moduleId string, ctx context.Context) (Module, error) {
 
 	module, err := s.q.GetModule(ctx, db.GetModuleParams{
 		Uuid:       moduleId,
 		CourseUuid: courseId,
 	})
 	if err != nil {
-		return db.Module{}, err
+		return Module{}, err
 	}
 
-	return module, nil
+	return s.dbModuleToModule(module), nil
 }
 
-func (s *Service) UpdateModule(courseId string, moduleId string, name string, description string, ctx context.Context) (db.Module, error) {
+func (s *Service) ListAllModules(courseId string, ctx context.Context) ([]Module, error) {
+
+	dbModules, err := s.q.ListAllModules(ctx, courseId)
+	if err != nil {
+		return nil, err
+	}
+
+	modules := make([]Module, 0, len(dbModules))
+	for _, dbM := range dbModules {
+		modules = append(modules, s.dbModuleToModule(dbM))
+	}
+
+	return modules, nil
+}
+
+func (s *Service) UpdateModule(courseId string, moduleId string, name string, description string, ctx context.Context) (Module, error) {
 
 	newModule, err := s.q.UpdateModule(ctx, db.UpdateModuleParams{
 		Uuid:        moduleId,
@@ -300,10 +341,10 @@ func (s *Service) UpdateModule(courseId string, moduleId string, name string, de
 		Description: description,
 	})
 	if err != nil {
-		return db.Module{}, err
+		return Module{}, err
 	}
 
-	return newModule, nil
+	return s.dbModuleToModule(newModule), nil
 }
 
 func (s *Service) DeleteModule(courseId string, moduleId string, ctx context.Context) error {

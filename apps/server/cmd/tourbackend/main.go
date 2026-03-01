@@ -112,6 +112,8 @@ func main() {
 	e.PUT("/courses/:courseId/modules/:moduleId", coursesHandler.UpdateModule)
 	e.DELETE("/courses/:courseId/modules/:moduleId", coursesHandler.DeleteModule)
 
+	e.GET("/courses/:courseId/modules/:moduleId", coursesHandler.ListAllModules)
+
 	//* Course materials
 	materialsHandler := materials.NewHandler(STATIC_PATH, matsService, queries, IS_DEPLOYED)
 

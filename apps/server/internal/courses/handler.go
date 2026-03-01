@@ -220,7 +220,7 @@ func (h *CourseHandler) ChangeCourseState(c echo.Context) error {
 	return r.JSONMsg(http.StatusCreated, "New course state set")
 }
 
-// modules
+//* Modules
 
 type ChangeModuleStateRequest struct {
 	State string `json:"state"`
@@ -284,6 +284,19 @@ func (h *CourseHandler) GetModule(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, module)
+}
+
+func (h *CourseHandler) ListAllModules(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	courseId := r.Echo.Param("courseId")
+
+	modules, err := h.service.ListAllModules(courseId, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+
+	return r.Echo.JSON(http.StatusOK, modules)
 }
 
 type UpdateModuleRequest struct {
