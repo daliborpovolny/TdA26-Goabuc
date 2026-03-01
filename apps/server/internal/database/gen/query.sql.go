@@ -354,9 +354,9 @@ func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) 
 const createModule = `-- name: CreateModule :one
 
 INSERT INTO module (
-    uuid, course_uuid, name, description,state, created_at, updated_at
+    uuid, course_uuid, name, description, created_at, updated_at
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?
 ) RETURNING uuid, course_uuid, name, description, state, created_at, updated_at
 `
 
@@ -365,7 +365,6 @@ type CreateModuleParams struct {
 	CourseUuid  string `json:"course_uuid"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	State       string `json:"state"`
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
 }
@@ -377,7 +376,6 @@ func (q *Queries) CreateModule(ctx context.Context, arg CreateModuleParams) (Mod
 		arg.CourseUuid,
 		arg.Name,
 		arg.Description,
-		arg.State,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)

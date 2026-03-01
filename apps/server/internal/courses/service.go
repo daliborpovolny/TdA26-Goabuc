@@ -13,6 +13,8 @@ import (
 	db "tourbackend/internal/database/gen"
 	"tourbackend/internal/feeds"
 	"tourbackend/internal/utils"
+
+	"github.com/google/uuid"
 )
 
 var ALLOWED_COURSE_STATES []string = []string{
@@ -93,6 +95,11 @@ type Item interface {
 
 func (s *Service) CreateCourse(params db.CreateCourseParams, ctx context.Context) (*db.Course, error) {
 	course, err := s.q.CreateCourse(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.CreateModule(course.Uuid, uuid.NewString(), "Unassigned", "unassigned things go here!", ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -220,12 +227,12 @@ func (s *Service) DeleteCourse(courseId string, ctx context.Context) error {
 
 	res, err := s.q.DeleteCourse(ctx, courseId)
 	if err != nil {
-		return errors.New("Failed to delete the course")
+		return err
 	}
 
 	n, err := res.RowsAffected()
 	if err != nil {
-		return errors.New("Failed to delete the course")
+		return err
 	}
 
 	if n == 0 {

@@ -1,21 +1,40 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { fade, slide } from 'svelte/transition';
-	import type { Course } from '$lib/types';
+	import type { Course, Module } from '$lib/types';
 
 	// Subcomponents
+	import EditCourse from './EditCourse.svelte';
+
 	import CreateMaterial from './CreateMaterial.svelte';
 	import EditMaterial from './EditMaterial.svelte';
-	import EditCourse from './EditCourse.svelte';
+
 	import EditQuiz from './EditQuiz.svelte';
+
 	import CreateFeedPost from './CreateFeedPost.svelte';
 	import EditFeed from './EditFeed.svelte';
 
+	import CreateModule from './CreateModule.svelte';
+	import EditModule from './EditModule.svelte';
+
 	let courseId = page.params.uuid!;
+
+	let sections = [
+		{ id: 'general', label: 'General Info', icon: '📝' },
+		{ id: 'modules', label: 'Modules', icon: '📦' },
+		{ id: 'materials', label: 'Materials', icon: '📁' },
+		{ id: 'quizzes', label: 'Quizzes', icon: '📝' },
+		{ id: 'feed', label: 'Course Feed', icon: '💬' }
+	];
+
+	let activeSection = $state('general'); // 'general', 'materials', 'quizzes', 'feed', 'modules'
+
 	let showCreateQuiz = $state(false);
-	let activeSection = $state('general'); // 'general', 'materials', 'quizzes', 'feed'
+	let showCreateModule = $state(false);
 
 	let course = $state<Course | null>(null);
+	$inspect(course);
+
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
@@ -31,12 +50,16 @@
 			loading = false;
 		}
 	}
-
 	loadCourse();
 
 	function onCreateQuizSubmit() {
 		loadCourse();
 		showCreateQuiz = false;
+	}
+
+	function onCreateModuleSubmit() {
+		loadCourse();
+		showCreateModule = false;
 	}
 </script>
 
@@ -88,7 +111,7 @@
 
 			<div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
 				<nav class="space-y-2 lg:col-span-3">
-					{#each [{ id: 'general', label: 'General Info', icon: '📝' }, { id: 'materials', label: 'Materials', icon: '📁' }, { id: 'quizzes', label: 'Quizzes', icon: '📝' }, { id: 'feed', label: 'Course Feed', icon: '💬' }] as section}
+					{#each sections as section}
 						<button
 							onclick={() => (activeSection = section.id)}
 							class="flex w-full cursor-pointer items-center gap-3 rounded-xl border-2 border-s-black p-4 text-left font-black tracking-tight uppercase transition-all
@@ -117,7 +140,11 @@
 							<div in:fade class="space-y-8">
 								<div>
 									<h2 class="mb-4 text-3xl font-black text-s-2 uppercase">Add Content</h2>
-									<CreateMaterial courseUuid={courseId} onchange={loadCourse} />
+									<CreateMaterial
+										courseUuid={courseId}
+										onchange={loadCourse}
+										modules={course.modules}
+									/>
 								</div>
 
 								{#if course.materials.length > 0}
@@ -145,13 +172,24 @@
 
 								{#if showCreateQuiz}
 									<div transition:slide class="rounded-xl border-2 border-s-black bg-gray-50 p-4">
-										<EditQuiz edit={false} courseId={course.uuid} onchange={onCreateQuizSubmit} />
+										<EditQuiz
+											modules={course.modules}
+											edit={false}
+											courseId={course.uuid}
+											onchange={onCreateQuizSubmit}
+										/>
 									</div>
 								{/if}
 
 								<div class="space-y-4">
 									{#each course.quizzes as quiz (quiz.uuid)}
-										<EditQuiz edit={true} {quiz} courseId={course.uuid} onchange={loadCourse} />
+										<EditQuiz
+											modules={course.modules}
+											edit={true}
+											{quiz}
+											courseId={course.uuid}
+											onchange={loadCourse}
+										/>
 									{/each}
 								</div>
 							</div>
@@ -164,6 +202,32 @@
 								<div class="border-t-2 border-dashed border-gray-200 pt-6">
 									<h3 class="mb-4 text-xl font-black text-gray-500 uppercase">History</h3>
 									<EditFeed courseId={course.uuid} />
+								</div>
+							</div>
+						{:else if activeSection === 'modules'}
+							<div in:fade class="space-y-8">
+								<div class="flex items-center justify-between space-x-1">
+									<h2 class="text-3xl font-black text-p-blue uppercase">Modules</h2>
+									<button
+										onclick={() => (showCreateModule = !showCreateModule)}
+										class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-4 py-2 font-bold uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:shadow-none"
+									>
+										{showCreateModule ? 'Cancel' : '+ New Module'}
+									</button>
+								</div>
+
+								{#if showCreateModule}
+									<div transition:slide class="rounded-xl border-2 border-s-black bg-gray-50 p-4">
+										<CreateModule courseId={course.uuid} onchange={onCreateModuleSubmit} />
+									</div>
+								{/if}
+
+								<div class="space-y-4">
+									{#each course.modules as module}
+										{#if module.name !== 'Unassigned'}
+											<EditModule {module} courseId={course.uuid} onchange={loadCourse} />
+										{/if}
+									{/each}
 								</div>
 							</div>
 						{/if}

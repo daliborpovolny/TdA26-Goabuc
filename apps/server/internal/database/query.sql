@@ -67,9 +67,9 @@ WHERE uuid = ? RETURNING *;
 
 -- name: CreateModule :one
 INSERT INTO module (
-    uuid, course_uuid, name, description,state, created_at, updated_at
+    uuid, course_uuid, name, description, created_at, updated_at
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?
 ) RETURNING *;
 
 -- name: ChangeModuleState :one

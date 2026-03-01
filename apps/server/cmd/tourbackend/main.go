@@ -107,7 +107,7 @@ func main() {
 	e.DELETE("/courses/:courseId", coursesHandler.DeleteCourse)
 
 	// modules
-	e.POST("/courses/:courseId/modules/:moduleId", coursesHandler.CreateModule)
+	e.POST("/courses/:courseId/modules", coursesHandler.CreateModule)
 	e.GET("/courses/:courseId/modules/:moduleId", coursesHandler.GetModule)
 	e.PUT("/courses/:courseId/modules/:moduleId", coursesHandler.UpdateModule)
 	e.DELETE("/courses/:courseId/modules/:moduleId", coursesHandler.DeleteModule)

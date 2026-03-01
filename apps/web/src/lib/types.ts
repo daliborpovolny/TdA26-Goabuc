@@ -12,7 +12,7 @@ export interface Course {
 	state: string; // 'preparation' | 'closed' | 'open'
 
 	archived: boolean;
-	
+
 	materials: Material[];
 	quizzes: Quiz[];
 
@@ -141,7 +141,7 @@ export interface QuizOutcome {
 // Heading
 
 export interface Heading {
-	uuid: string
+	uuid: string;
 	courseUuid: string;
 
 	content: string;
@@ -154,13 +154,12 @@ export interface Heading {
 	moduleOrder: number;
 }
 
-
 // Module
 
 export interface Module {
 	uuid: string;
 	courseUuid: string;
-	
+
 	name: string;
 	description: string;
 	state: 'preparation' | 'open' | 'closed';

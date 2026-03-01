@@ -1,6 +1,7 @@
 package courses
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -156,10 +157,11 @@ func (h *CourseHandler) DeleteCourse(c echo.Context) error {
 
 	err := h.service.DeleteCourse(courseId, r.Ctx)
 	if err != nil {
+		fmt.Println(err, "error")
 		if err == ErrFailedToFetchCourse {
 			return r.Error(http.StatusNotFound, "The requested resource was not found.")
 		}
-		return r.Error(http.StatusInternalServerError, "Failed to delete the course.")
+		return r.ServerError(err)
 	}
 
 	return c.NoContent(http.StatusNoContent)
