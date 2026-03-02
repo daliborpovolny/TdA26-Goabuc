@@ -8,6 +8,8 @@
 	let email = $state('');
 	let password = $state('');
 
+	let acceptedTerms = $state(false);
+
 	let registerPromise: Promise<any> | null = $state(null);
 
 	function handleRegister(e: Event) {
@@ -111,11 +113,47 @@
 						class="w-full rounded-xl border-4 border-s-black bg-white p-3 font-bold text-s-black focus:ring-4 focus:ring-p-green focus:outline-none"
 					/>
 				</div>
+
+				<div class="flex items-start space-x-3 py-2">
+					<div class="relative flex items-center">
+						<input
+							id="terms"
+							type="checkbox"
+							bind:checked={acceptedTerms}
+							required
+							class="h-6 w-6 cursor-pointer appearance-none rounded-md border-4 border-s-black bg-white transition-all checked:bg-p-green focus:ring-2 focus:ring-p-green focus:outline-none"
+						/>
+						{#if acceptedTerms}
+							<span
+								class="pointer-events-none absolute inset-0 flex items-center justify-center text-s-black"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							</span>
+						{/if}
+					</div>
+					<label for="terms" class="text-sm font-bold text-white select-none">
+						I AGREE TO THE
+						<a href="/terms" class="text-p-green underline hover:text-white">TERMS OF SERVICE</a>
+						AND
+						<a href="/privacy" class="text-p-green underline hover:text-white">PRIVACY POLICY</a>.
+					</label>
+				</div>
 			</div>
 
 			<button
 				type="submit"
-				disabled={!!registerPromise}
+				disabled={!!registerPromise || !acceptedTerms}
 				class="group relative mt-4 cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-p-green py-4 text-2xl font-black tracking-widest text-s-black uppercase shadow-[5px_5px_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-1 active:translate-y-1 disabled:opacity-50"
 			>
 				{#if !registerPromise}
