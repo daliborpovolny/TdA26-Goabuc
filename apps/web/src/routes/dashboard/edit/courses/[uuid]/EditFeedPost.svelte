@@ -41,7 +41,7 @@
 
 	<form
 		onsubmit={editFeedPost}
-		class="relative flex flex-col gap-3 rounded-xl border-2 border-s-black p-4 transition-colors
+		class="relative flex flex-col rounded-xl border-2 border-s-black p-4 transition-colors
         {isManual ? 'bg-white' : 'bg-gray-100 opacity-80'}"
 	>
 		<div class="flex items-center justify-between border-b border-gray-100 pb-2">
@@ -69,24 +69,34 @@
 				required
 			></textarea>
 
-			<div class="flex items-center justify-end gap-2 pt-2">
-				{#if isEdited}
-					<button
-						transition:fade
-						disabled={isSaving}
-						class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-3 py-1 text-xs font-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
-					>
-						{isSaving ? '...' : 'Save Edit'}
-					</button>
+			<div class="flex items-center justify-between">
+				{#if post.createdAt !== post.updatedAt}
+					<p class="text-[9px] font-bold text-gray-300 uppercase">
+						Edited: {post.updatedAt}
+					</p>
+				{:else}
+					<div></div>
 				{/if}
 
-				<button
-					type="button"
-					onclick={deleteFeedPost}
-					class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-3 py-1 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition active:translate-y-0.5 active:shadow-none"
-				>
-					Delete
-				</button>
+				<div class="flex items-center gap-2">
+					{#if isEdited}
+						<button
+							transition:fade
+							disabled={isSaving}
+							class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-3 py-1 text-xs font-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+						>
+							{isSaving ? '...' : 'Save Edit'}
+						</button>
+					{/if}
+
+					<button
+						type="button"
+						onclick={deleteFeedPost}
+						class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-3 py-1 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition active:translate-y-0.5 active:shadow-none"
+					>
+						Delete
+					</button>
+				</div>
 			</div>
 		{:else}
 			<p class="py-2 font-medium text-gray-600 italic">
@@ -94,8 +104,8 @@
 			</p>
 		{/if}
 
-		{#if post.createdAt !== post.updatedAt}
+		<!-- {#if post.createdAt !== post.updatedAt}
 			<p class="text-[9px] font-bold text-gray-300 uppercase">Edited: {post.updatedAt}</p>
-		{/if}
+		{/if} -->
 	</form>
 </div>
