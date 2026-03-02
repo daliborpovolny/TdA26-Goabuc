@@ -145,9 +145,9 @@
 					</div>
 					<label for="terms" class="text-sm font-bold text-white select-none">
 						I AGREE TO THE
-						<a href="/terms" class="text-p-green underline hover:text-white">TERMS OF SERVICE</a>
+						<a href="/about" class="text-p-green underline hover:text-white">TERMS OF SERVICE</a>
 						AND
-						<a href="/privacy" class="text-p-green underline hover:text-white">PRIVACY POLICY</a>.
+						<a href="/about" class="text-p-green underline hover:text-white">PRIVACY POLICY</a>.
 					</label>
 				</div>
 			</div>
