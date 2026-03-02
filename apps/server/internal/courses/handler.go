@@ -98,6 +98,7 @@ func (h *CourseHandler) GetCourse(c echo.Context) error {
 type UpdateCourseRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	State       string `json:"state"`
 }
 
 type UpdateCourseResponse struct {
@@ -128,6 +129,7 @@ func (h *CourseHandler) UpdateCourse(c echo.Context) error {
 		Description: req.Description,
 		UpdatedAt:   unixTime,
 		Uuid:        courseId,
+		State:       req.State,
 	}
 
 	course, err := h.service.UpdateCourse(updateParams, r.Ctx)

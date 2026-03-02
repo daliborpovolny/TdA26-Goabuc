@@ -50,7 +50,13 @@ INSERT INTO course (
 ) RETURNING *;
 
 -- name: UpdateCourse :one
-UPDATE course SET name = ?, description = ?, updated_at = ? WHERE course.uuid = ? RETURNING *;
+UPDATE course
+SET
+    state = ?,
+    name = ?,
+    description = ?,
+    updated_at = ?
+WHERE course.uuid = ? RETURNING *;
 
 -- name: DeleteCourse :execresult
 DELETE FROM course WHERE course.uuid = ?;

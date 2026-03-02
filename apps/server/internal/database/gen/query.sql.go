@@ -1481,10 +1481,17 @@ func (q *Queries) RemoveQuizFromModule(ctx context.Context, arg RemoveQuizFromMo
 }
 
 const updateCourse = `-- name: UpdateCourse :one
-UPDATE course SET name = ?, description = ?, updated_at = ? WHERE course.uuid = ? RETURNING uuid, name, description, created_at, updated_at, archived, state
+UPDATE course
+SET
+    state = ?,
+    name = ?,
+    description = ?,
+    updated_at = ?
+WHERE course.uuid = ? RETURNING uuid, name, description, created_at, updated_at, archived, state
 `
 
 type UpdateCourseParams struct {
+	State       string `json:"state"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	UpdatedAt   int64  `json:"updated_at"`
@@ -1493,6 +1500,7 @@ type UpdateCourseParams struct {
 
 func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) (Course, error) {
 	row := q.db.QueryRowContext(ctx, updateCourse,
+		arg.State,
 		arg.Name,
 		arg.Description,
 		arg.UpdatedAt,
