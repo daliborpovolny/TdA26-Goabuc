@@ -63,6 +63,8 @@
 					<NavbarLink name="Register" url="/register" onclick={closeMenu} />
 				</div>
 			{/if}
+
+			<NavbarLink name="About" url="/about" />
 		</div>
 	</div>
 </nav>
