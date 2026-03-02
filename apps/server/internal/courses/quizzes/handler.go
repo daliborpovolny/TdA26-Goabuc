@@ -42,6 +42,7 @@ func (h *Handler) CreateQuiz(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
 	courseId := r.Echo.Param("courseId")
+	moduleId := r.Echo.Param("moduleId")
 
 	var quiz Quiz
 	if err := c.Bind(&quiz); err != nil {
@@ -73,18 +74,9 @@ func (h *Handler) CreateQuiz(c echo.Context) error {
 		return r.ServerError(err)
 	}
 
-	// for now modules are optional
-	if quiz.ModuleId != "" {
-		// if quiz.ModuleOrder == nil {
-		// return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
-		// }
-
-		_, err := h.service.AssignQuizToModule(dbQuiz.Uuid, quiz.ModuleId, quiz.ModuleOrder, r.Ctx)
-		if err != nil {
-			return r.ServerError(err)
-		}
-	} else if !QUIZ_CAN_EXIST_ALONE {
-		return r.Error(http.StatusBadRequest, "quiz must always be part of a module")
+	_, err = h.service.AssignQuizToModule(dbQuiz.Uuid, moduleId, quiz.ModuleOrder, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
 	}
 
 	return r.Echo.JSON(http.StatusCreated, dbQuiz)

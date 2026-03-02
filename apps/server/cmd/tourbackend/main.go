@@ -129,7 +129,7 @@ func main() {
 	//* Course Quizes
 	quizzesHandler := quizzes.NewHandler(STATIC_PATH, quizzesService, queries, IS_DEPLOYED)
 
-	quizzes := e.Group("/courses/modules/:moduleId/:courseId/quizzes")
+	quizzes := e.Group("/courses/:courseId/modules/:moduleId/quizzes")
 	quizzes.GET("", quizzesHandler.ListQuizzes)
 	quizzes.POST("", quizzesHandler.CreateQuiz)
 

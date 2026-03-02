@@ -20,7 +20,7 @@ import (
 )
 
 // this variable controls whether a material can exist withouth being part of a module
-var MATERIAL_CAN_EXIST_ALONE = true
+var MATERIAL_CAN_EXIST_ALONE = false
 
 // max file size in bytes
 var MAX_SIZE = int64(30 * 1024 * 1024)

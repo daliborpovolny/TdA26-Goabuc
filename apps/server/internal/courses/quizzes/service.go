@@ -19,7 +19,7 @@ import (
 )
 
 // this variable controls whether quiz can exist withouth being part of a module
-var QUIZ_CAN_EXIST_ALONE = true
+var QUIZ_CAN_EXIST_ALONE = false
 
 type Service struct {
 	q            *db.Queries
