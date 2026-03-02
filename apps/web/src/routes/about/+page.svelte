@@ -6,6 +6,10 @@
 	let activeTab = $state<'terms' | 'privacy'>('terms');
 </script>
 
+<svelte:head>
+	<title>About | TdA</title>
+</svelte:head>
+
 <div class="min-h-screen bg-p-green/10 p-4 py-16 md:p-12">
 	<div class="mx-auto max-w-4xl">
 		<header class="mb-12 text-center">
