@@ -41,8 +41,11 @@
 			<NavbarLink name="Home" url="/" onclick={closeMenu} />
 			<NavbarLink name="Courses" url="/courses" onclick={closeMenu} />
 
-			{#if auth.user}
+			{#if auth.user?.isAdmin}
 				<NavbarLink name="Dashboard" url="/dashboard" onclick={closeMenu} />
+			{/if}
+
+			{#if auth.user}
 				<NavbarLink name="Profile" url="/profile" onclick={closeMenu} />
 
 				<button

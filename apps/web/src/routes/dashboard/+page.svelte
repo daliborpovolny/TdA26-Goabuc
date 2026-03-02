@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { auth } from '$lib/auth.svelte';
 
-	if (!auth.isLoggedIn) {
+	if (!auth.user?.isAdmin) {
 		goto('/login');
 	}
 

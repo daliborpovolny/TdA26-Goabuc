@@ -24,9 +24,9 @@
 				if (!res.ok) throw new Error(data.message || 'Registration failed');
 				return data;
 			})
-			.then((data) => {
-				auth.check();
-				setTimeout(() => goto('/dashboard'), 1500);
+			.then(async (data) => {
+				await auth.check();
+				setTimeout(() => goto('/courses'), 500);
 				return data;
 			});
 	}

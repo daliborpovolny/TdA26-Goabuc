@@ -22,12 +22,24 @@ func NewHandler(queries *db.Queries, isDeployed bool) *Handler {
 	return &Handler{queries: queries, IsDeployed: isDeployed}
 }
 
+type User struct {
+	ID int `json:"id"`
+
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Email     string `json:"email"`
+
+	Hash string `json:"hash"`
+
+	IsAdmin bool `json:"isAdmin"`
+}
+
 type RequestCtx struct {
 	Ctx     context.Context
 	Echo    echo.Context
 	Queries *db.Queries
 
-	User *db.User
+	User *User
 }
 
 func (h *Handler) NewReqCtx(c echo.Context) *RequestCtx {
@@ -38,7 +50,7 @@ func (h *Handler) NewReqCtx(c echo.Context) *RequestCtx {
 		Queries: h.queries,
 	}
 
-	if user, ok := c.Get("user").(*db.User); ok {
+	if user, ok := c.Get("user").(*User); ok {
 		r.User = user
 	}
 

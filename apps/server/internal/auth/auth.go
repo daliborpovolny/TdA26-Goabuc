@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -134,25 +135,34 @@ func (h *AuthHandler) Register(c echo.Context) error {
 	return r.JSONMsg(http.StatusCreated, "registered user")
 }
 
-type ProfileResponse struct {
+type PublicUser struct {
+	ID int `json:"id"`
+
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 	Email     string `json:"email"`
+
+	IsAdmin bool `json:"isAdmin"`
 }
 
 func (h *AuthHandler) Profile(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
+	fmt.Println("in profile")
+
 	if r.User == nil {
+		fmt.Println("rejected")
 		return r.Error(http.StatusUnauthorized, "authentication required")
 	}
 
-	c.Logger().Infof("returned profile of user: %v", r.User.Email)
+	// c.Logger().Infof("returned profile of user: %v", )
 
-	return c.JSON(http.StatusOK, ProfileResponse{
+	return c.JSON(http.StatusOK, PublicUser{
+		ID:        r.User.ID,
 		FirstName: r.User.FirstName,
 		LastName:  r.User.LastName,
 		Email:     r.User.Email,
+		IsAdmin:   r.User.IsAdmin,
 	})
 }
 
@@ -182,22 +192,28 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 	return r.JSONMsg(http.StatusOK, "logged out")
 }
 
-func validateToken(token string, queries *db.Queries, ctx context.Context) (*db.User, error) {
+func validateToken(token string, queries *db.Queries, ctx context.Context) (*handlers.User, error) {
+	fmt.Println("validating token")
 
 	authInfo, err := queries.GetUserBySessionToken(ctx, token)
 	if err != nil {
+		fmt.Println("db fail", err)
 		return nil, err
 	}
 
 	if authInfo.ExpiresAt <= time.Now().Unix() {
+		fmt.Println("expired sesstion")
 		return nil, errors.New("session expired")
 	}
 
-	return &db.User{
-		ID:        authInfo.UserID,
+	fmt.Println("valid")
+
+	return &handlers.User{
+		ID:        int(authInfo.ID),
 		FirstName: authInfo.FirstName,
 		LastName:  authInfo.LastName,
 		Hash:      authInfo.Hash,
 		Email:     authInfo.Email,
+		IsAdmin:   authInfo.IsAdmin,
 	}, nil
 }

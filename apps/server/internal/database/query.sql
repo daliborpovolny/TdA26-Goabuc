@@ -1,15 +1,24 @@
 --* USER
 
 -- name: GetUser :one
-SELECT * FROM user WHERE user.id = ?;
+SELECT 
+    u.*, 
+    (a.user_id IS NOT NULL) AS is_admin
+FROM user u
+LEFT JOIN admin a ON u.id = a.user_id
+WHERE u.id = ?;
 
 -- name: GetUserByEmail :one
 SELECT * FROM user WHERE user.email = ?;
 
 -- name: GetUserBySessionToken :one
-SELECT * FROM user
-JOIN session on user.id = session.user_id
-WHERE session.token = ?;
+SELECT 
+    *, 
+    CAST(a.user_id IS NOT NULL AS BOOLEAN) AS is_admin
+FROM user u
+JOIN session s ON u.id = s.user_id
+LEFT JOIN admin a ON u.id = a.user_id
+WHERE s.token = ?;
 
 -- name: CreateUser :one
 INSERT INTO user (first_name, last_name, hash, email) VALUES (?, ?, ?, ?) RETURNING *;

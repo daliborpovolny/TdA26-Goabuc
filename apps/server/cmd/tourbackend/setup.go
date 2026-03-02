@@ -23,7 +23,7 @@ func createAdmin(q *db.Queries) error {
 		return err
 	}
 
-	_, err = q.CreateUser(ctx, db.CreateUserParams{
+	user, err := q.CreateUser(ctx, db.CreateUserParams{
 		FirstName: "lecturer",
 		LastName:  "lecturer",
 		Email:     "lecturer",
@@ -31,6 +31,11 @@ func createAdmin(q *db.Queries) error {
 	})
 	if err != nil {
 		return nil
+	}
+
+	err = q.MakeUserAdmin(ctx, user.ID)
+	if err != nil {
+		fmt.Println("failed to make user an admin")
 	}
 
 	return nil
@@ -47,9 +52,9 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 	}
 
 	_, err = q.CreateUser(ctx, db.CreateUserParams{
-		FirstName: "Adminov",
-		LastName:  "Adminsky",
-		Email:     "ad.min@goabuc.cz",
+		FirstName: "Student",
+		LastName:  "Studentsky",
+		Email:     "stu.dent@goabuc.cz",
 		Hash:      hash,
 	})
 	if err != nil {

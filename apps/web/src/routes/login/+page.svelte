@@ -22,9 +22,17 @@
 				if (!res.ok) throw new Error(data.message || 'Login failed');
 				return data;
 			})
-			.then((data) => {
-				auth.check();
-				setTimeout(() => goto('/dashboard'), 1500);
+			.then(async (data) => {
+				await auth.check();
+
+				if (auth.user?.isAdmin) {
+					console.log('admin');
+					setTimeout(() => goto('/dashboard'), 500);
+				} else {
+					console.log('no andmin');
+					setTimeout(() => goto('/courses'), 500);
+				}
+
 				return data;
 			});
 

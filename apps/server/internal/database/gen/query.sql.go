@@ -1035,19 +1035,34 @@ func (q *Queries) GetQuiz(ctx context.Context, uuid string) ([]GetQuizRow, error
 
 const getUser = `-- name: GetUser :one
 
-SELECT id, first_name, last_name, hash, email FROM user WHERE user.id = ?
+SELECT 
+    u.id, u.first_name, u.last_name, u.hash, u.email, 
+    (a.user_id IS NOT NULL) AS is_admin
+FROM user u
+LEFT JOIN admin a ON u.id = a.user_id
+WHERE u.id = ?
 `
 
+type GetUserRow struct {
+	ID        int64       `json:"id"`
+	FirstName string      `json:"first_name"`
+	LastName  string      `json:"last_name"`
+	Hash      string      `json:"hash"`
+	Email     string      `json:"email"`
+	IsAdmin   interface{} `json:"is_admin"`
+}
+
 // * USER
-func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
+func (q *Queries) GetUser(ctx context.Context, id int64) (GetUserRow, error) {
 	row := q.db.QueryRowContext(ctx, getUser, id)
-	var i User
+	var i GetUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.FirstName,
 		&i.LastName,
 		&i.Hash,
 		&i.Email,
+		&i.IsAdmin,
 	)
 	return i, err
 }
@@ -1070,22 +1085,28 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserBySessionToken = `-- name: GetUserBySessionToken :one
-SELECT user.id, first_name, last_name, hash, email, session.id, user_id, token, created_at, expires_at FROM user
-JOIN session on user.id = session.user_id
-WHERE session.token = ?
+SELECT 
+    u.id, first_name, last_name, hash, email, s.id, s.user_id, token, created_at, expires_at, a.user_id, 
+    CAST(a.user_id IS NOT NULL AS BOOLEAN) AS is_admin
+FROM user u
+JOIN session s ON u.id = s.user_id
+LEFT JOIN admin a ON u.id = a.user_id
+WHERE s.token = ?
 `
 
 type GetUserBySessionTokenRow struct {
-	ID        int64  `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Hash      string `json:"hash"`
-	Email     string `json:"email"`
-	ID_2      int64  `json:"id_2"`
-	UserID    int64  `json:"user_id"`
-	Token     string `json:"token"`
-	CreatedAt int64  `json:"created_at"`
-	ExpiresAt int64  `json:"expires_at"`
+	ID        int64         `json:"id"`
+	FirstName string        `json:"first_name"`
+	LastName  string        `json:"last_name"`
+	Hash      string        `json:"hash"`
+	Email     string        `json:"email"`
+	ID_2      int64         `json:"id_2"`
+	UserID    int64         `json:"user_id"`
+	Token     string        `json:"token"`
+	CreatedAt int64         `json:"created_at"`
+	ExpiresAt int64         `json:"expires_at"`
+	UserID_2  sql.NullInt64 `json:"user_id_2"`
+	IsAdmin   bool          `json:"is_admin"`
 }
 
 func (q *Queries) GetUserBySessionToken(ctx context.Context, token string) (GetUserBySessionTokenRow, error) {
@@ -1102,6 +1123,8 @@ func (q *Queries) GetUserBySessionToken(ctx context.Context, token string) (GetU
 		&i.Token,
 		&i.CreatedAt,
 		&i.ExpiresAt,
+		&i.UserID_2,
+		&i.IsAdmin,
 	)
 	return i, err
 }

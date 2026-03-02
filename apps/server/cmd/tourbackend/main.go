@@ -85,9 +85,9 @@ func main() {
 	feedsHandler := feeds.NewHandler(STATIC_PATH, feedsService, queries, IS_DEPLOYED)
 
 	e.GET("/courses/:courseId/feed", feedsHandler.GetCourseFeed)
-	e.POST("/courses/:courseId/feed", feedsHandler.CreateFeedPost)
-	e.PUT("/courses/:courseId/feed/:postId", feedsHandler.UpdateFeedPost)
-	e.DELETE("/courses/:courseId/feed/:postId", feedsHandler.DeleteFeedPost)
+	e.POST("/courses/:courseId/feed", feedsHandler.CreateFeedPost, auth.AdminRequired())
+	e.PUT("/courses/:courseId/feed/:postId", feedsHandler.UpdateFeedPost, auth.AdminRequired())
+	e.DELETE("/courses/:courseId/feed/:postId", feedsHandler.DeleteFeedPost, auth.AdminRequired())
 
 	e.GET("/courses/:courseId/feed/stream", feedsHandler.StreamFeed)
 
@@ -99,49 +99,49 @@ func main() {
 
 	coursesHandler := courses.NewCourseHandler(queries, IS_DEPLOYED, courseService)
 
-	e.GET("/courses", coursesHandler.ListAllCourses)
-	e.POST("/courses", coursesHandler.CreateCourse)
-
 	e.GET("/courses/:courseId", coursesHandler.GetCourse)
-	e.PUT("/courses/:courseId", coursesHandler.UpdateCourse)
-	e.DELETE("/courses/:courseId", coursesHandler.DeleteCourse)
+	e.GET("/courses", coursesHandler.ListAllCourses)
+
+	e.POST("/courses", coursesHandler.CreateCourse, auth.AdminRequired())
+	e.PUT("/courses/:courseId", coursesHandler.UpdateCourse, auth.AdminRequired())
+	e.DELETE("/courses/:courseId", coursesHandler.DeleteCourse, auth.AdminRequired())
 
 	// modules
-	e.POST("/courses/:courseId/modules", coursesHandler.CreateModule)
-	e.GET("/courses/:courseId/modules/:moduleId", coursesHandler.GetModule)
-	e.PUT("/courses/:courseId/modules/:moduleId", coursesHandler.UpdateModule)
-	e.DELETE("/courses/:courseId/modules/:moduleId", coursesHandler.DeleteModule)
+	e.POST("/courses/:courseId/modules", coursesHandler.CreateModule, auth.AdminRequired())
+	e.PUT("/courses/:courseId/modules/:moduleId", coursesHandler.UpdateModule, auth.AdminRequired())
+	e.DELETE("/courses/:courseId/modules/:moduleId", coursesHandler.DeleteModule, auth.AdminRequired())
 
+	e.GET("/courses/:courseId/modules/:moduleId", coursesHandler.GetModule)
 	e.GET("/courses/:courseId/modules/:moduleId", coursesHandler.ListAllModules)
 
 	//* Course materials
 	materialsHandler := materials.NewHandler(STATIC_PATH, matsService, queries, IS_DEPLOYED)
 
 	materials := e.Group("/courses/:courseId/modules/:moduleId/materials")
+
 	materials.GET("", materialsHandler.ListMaterials)
-	materials.POST("", materialsHandler.CreateMaterial)
 
-	materials.PUT("/:materialId", materialsHandler.UpdateMaterial)
-	materials.DELETE("/:materialId", materialsHandler.DeleteMaterial)
-
-	materials.POST("/:materialId/:order", materialsHandler.ChangeMaterialInModuleOrder)
+	materials.POST("", materialsHandler.CreateMaterial, auth.AdminRequired())
+	materials.PUT("/:materialId", materialsHandler.UpdateMaterial, auth.AdminRequired())
+	materials.DELETE("/:materialId", materialsHandler.DeleteMaterial, auth.AdminRequired())
+	materials.POST("/:materialId/:order", materialsHandler.ChangeMaterialInModuleOrder, auth.AdminRequired())
 
 	//* Course Quizes
 	quizzesHandler := quizzes.NewHandler(STATIC_PATH, quizzesService, queries, IS_DEPLOYED)
 
 	quizzes := e.Group("/courses/:courseId/modules/:moduleId/quizzes")
 	quizzes.GET("", quizzesHandler.ListQuizzes)
-	quizzes.POST("", quizzesHandler.CreateQuiz)
+	quizzes.POST("", quizzesHandler.CreateQuiz, auth.AdminRequired())
 
 	quizzes.GET("/:quizId", quizzesHandler.GetQuiz)
 	quizzes.GET("/:quizId/answers", quizzesHandler.GetAnswersOfQuiz)
 
-	quizzes.PUT("/:quizId", quizzesHandler.UpdateQuiz)
-	quizzes.DELETE("/:quizId", quizzesHandler.DeleteQuiz)
+	quizzes.PUT("/:quizId", quizzesHandler.UpdateQuiz, auth.AdminRequired())
+	quizzes.DELETE("/:quizId", quizzesHandler.DeleteQuiz, auth.AdminRequired())
 
 	quizzes.POST("/:quizId/submit", quizzesHandler.SubmitQuizAnswers)
 
-	quizzes.POST("/:quizId/modules/:moduleId/:order", quizzesHandler.ChangeQuizInModuleOrder)
+	quizzes.POST("/:quizId/modules/:moduleId/:order", quizzesHandler.ChangeQuizInModuleOrder, auth.AdminRequired())
 
 	//* Static
 	e.Static("/static", STATIC_PATH)

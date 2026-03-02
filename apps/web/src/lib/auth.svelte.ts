@@ -4,6 +4,7 @@ export interface User {
 	email: string;
 	firstName: string;
 	lastName: string;
+	isAdmin: boolean;
 }
 
 class AuthState {
@@ -39,3 +40,4 @@ class AuthState {
 }
 
 export const auth = new AuthState();
+// $inspect(auth.user)
