@@ -101,7 +101,8 @@ SELECT * FROM module WHERE course_uuid = ?;
 UPDATE module
 SET
     name = ?,
-    description = ?
+    description = ?,
+    state = ?
 WHERE
     uuid = ? and course_uuid = ?
 RETURNING *;

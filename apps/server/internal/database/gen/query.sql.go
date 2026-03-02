@@ -1636,7 +1636,8 @@ const updateModule = `-- name: UpdateModule :one
 UPDATE module
 SET
     name = ?,
-    description = ?
+    description = ?,
+    state = ?
 WHERE
     uuid = ? and course_uuid = ?
 RETURNING uuid, course_uuid, name, description, state, created_at, updated_at
@@ -1645,6 +1646,7 @@ RETURNING uuid, course_uuid, name, description, state, created_at, updated_at
 type UpdateModuleParams struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	State       string `json:"state"`
 	Uuid        string `json:"uuid"`
 	CourseUuid  string `json:"course_uuid"`
 }
@@ -1653,6 +1655,7 @@ func (q *Queries) UpdateModule(ctx context.Context, arg UpdateModuleParams) (Mod
 	row := q.db.QueryRowContext(ctx, updateModule,
 		arg.Name,
 		arg.Description,
+		arg.State,
 		arg.Uuid,
 		arg.CourseUuid,
 	)

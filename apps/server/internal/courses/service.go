@@ -339,13 +339,15 @@ func (s *Service) ListAllModules(courseId string, ctx context.Context) ([]Module
 	return modules, nil
 }
 
-func (s *Service) UpdateModule(courseId string, moduleId string, name string, description string, ctx context.Context) (Module, error) {
+func (s *Service) UpdateModule(courseId string, moduleId string, name string, description string, state string, ctx context.Context) (Module, error) {
 
 	newModule, err := s.q.UpdateModule(ctx, db.UpdateModuleParams{
-		Uuid:        moduleId,
-		CourseUuid:  courseId,
+		Uuid:       moduleId,
+		CourseUuid: courseId,
+
 		Name:        name,
 		Description: description,
+		State:       state,
 	})
 	if err != nil {
 		return Module{}, err

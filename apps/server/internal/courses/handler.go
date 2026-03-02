@@ -304,6 +304,7 @@ func (h *CourseHandler) ListAllModules(c echo.Context) error {
 type UpdateModuleRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	State       string `json:"state"`
 }
 
 func (h *CourseHandler) UpdateModule(c echo.Context) error {
@@ -317,7 +318,7 @@ func (h *CourseHandler) UpdateModule(c echo.Context) error {
 	courseId := r.Echo.Param("courseId")
 	moduleId := r.Echo.Param("moduleId")
 
-	_, err := h.service.UpdateModule(courseId, moduleId, req.Name, req.Description, r.Ctx)
+	_, err := h.service.UpdateModule(courseId, moduleId, req.Name, req.Description, req.State, r.Ctx)
 	if err != nil {
 		return r.ServerError(err)
 	}
