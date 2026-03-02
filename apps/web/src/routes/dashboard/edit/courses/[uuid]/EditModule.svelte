@@ -115,7 +115,7 @@
 
 					<div class="relative space-y-1 md:col-span-1">
 						<label class="text-xs font-black tracking-widest text-gray-500 uppercase"
-							>Visibility State</label
+							>Module State</label
 						>
 
 						<div class="relative">
