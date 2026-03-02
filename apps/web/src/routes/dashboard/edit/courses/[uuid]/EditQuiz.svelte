@@ -21,17 +21,21 @@
 		}
 	);
 
-	$inspect(quiz);
-
 	let collapsed = $state(props.edit); // Default open for new quizzes, collapsed for existing
 	let isSaving = $state(false);
 	let showSuccess = $state(false);
 	let savedTitle = $state(quiz.title);
 
 	let selectedModuleUuid = $state('');
+	// $inspect(selectedModuleUuid);
 
 	async function updateQuiz(e: Event) {
 		e.preventDefault();
+
+		let module = props.modules.find((x: Module) => x.uuid === quiz.moduleId) || {
+			name: 'm name',
+			uuid: 'm uuid'
+		};
 
 		// Validation for multiple choice
 		for (const q of quiz.questions) {
@@ -46,8 +50,8 @@
 		}
 
 		isSaving = true;
-		const putRoute = `/api/courses/${props.courseId}/quizzes/${quiz.uuid}`;
-		const postRoute = `/api/courses/${props.courseId}/quizzes`;
+		const putRoute = `/api/courses/${props.courseId}/modules/${module.uuid}/quizzes/${quiz.uuid}`;
+		const postRoute = `/api/courses/${props.courseId}/modules/${selectedModuleUuid}/quizzes`;
 
 		const res = await fetch(props.edit ? putRoute : postRoute, {
 			method: props.edit ? 'PUT' : 'POST',
@@ -150,7 +154,7 @@
 						class="w-full rounded-xl border-4 border-s-black p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
 					/>
 					{#if !props.edit}
-						<ModuleSelector modules={props.modules} selectedId={selectedModuleUuid} />
+						<ModuleSelector modules={props.modules} bind:selectedId={selectedModuleUuid} />
 					{/if}
 				</div>
 

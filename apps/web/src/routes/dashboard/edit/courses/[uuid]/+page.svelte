@@ -33,7 +33,7 @@
 	let showCreateModule = $state(false);
 
 	let course = $state<Course | null>(null);
-	$inspect(course);
+	// $inspect(course);
 
 	let loading = $state(true);
 	let error = $state<string | null>(null);

@@ -18,11 +18,18 @@
 	let isSaving = $state(false);
 	let showSuccess = $state(false);
 
+	let module = modules.find((x: Module) => x.uuid === material.moduleId) || {
+		name: 'm name',
+		uuid: 'm uuid'
+	};
+
 	async function remove(e: Event) {
 		e.preventDefault();
 		if (!confirm(`Are you sure you want to delete "${material.name}"?`)) return;
 
-		await fetch(`/api/courses/${courseUuid}/materials/${material.uuid}`, { method: 'DELETE' });
+		await fetch(`/api/courses/${courseUuid}/modules/${module.uuid}/materials/${material.uuid}`, {
+			method: 'DELETE'
+		});
 		onchange();
 	}
 
@@ -43,7 +50,10 @@
 		}
 
 		try {
-			const res = await fetch(`/api/courses/${courseUuid}/materials/${material.uuid}`, options);
+			const res = await fetch(
+				`/api/courses/${courseUuid}/modules/${module.uuid}/materials/${material.uuid}`,
+				options
+			);
 			if (res.ok) {
 				showSuccess = true;
 				onchange();

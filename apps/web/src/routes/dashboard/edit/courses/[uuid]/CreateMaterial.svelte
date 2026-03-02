@@ -35,7 +35,10 @@
 		}
 
 		try {
-			const res = await fetch(`/api/courses/${courseUuid}/modules/${formData}/materials`, options);
+			const res = await fetch(
+				`/api/courses/${courseUuid}/modules/${selectedModuleUuid}/materials`,
+				options
+			);
 			if (res.ok) {
 				materialType = '';
 				showSuccess = true;
