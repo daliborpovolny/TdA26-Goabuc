@@ -5,10 +5,10 @@
 	import UniButton from './UniButton.svelte';
 	import UniLink from './UniLink.svelte';
 
-	let dataPromise = fetch('/api/me').then((r) => {
-		if (!r.ok) throw new Error('Not logged in');
-		return r.json();
-	});
+	// let dataPromise = fetch('/api/me').then((r) => {
+	// 	if (!r.ok) throw new Error('Not logged in');
+	// 	return r.json();
+	// });
 </script>
 
 <svelte:head>
@@ -25,12 +25,10 @@
 					Think different <span class="text-p-green">Academy</span>
 				</h1>
 
-				{#await dataPromise}
-					<div class="h-20 w-20 animate-pulse rounded-lg bg-white/20"></div>
-				{:then user}
+				{#if auth.isLoggedIn}
 					<div in:fade class="space-y-6">
 						<h2 class="text-3xl font-bold md:text-4xl">
-							Welcome back, {user.firstName}!
+							Welcome back, {auth.user?.firstName}!
 						</h2>
 						<div class="flex flex-wrap gap-4">
 							<a
@@ -41,7 +39,7 @@
 							</a>
 						</div>
 					</div>
-				{:catch}
+				{:else}
 					<div in:fade class="space-y-6">
 						<p class="text-2xl font-medium opacity-90">
 							The ultimate academy for modern developers. Master your craft with interactive courses
@@ -52,7 +50,7 @@
 							<UniLink href="/login" content="Member Login" uppercase={true} />
 						</div>
 					</div>
-				{/await}
+				{/if}
 			</div>
 		</div>
 
