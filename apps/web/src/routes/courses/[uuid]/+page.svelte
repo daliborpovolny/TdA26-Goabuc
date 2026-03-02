@@ -63,7 +63,7 @@
 				>
 					<h2 class="text-center text-2xl font-bold">Course Materials</h2>
 					{#if course.materials?.length}
-						<div class="space-y-2 rounded-xl bg-p-blue p-2">
+						<div class="space-y-2 rounded-xl bg-p-blue p-4">
 							{#each course.materials as material}
 								<ViewMaterial {material} />
 							{/each}

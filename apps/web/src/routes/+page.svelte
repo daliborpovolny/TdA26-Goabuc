@@ -2,6 +2,9 @@
 	import { auth } from '$lib/auth.svelte';
 	import { fade, fly } from 'svelte/transition';
 
+	import UniButton from './UniButton.svelte';
+	import UniLink from './UniLink.svelte';
+
 	let dataPromise = fetch('/api/me').then((r) => {
 		if (!r.ok) throw new Error('Not logged in');
 		return r.json();
@@ -45,18 +48,8 @@
 							and real-time feeds.
 						</p>
 						<div class="flex flex-wrap gap-4 pt-4">
-							<a
-								href="/register"
-								class="rounded-xl border-4 border-s-black bg-p-green px-8 py-4 text-2xl font-black text-s-black uppercase shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-							>
-								Get Started
-							</a>
-							<a
-								href="/login"
-								class="rounded-xl border-4 border-s-black bg-white px-8 py-4 text-2xl font-black text-s-black uppercase shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-							>
-								Member Login
-							</a>
+							<UniLink href="/register" content="Get Started" uppercase={true} />
+							<UniLink href="/login" content="Member Login" uppercase={true} />
 						</div>
 					</div>
 				{/await}

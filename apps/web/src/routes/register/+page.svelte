@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { auth } from '$lib/auth.svelte';
 	import { fade } from 'svelte/transition';
+	import UniButton from '../UniButton.svelte';
 
 	let first_name = $state('');
 	let last_name = $state('');
@@ -151,17 +152,18 @@
 				</div>
 			</div>
 
-			<button
+			<UniButton
 				type="submit"
 				disabled={!!registerPromise || !acceptedTerms}
-				class="group relative mt-4 cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-p-green py-4 text-2xl font-black tracking-widest text-s-black uppercase shadow-[5px_5px_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-1 active:translate-y-1 disabled:opacity-50"
+				uppercase
+				more_style="disabled:opacity-50"
 			>
 				{#if !registerPromise}
 					<span>Start Learning</span>
 				{:else}
 					<span class="inline-block animate-pulse">Creating Account...</span>
 				{/if}
-			</button>
+			</UniButton>
 
 			<p class="text-center font-bold text-white">
 				Already a member?
