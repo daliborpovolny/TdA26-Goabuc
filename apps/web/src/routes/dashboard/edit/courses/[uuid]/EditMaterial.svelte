@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Material, Module } from '$lib/types';
 	import { fade, slide } from 'svelte/transition';
+	import { modal } from '$lib/modal.svelte';
 
 	let {
 		material,
@@ -25,8 +26,13 @@
 
 	async function remove(e: Event) {
 		e.preventDefault();
-		if (!confirm(`Are you sure you want to delete "${material.name}"?`)) return;
 
+		const confirmed = await modal.confirm(
+			`Delete materail "${material.name}"? This action cannot be undone.`
+		);
+		if (!confirmed) {
+			return;
+		}
 		await fetch(`/api/courses/${courseUuid}/modules/${module.uuid}/materials/${material.uuid}`, {
 			method: 'DELETE'
 		});

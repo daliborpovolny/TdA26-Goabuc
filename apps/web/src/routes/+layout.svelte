@@ -6,6 +6,8 @@
 	import { onMount } from 'svelte';
 	import Navbar from './Navbar.svelte';
 
+	import CustomConfirm from '$lib/components/CustomConfirm.svelte';
+
 	let { children } = $props();
 
 	onMount(() => {
@@ -16,6 +18,8 @@
 <svelte:head>
 	<link rel="icon" href={favicon} />
 </svelte:head>
+
+<CustomConfirm />
 
 {#if !auth.initialized}
 	<div class="splash-screen">Loading App...</div>

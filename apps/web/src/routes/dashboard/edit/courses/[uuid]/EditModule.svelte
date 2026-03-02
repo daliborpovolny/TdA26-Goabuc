@@ -2,6 +2,8 @@
 	import type { Module } from '$lib/types';
 	import { fade, slide } from 'svelte/transition';
 
+	import { modal } from '$lib/modal.svelte';
+
 	let { module, courseId, onchange }: { module: Module; courseId: string; onchange: () => void } =
 		$props();
 
@@ -35,7 +37,13 @@
 	}
 
 	async function deleteModule() {
-		if (!confirm(`Delete module "${module.name}"? This will move items to unassigned!`)) return;
+		const confirmed = await modal.confirm(
+			`Delete module "${module.name}"? This action cannot be undone.`
+		);
+		if (!confirmed) {
+			return;
+		}
+
 		await fetch(`/api/courses/${courseId}/modules/${module.uuid}`, { method: 'DELETE' });
 		onchange();
 	}

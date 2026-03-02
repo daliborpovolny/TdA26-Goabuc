@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
+
 	import type { Quiz, Question, Module } from '$lib/types';
+	import { modal } from '$lib/modal.svelte';
+
 	import { fade, slide } from 'svelte/transition';
 	import ModuleSelector from './ModuleSelector.svelte';
 
@@ -107,8 +110,22 @@
 	}
 
 	async function deleteQuiz() {
-		if (!confirm('Permanently delete this entire quiz?')) return;
-		await fetch(`/api/courses/${props.courseId}/quizzes/${quiz.uuid}`, { method: 'DELETE' });
+		const confirmed = await modal.confirm(
+			`Delete quiz "${quiz.title}"? This action cannot be undone.`
+		);
+		if (!confirmed) {
+			return;
+		}
+
+		let module = props.modules.find((x: Module) => x.uuid === quiz.moduleId) || {
+			name: 'm name',
+			uuid: 'm uuid'
+		};
+
+		// if (!confirm('Permanently delete this entire quiz?')) return;
+		await fetch(`/api/courses/${props.courseId}/modules/${module.uuid}/quizzes/${quiz.uuid}`, {
+			method: 'DELETE'
+		});
 		props.onchange?.(quiz);
 	}
 </script>

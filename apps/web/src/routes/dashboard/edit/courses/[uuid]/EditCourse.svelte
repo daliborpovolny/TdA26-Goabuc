@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import type { Course } from '$lib/types';
 	import { fade } from 'svelte/transition';
+	import { modal } from '$lib/modal.svelte';
 
 	let { course, onchange }: { course: Course; onchange: () => void } = $props();
 
@@ -34,6 +35,14 @@
 
 	async function deleteCourse(e: Event) {
 		e.preventDefault();
+
+		const confirmed = await modal.confirm(
+			`Delete entire course "${course.name}"? This action cannot be undone.`
+		);
+		if (!confirmed) {
+			return;
+		}
+
 		isSaving = true;
 
 		try {
