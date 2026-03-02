@@ -315,7 +315,7 @@ func (h *CourseHandler) UpdateModule(c echo.Context) error {
 	}
 
 	courseId := r.Echo.Param("courseId")
-	moduleId := uuid.NewString()
+	moduleId := r.Echo.Param("moduleId")
 
 	_, err := h.service.UpdateModule(courseId, moduleId, req.Name, req.Description, r.Ctx)
 	if err != nil {
