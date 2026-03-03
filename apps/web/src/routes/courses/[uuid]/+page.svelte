@@ -1,102 +1,173 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { slide, fade } from 'svelte/transition';
+	import type { Course, FullModule, Quiz, Material, Heading } from '$lib/types';
+
 	import ViewMaterial from './ViewMaterial.svelte';
-	import type { Course } from '$lib/types';
 	import TakeQuiz from './TakeQuiz.svelte';
 	import ViewFeed from './ViewFeed.svelte';
+	import { goto } from '$app/navigation';
 
-	let activeTab = $state('materials');
+	let activeTab = $state('modules');
 
-	let message: string = $state('loading');
-	let course: null | Course = $state(null);
-	loadCourseDetail();
+	let course = $state<Course | null>(null);
 
-	async function loadCourseDetail() {
-		const res = await fetch('/api/courses/' + page.params.uuid);
-		if (!res.ok) {
-			if (res.status === 404) {
-				message = 'Unknown course';
-			} else {
-				message = 'Failed to load course detail';
+	let loading = $state(true);
+	let error = $state<string | null>(null);
+
+	async function loadCourse() {
+		error = null;
+		try {
+			const res = await fetch(`/api/courses/${page.params.uuid}`);
+			if (!res.ok) {
+				if (res.status == 404) {
+					throw new Error('Unknown Course');
+				}
+
+				throw new Error('Failed to load course');
 			}
-			return;
+			course = await res.json();
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Unknown error';
+		} finally {
+			loading = false;
 		}
-		course = await res.json();
+	}
+	loadCourse();
+
+	// Helper to check if item is Quiz or Material
+	function isQuiz(item: Quiz | Material | Heading): item is Quiz {
+		return 'questions' in item;
+	}
+
+	function isMaterial(item: Material | Heading): item is Material {
+		return !('content' in item);
 	}
 </script>
 
 <svelte:head>
-	<title>{course?.name + ' | TdA'}</title>
+	<title>{course ? course.name + ' | TdA' : 'Loading...'}</title>
 </svelte:head>
 
-{#if course !== null}
-	<div class="min-h-screen bg-s-white p-4 md:p-10">
-		<div class="mx-auto flex w-full flex-col gap-6 md:max-w-8/9">
-			<div class="space-y-4">
-				<h1 class="text-4xl font-bold text-s-black md:text-6xl">{course.name}</h1>
-				<div class="rounded-xl bg-p-blue p-1.5 shadow-lg">
-					<div class="rounded-lg bg-p-green p-4">
-						<p class="text-xl text-s-black md:text-2xl">{course.description}</p>
+<div class="min-h-screen bg-s-white p-4 md:p-10">
+	{#if loading}
+		<div class="flex h-64 flex-col items-center justify-center space-y-4">
+			<div
+				class="h-12 w-12 animate-spin rounded-full border-4 border-p-blue border-t-p-green"
+			></div>
+			<p class="font-black tracking-widest text-s-black uppercase">Syncing Academy Data...</p>
+		</div>
+	{:else if error}
+		<div
+			class="mx-auto max-w-md rounded-xl border-4 border-s-black bg-red-500 p-6 text-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+		>
+			<p class="text-2xl font-black">ERROR</p>
+			<p class="mt-2 font-bold">{error}</p>
+			<button
+				onclick={loadCourse}
+				class="mt-4 rounded-lg bg-s-black px-4 py-2 font-bold hover:bg-white hover:text-s-black"
+				>Retry Connection</button
+			>
+			<button
+				onclick={() => goto('/courses')}
+				class="mt-4 rounded-lg bg-s-black px-4 py-2 font-bold hover:bg-white hover:text-s-black"
+				>Go back</button
+			>
+		</div>
+	{:else if course}
+		<div class="mx-auto flex w-full flex-col gap-8 md:max-w-[90%]">
+			<header class="space-y-4">
+				<h1 class="text-5xl font-black tracking-tighter text-s-black uppercase md:text-7xl">
+					{course.name}
+				</h1>
+				<div class="relative">
+					<div class="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-s-black"></div>
+					<div class="relative rounded-2xl border-4 border-s-black bg-p-green p-6">
+						<p class="text-xl font-bold text-s-black italic md:text-2xl">
+							{course.description}
+						</p>
+					</div>
+				</div>
+			</header>
+
+			<div
+				class="sticky top-4 z-20 flex rounded-xl border-4 border-s-black bg-s-black p-1 shadow-xl lg:hidden"
+			>
+				<button
+					onclick={() => (activeTab = 'modules')}
+					class="flex-1 rounded-lg py-3 text-lg font-black tracking-widest uppercase transition-all
+                        {activeTab === 'modules' ? 'bg-p-green text-s-black' : 'text-white'}"
+				>
+					Modules
+				</button>
+				<button
+					onclick={() => (activeTab = 'feed')}
+					class="flex-1 rounded-lg py-3 text-lg font-black tracking-widest uppercase transition-all
+                        {activeTab === 'feed' ? 'bg-p-green text-s-black' : 'text-white'}"
+				>
+					Feed
+				</button>
+			</div>
+
+			<div class="flex flex-col gap-8 lg:flex-row">
+				<div
+					class="w-full space-y-8 lg:w-2/3 {activeTab === 'modules' ? 'block' : 'hidden lg:block'}"
+				>
+					<h2 class="text-3xl font-black tracking-tight text-p-blue uppercase">Learning Path</h2>
+
+					{#if course.modules.length > 0}
+						<div class="space-y-12">
+							{#each course.modules as module, i}
+								<section class="relative">
+									<div
+										class="absolute -top-3 -left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border-4 border-s-black bg-p-green font-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+									>
+										{i + 1}
+									</div>
+
+									<div
+										class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]"
+									>
+										<div class="mb-6 border-b-2 border-gray-100 pb-4">
+											<h3 class="text-2xl font-black tracking-tight uppercase">{module.name}</h3>
+											<p class="font-bold text-gray-500 italic">{module.description}</p>
+										</div>
+
+										<div class="space-y-3">
+											{#each module.items as item}
+												{#if isQuiz(item)}
+													<TakeQuiz quiz={item} courseId={course.uuid} />
+												{:else if isMaterial(item)}
+													<ViewMaterial material={item} />
+												{/if}
+											{/each}
+										</div>
+									</div>
+								</section>
+							{/each}
+						</div>
+					{:else}
+						<div
+							class="rounded-2xl border-4 border-dashed border-gray-300 p-12 text-center font-bold text-gray-400"
+						>
+							No modules have been released for this path yet.
+						</div>
+					{/if}
+				</div>
+
+				<div class="w-full space-y-8 lg:w-1/3 {activeTab === 'feed' ? 'block' : 'hidden lg:block'}">
+					<div class="sticky top-10">
+						<h2 class="mb-8 text-3xl font-black tracking-tight text-s-black uppercase">
+							News Feed
+						</h2>
+						<div
+							class="rounded-2xl border-4 border-s-black bg-p-blue/5 p-2 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+						>
+							<ViewFeed courseId={course.uuid} />
+						</div>
 					</div>
 				</div>
 			</div>
-
-			<div class="sticky top-2 z-10 flex gap-2 rounded-xl bg-s-black p-1 shadow-md lg:hidden">
-				{#each ['materials', 'quizzes', 'feed'] as tab}
-					<button
-						onclick={() => (activeTab = tab)}
-						class="flex-1 cursor-pointer rounded-lg py-2 text-lg font-bold capitalize transition-all
-                            {activeTab === tab
-							? 'bg-p-green text-s-black'
-							: 'text-s-white hover:bg-p-blue'}"
-					>
-						{tab}
-					</button>
-				{/each}
-			</div>
-
-			<div class="mt-2 flex min-h-[400px] flex-col lg:flex-row lg:space-x-4">
-				<div
-					class="w-full space-y-3 lg:w-1/3 {activeTab === 'materials'
-						? 'block'
-						: 'hidden lg:block'}"
-				>
-					<h2 class="text-center text-2xl font-bold">Course Materials</h2>
-					{#if course.materials?.length}
-						<div class="space-y-2 rounded-xl bg-p-blue p-4">
-							{#each course.materials as material}
-								<ViewMaterial {material} />
-							{/each}
-						</div>
-					{:else}
-						<p class="text-center text-gray-500 italic">No materials available yet.</p>
-					{/if}
-				</div>
-
-				<div
-					class="w-full space-y-3 lg:w-1/3 {activeTab === 'quizzes' ? 'block' : 'hidden lg:block'}"
-				>
-					<h2 class="text-center text-2xl font-bold">Available Quizzes</h2>
-					{#if course.quizzes?.length}
-						<div class="space-y-2 rounded-xl bg-p-blue p-2">
-							{#each course.quizzes as quiz}
-								<TakeQuiz {quiz} courseId={course.uuid} />
-							{/each}
-						</div>
-					{:else}
-						<p class="text-center text-gray-500 italic">No quizzes assigned.</p>
-					{/if}
-				</div>
-
-				<div class="w-full space-y-3 lg:w-1/3 {activeTab === 'feed' ? 'block' : 'hidden lg:block'}">
-					<h2 class="text-center text-2xl font-bold">News Feed</h2>
-					<ViewFeed courseId={course.uuid} />
-				</div>
-			</div>
 		</div>
-	</div>
-{:else}
-	<div class="text-2xl">
-		{message}
-	</div>
-{/if}
+	{/if}
+</div>
