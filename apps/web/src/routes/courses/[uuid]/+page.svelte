@@ -26,7 +26,7 @@
 </script>
 
 <svelte:head>
-	<title>{course?.name || 'Tda course'}</title>
+	<title>{course?.name + ' | TdA'}</title>
 </svelte:head>
 
 {#if course !== null}
