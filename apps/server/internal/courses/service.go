@@ -99,7 +99,12 @@ func (s *Service) CreateCourse(params db.CreateCourseParams, ctx context.Context
 		return nil, err
 	}
 
-	_, err = s.CreateModule(course.Uuid, uuid.NewString(), "Unassigned", "unassigned things go here!", ctx)
+	module, err := s.CreateModule(course.Uuid, uuid.NewString(), "Unassigned", "unassigned things go here!", ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.ChangeModuleState(course.Uuid, module.Uuid, "open", ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +128,7 @@ type GetCourseResponse struct {
 	Modules []FullModule `json:"modules"`
 }
 
-func (s *Service) GetCourse(courseId string, host string, scheme string, ctx context.Context) (*GetCourseResponse, error) {
+func (s *Service) GetCourse(courseId string, host string, scheme string, isAdmin bool, ctx context.Context) (*GetCourseResponse, error) {
 
 	course, err := s.q.GetCourse(ctx, courseId)
 	if err != nil {
@@ -131,6 +136,26 @@ func (s *Service) GetCourse(courseId string, host string, scheme string, ctx con
 			return nil, ErrCourseNotFound
 		}
 		return nil, ErrFailedToFetchCourse
+	}
+
+	if !isAdmin {
+		if course.State != "open" {
+			return &GetCourseResponse{
+				Uuid: course.Uuid,
+
+				Name:        course.Name,
+				Description: course.Description,
+				State:       course.State,
+				Archived:    course.Archived == 1,
+
+				Materials: []materials.Material{},
+				Quizzes:   []quizzes.Quiz{},
+
+				Feed: []feeds.FeedPostResponse{},
+
+				Modules: []FullModule{},
+			}, nil
+		}
 	}
 
 	mats, err := s.materialsService.ListMaterials(courseId, host, scheme, ctx)
@@ -159,6 +184,17 @@ func (s *Service) GetCourse(courseId string, host string, scheme string, ctx con
 	fullModules := make([]FullModule, 0, len(modules))
 
 	for _, module := range modules {
+
+		if !isAdmin {
+			if module.State == "closed" {
+				fullModules = append(fullModules, s.moduleToFullModule(module, []Item{}, 0))
+			}
+
+			if module.State != "open" {
+				continue
+			}
+		}
+
 		items := make([]Item, 0, 10)
 		maxItemOrder := 0
 
