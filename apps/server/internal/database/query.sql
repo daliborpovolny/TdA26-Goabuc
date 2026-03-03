@@ -423,7 +423,14 @@ INSERT INTO answer (
 -- TODO RETURN ANSWERS AND SHOW THEM ON FRONTEND
 
 -- name: GetAnswersOfQuiz :many
-SELECT * FROM answer WHERE quiz_uuid = ? ORDER BY answer.submitted_at DESC;
+SELECT
+    answer.*,
+    user.first_name,
+    user.last_name
+FROM answer
+LEFT JOIN user ON user.id = answer.user_id
+WHERE quiz_uuid = ?
+ORDER BY answer.submitted_at DESC;
 
 --* Posts
 

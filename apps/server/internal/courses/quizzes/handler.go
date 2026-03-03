@@ -169,7 +169,7 @@ type Answer struct {
 type SubmitQuizAnswersRequest struct {
 	Comment string   `json:"comment"`
 	Answers []Answer `json:"answers"`
-	UserID  *int     `json:"userId"`
+	UserID  *int     `json:"id"`
 }
 
 type SubmittedAnswersOutcome struct {

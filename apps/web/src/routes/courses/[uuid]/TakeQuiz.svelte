@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { auth } from '$lib/auth.svelte';
 	import type { Quiz, QuizSubmit, QuizMarked, Answer } from '$lib/types';
 	import { slide } from 'svelte/transition';
 
 	let { quiz, courseId }: { quiz: Quiz; courseId: string } = $props();
 
 	let collapsed = $state(true);
-	let quizSubmit: QuizSubmit = { answers: [] };
+	let quizSubmit: QuizSubmit = { answers: [], id: null };
 	let quizMarked: QuizMarked | null = $state(null);
 	let missingAnswers: number[] = $state([]);
 	let attempsCount: number = $state(quiz.attemptsCount);
@@ -31,6 +32,12 @@
 		});
 
 		if (missingAnswers.length > 0) return;
+
+		if (auth.user) {
+			quizSubmit.id = auth.user.id;
+		}
+
+		let body = JSON.stringify(quizSubmit);
 
 		let res = await fetch(
 			`/api/courses/${courseId}/modules/${quiz.moduleId}/quizzes/${quiz.uuid}/submit`,

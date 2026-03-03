@@ -23,8 +23,11 @@
 	// Initial load
 	loadOutcomes();
 
-	function formatTime(timestamp: number) {
-		return new Date(timestamp).toLocaleString();
+	function formatTime(iso: string) {
+		const date = new Date(iso);
+
+		const formatted = date.toLocaleString();
+		return formatted;
 	}
 
 	function getScoreColor(score: number, max: number) {
@@ -34,6 +37,10 @@
 		return 'text-red-500';
 	}
 </script>
+
+<svelte:head>
+	<title>Quiz results | TdA</title>
+</svelte:head>
 
 <div class="p-6 md:p-12">
 	<header class="mb-10 flex items-center justify-between border-b-4 border-s-black pb-6">
@@ -67,7 +74,7 @@
 				<table class="w-full border-collapse text-left">
 					<thead class="bg-s-black text-sm tracking-widest text-white uppercase">
 						<tr>
-							<th class="p-4">Student ID</th>
+							<th class="p-4">Student Name</th>
 							<th class="p-4">Attempt</th>
 							<th class="p-4">Score</th>
 							<th class="p-4">Submitted At</th>
@@ -79,12 +86,12 @@
 							<tr class="border-b-2 border-gray-100 transition-colors hover:bg-p-green/5">
 								<td class="p-4">
 									<span class="rounded bg-p-blue/10 px-2 py-1 text-p-blue">
-										{outcome.user_id != 0 ? `User #${outcome.user_id}` : 'Anonymous'}
+										{outcome.user_id != 0 ? `${outcome.user_full_name}` : 'Anonymous'}
 									</span>
 								</td>
 								<td class="p-4">
 									<span class="rounded-full border-2 border-s-black bg-white px-3 py-1 text-xs">
-										#{outcome.attempt_number}
+										{outcome.user_id != 0 ? '#' + outcome.attempt_number : '—'}
 									</span>
 								</td>
 								<td class="p-4 text-2xl font-black">
@@ -94,7 +101,7 @@
 									<span class="text-sm text-gray-400">/ {outcome.max_score}</span>
 								</td>
 								<td class="p-4 text-sm text-gray-500">
-									{outcome.submitted_at}
+									{formatTime(outcome.submitted_at)}
 								</td>
 								<td class="p-4 text-gray-400 italic">
 									{outcome.comment || '—'}

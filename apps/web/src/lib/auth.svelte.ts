@@ -5,6 +5,7 @@ export interface User {
 	firstName: string;
 	lastName: string;
 	isAdmin: boolean;
+	id: number;
 }
 
 class AuthState {
@@ -14,7 +15,6 @@ class AuthState {
 
 	async check() {
 		try {
-			// Your actual API call to backend
 			const response = await fetch('/api/me');
 			if (response.ok) {
 				this.user = await response.json();
@@ -40,4 +40,3 @@ class AuthState {
 }
 
 export const auth = new AuthState();
-// $inspect(auth.user)

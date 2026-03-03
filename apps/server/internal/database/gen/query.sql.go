@@ -651,19 +651,38 @@ func (q *Queries) DeleteQuiz(ctx context.Context, uuid string) (sql.Result, erro
 
 const getAnswersOfQuiz = `-- name: GetAnswersOfQuiz :many
 
-SELECT quiz_uuid, comment, score, max_score, user_id, attempt_number, submitted_at, "foreign" FROM answer WHERE quiz_uuid = ? ORDER BY answer.submitted_at DESC
+SELECT
+    answer.quiz_uuid, answer.comment, answer.score, answer.max_score, answer.user_id, answer.attempt_number, answer.submitted_at,
+    user.first_name,
+    user.last_name
+FROM answer
+LEFT JOIN user ON user.id = answer.user_id
+WHERE quiz_uuid = ?
+ORDER BY answer.submitted_at DESC
 `
 
+type GetAnswersOfQuizRow struct {
+	QuizUuid      string         `json:"quiz_uuid"`
+	Comment       sql.NullString `json:"comment"`
+	Score         int64          `json:"score"`
+	MaxScore      int64          `json:"max_score"`
+	UserID        sql.NullInt64  `json:"user_id"`
+	AttemptNumber int64          `json:"attempt_number"`
+	SubmittedAt   int64          `json:"submitted_at"`
+	FirstName     sql.NullString `json:"first_name"`
+	LastName      sql.NullString `json:"last_name"`
+}
+
 // TODO RETURN ANSWERS AND SHOW THEM ON FRONTEND
-func (q *Queries) GetAnswersOfQuiz(ctx context.Context, quizUuid string) ([]Answer, error) {
+func (q *Queries) GetAnswersOfQuiz(ctx context.Context, quizUuid string) ([]GetAnswersOfQuizRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAnswersOfQuiz, quizUuid)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Answer
+	var items []GetAnswersOfQuizRow
 	for rows.Next() {
-		var i Answer
+		var i GetAnswersOfQuizRow
 		if err := rows.Scan(
 			&i.QuizUuid,
 			&i.Comment,
@@ -672,7 +691,8 @@ func (q *Queries) GetAnswersOfQuiz(ctx context.Context, quizUuid string) ([]Answ
 			&i.UserID,
 			&i.AttemptNumber,
 			&i.SubmittedAt,
-			&i.Foreign,
+			&i.FirstName,
+			&i.LastName,
 		); err != nil {
 			return nil, err
 		}
@@ -1163,7 +1183,7 @@ INSERT INTO answer (
         )
     END,
     ?6
-) RETURNING quiz_uuid, comment, score, max_score, user_id, attempt_number, submitted_at, "foreign"
+) RETURNING quiz_uuid, comment, score, max_score, user_id, attempt_number, submitted_at
 `
 
 type InsertAnswerParams struct {
@@ -1194,7 +1214,6 @@ func (q *Queries) InsertAnswer(ctx context.Context, arg InsertAnswerParams) (Ans
 		&i.UserID,
 		&i.AttemptNumber,
 		&i.SubmittedAt,
-		&i.Foreign,
 	)
 	return i, err
 }

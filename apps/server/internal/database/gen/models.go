@@ -20,7 +20,6 @@ type Answer struct {
 	UserID        sql.NullInt64  `json:"user_id"`
 	AttemptNumber int64          `json:"attempt_number"`
 	SubmittedAt   int64          `json:"submitted_at"`
-	Foreign       interface{}    `json:"foreign"`
 }
 
 type Course struct {

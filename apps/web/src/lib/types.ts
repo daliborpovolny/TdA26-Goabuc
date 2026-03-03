@@ -88,6 +88,7 @@ export interface Answer {
 
 export interface QuizSubmit {
 	answers: Answer[];
+	id: number | null;
 }
 
 export interface QuizMarked {
@@ -133,6 +134,8 @@ export interface QuizOutcome {
 	max_score: number;
 
 	user_id: number;
+	user_full_name: string;
+
 	attempt_number: number;
 
 	submitted_at: string;

@@ -565,6 +565,7 @@ type Outcome struct {
 	UserID        int    `json:"user_id"`
 	AttemptNumber int    `json:"attempt_number"`
 	SubmittedAt   string `json:"submitted_at"`
+	UserFullName  string `json:"user_full_name"`
 }
 
 func (s *Service) GetAnswersOfQuiz(quizId string, ctx context.Context) ([]Outcome, error) {
@@ -582,6 +583,10 @@ func (s *Service) GetAnswersOfQuiz(quizId string, ctx context.Context) ([]Outcom
 			MaxScore:      int(an.MaxScore),
 			AttemptNumber: int(an.AttemptNumber),
 			SubmittedAt:   utils.UnixToIso(an.SubmittedAt),
+		}
+
+		if an.FirstName.Valid && an.LastName.Valid {
+			o.UserFullName = an.FirstName.String + " " + an.LastName.String
 		}
 
 		if an.Comment.Valid {
