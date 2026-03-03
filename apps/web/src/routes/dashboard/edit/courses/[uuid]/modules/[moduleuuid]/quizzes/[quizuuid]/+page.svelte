@@ -11,7 +11,7 @@
 	async function loadOutcomes() {
 		loading = true;
 		let res = await fetch(
-			`/api/courses/${page.params.uuid}/quizzes/${page.params.quizuuid}/answers`
+			`/api/courses/${page.params.uuid}/modules/${page.params.moduleuuid}/quizzes/${page.params.quizuuid}/answers`
 		);
 		if (res.ok) {
 			outcomes = await res.json();

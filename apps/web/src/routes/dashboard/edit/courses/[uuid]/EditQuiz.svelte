@@ -29,13 +29,15 @@
 	let showSuccess = $state(false);
 	let savedTitle = $state(quiz.title);
 
+	let module: null | Module = $state(null);
+
 	let selectedModuleUuid = $state('');
 	// $inspect(selectedModuleUuid);
 
 	async function updateQuiz(e: Event) {
 		e.preventDefault();
 
-		let module = props.modules.find((x: Module) => x.uuid === quiz.moduleId) || {
+		module = props.modules.find((x: Module) => x.uuid === quiz.moduleId) || {
 			name: 'm name',
 			uuid: 'm uuid'
 		};
@@ -53,7 +55,7 @@
 		}
 
 		isSaving = true;
-		const putRoute = `/api/courses/${props.courseId}/modules/${module.uuid}/quizzes/${quiz.uuid}`;
+		const putRoute = `/api/courses/${props.courseId}/modules/${module?.uuid}/quizzes/${quiz.uuid}`;
 		const postRoute = `/api/courses/${props.courseId}/modules/${selectedModuleUuid}/quizzes`;
 
 		const res = await fetch(props.edit ? putRoute : postRoute, {
@@ -272,14 +274,19 @@
 					</button>
 
 					<div class="ml-auto flex-1 gap-3 space-y-1">
-						<a
-							href={'/dashboard/edit/courses/' + page.params.uuid + '/quizzes/' + quiz.uuid}
-							class="rounded-lg border-2 border-s-black bg-s-2 px-8 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
-						>
-							Results
-						</a>
-
 						{#if props.edit}
+							<a
+								href={'/dashboard/edit/courses/' +
+									page.params.uuid +
+									'/modules/' +
+									module?.uuid +
+									'/quizzes/' +
+									quiz.uuid}
+								class="rounded-lg border-2 border-s-black bg-s-2 px-8 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+							>
+								Results
+							</a>
+
 							<button
 								type="button"
 								onclick={deleteQuiz}
