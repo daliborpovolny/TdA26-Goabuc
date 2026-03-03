@@ -3,6 +3,7 @@
 	import type { Course } from '$lib/types';
 	import { fade, slide } from 'svelte/transition';
 	import { modal } from '$lib/modal.svelte';
+	import UniButton from '../../../../UniButton.svelte';
 
 	let { course, onchange }: { course: Course; onchange: () => void } = $props();
 
@@ -99,10 +100,13 @@
 						Course State
 					</label>
 					<div class="relative">
-						<button
+						<UniButton
 							type="button"
 							onclick={() => (showStateDropdown = !showStateDropdown)}
-							class="flex w-full items-center justify-between rounded-xl border-4 border-s-black bg-white p-3 font-bold tracking-tight uppercase transition-all active:translate-y-1"
+							more_style="tracking-tight w-full flex items-center"
+							text="text-l"
+							uppercase
+							px="px-4"
 						>
 							<span class="flex items-center gap-2">
 								<span
@@ -114,8 +118,8 @@
 								></span>
 								{currentState}
 							</span>
-							<span>{showStateDropdown ? '▲' : '▼'}</span>
-						</button>
+							<span class="w-full text-right">{showStateDropdown ? '▲' : '▼'}</span>
+						</UniButton>
 
 						{#if showStateDropdown}
 							<div
@@ -123,18 +127,20 @@
 								class="absolute top-[calc(100%+8px)] right-0 left-0 z-50 overflow-hidden rounded-xl border-4 border-s-black bg-white shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]"
 							>
 								{#each STAGES as stage}
-									<button
-										type="button"
-										class="w-full p-4 text-left font-black tracking-widest uppercase transition-colors hover:bg-p-green"
-										class:bg-p-blue={currentState === stage}
-										class:text-white={currentState === stage}
+									<UniButton
+										content={stage}
+										border={false}
+										shadow={false}
+										more_style="w-full"
+										px="px-0"
+										text="text-l"
+										uppercase
 										onclick={() => {
 											currentState = stage;
 											showStateDropdown = false;
 										}}
-									>
-										{stage}
-									</button>
+										translate={false}
+									/>
 								{/each}
 							</div>
 						{/if}
@@ -160,22 +166,39 @@
 			</div>
 
 			<div class="flex flex-wrap gap-4 pt-4">
-				<button
+				<!-- <button
 					type="submit"
 					disabled={isSaving}
 					class="group relative flex-1 cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-p-blue px-8 py-3 text-xl font-black tracking-widest text-white uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
 				>
 					{isSaving ? 'Syncing...' : 'Save Settings'}
-				</button>
+				</button> -->
 
-				<button
+				<UniButton
+					type="submit"
+					disabled={isSaving}
+					content={isSaving ? 'Syncing...' : 'Save Settings'}
+					bgcolor="bg-p-green"
+					hv_bgcolor="bg-green-400"
+				/>
+
+				<!-- <button
 					type="button"
 					onclick={deleteCourse}
 					disabled={isSaving}
 					class="group relative cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-red-400 px-8 py-3 text-xl font-black tracking-widest text-white uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
 				>
 					{isSaving ? 'Deleting...' : 'Delete'}
-				</button>
+				</button> -->
+
+				<UniButton
+					type="button"
+					onclick={deleteCourse}
+					disabled={isSaving}
+					content={isSaving ? 'Deleting...' : 'Delete'}
+					bgcolor="bg-red-300"
+					hv_bgcolor="bg-red-500"
+				/>
 			</div>
 		</form>
 	</div>

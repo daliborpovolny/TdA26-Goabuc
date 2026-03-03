@@ -17,6 +17,7 @@
 	import CreateModule from './CreateModule.svelte';
 	import EditModule from './EditModule.svelte';
 	import UniLink from '../../../../UniLink.svelte';
+	import UniButton from '../../../../UniButton.svelte';
 
 	let courseId = page.params.uuid!;
 
@@ -82,11 +83,13 @@
 		>
 			<p class="text-2xl font-black">SYSTEM ERROR</p>
 			<p class="mt-2 font-bold">{error}</p>
-			<button
+			<UniButton
 				onclick={loadCourse}
-				class="mt-4 rounded-lg bg-s-black px-4 py-2 font-bold hover:bg-white hover:text-s-black"
-				>Retry Connection</button
-			>
+				content="Retry Connection"
+				bgcolor="bg-[#444]"
+				hv_bgcolor="bg-white"
+				more_style="text-white hover:text-s-black"
+			/>
 		</div>
 	{:else if course}
 		<div class="mx-auto max-w-5xl">
@@ -114,16 +117,15 @@
 			<div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
 				<nav class="space-y-2 lg:col-span-3">
 					{#each sections as section}
-						<button
+						<UniButton
 							onclick={() => (activeSection = section.id)}
-							class="flex w-full cursor-pointer items-center gap-3 rounded-xl border-2 border-s-black p-4 text-left font-black tracking-tight uppercase transition-all
-                            {activeSection === section.id
-								? 'translate-x-1 bg-p-blue text-white shadow-none'
-								: 'bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green'}"
+							more_style={activeSection === section.id
+								? 'translate-x-1 bg-p-blue text-white shadow-none w-full'
+								: 'w-full'}
 						>
 							<span>{section.icon}</span>
 							{section.label}
-						</button>
+						</UniButton>
 					{/each}
 				</nav>
 
@@ -169,12 +171,10 @@
 							<div in:fade class="space-y-6">
 								<div class="flex items-center justify-between space-x-1">
 									<h2 class="text-3xl font-black text-p-blue uppercase">Examinations</h2>
-									<button
+									<UniButton
 										onclick={() => (showCreateQuiz = !showCreateQuiz)}
-										class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-4 py-2 font-bold uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:shadow-none"
-									>
-										{showCreateQuiz ? 'Cancel' : '+ New Quiz'}
-									</button>
+										content={showCreateQuiz ? 'Cancel' : '+ New Quiz'}
+									/>
 								</div>
 
 								{#if showCreateQuiz}
@@ -215,12 +215,10 @@
 							<div in:fade class="space-y-8">
 								<div class="flex items-center justify-between space-x-1">
 									<h2 class="text-3xl font-black text-p-blue uppercase">Modules</h2>
-									<button
+									<UniButton
 										onclick={() => (showCreateModule = !showCreateModule)}
-										class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-4 py-2 font-bold uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:shadow-none"
-									>
-										{showCreateModule ? 'Cancel' : '+ New Module'}
-									</button>
+										content={showCreateModule ? 'Cancel' : '+ New Module'}
+									/>
 								</div>
 
 								{#if showCreateModule}

@@ -2,6 +2,8 @@
 	import type { Module } from '$lib/types';
 	import { fade, slide } from 'svelte/transition';
 	import { modal } from '$lib/modal.svelte';
+	import UniButton from '../../../../UniButton.svelte';
+	import UniLink from '../../../../UniLink.svelte';
 
 	let { module, courseId, onchange }: { module: Module; courseId: string; onchange: () => void } =
 		$props();
@@ -119,14 +121,17 @@
 						>
 
 						<div class="relative">
-							<button
+							<UniButton
 								type="button"
 								onclick={() => (showStateDropdown = !showStateDropdown)}
-								class="flex w-full items-center justify-between rounded-xl border-2 border-s-black bg-white p-3 font-bold tracking-tight uppercase transition-all active:translate-y-0.5"
+								more_style="tracking-tight w-full flex items-center"
+								text="text-l"
+								uppercase
+								px="px-4"
 							>
 								<span class="flex items-center gap-2">
 									<span
-										class="h-2 w-2 rounded-full {currentState === 'open'
+										class="h-3 w-3 rounded-full {currentState === 'open'
 											? 'bg-p-green'
 											: currentState === 'preparation'
 												? 'bg-p-blue'
@@ -134,8 +139,8 @@
 									></span>
 									{currentState}
 								</span>
-								<span>{showStateDropdown ? '▲' : '▼'}</span>
-							</button>
+								<span class="w-full text-right">{showStateDropdown ? '▲' : '▼'}</span>
+							</UniButton>
 
 							{#if showStateDropdown}
 								<div
@@ -143,18 +148,20 @@
 									class="absolute top-[calc(100%+8px)] right-0 left-0 z-50 overflow-hidden rounded-xl border-4 border-s-black bg-white shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]"
 								>
 									{#each STAGES as stage}
-										<button
-											type="button"
-											class="w-full p-3 text-left text-sm font-black tracking-tighter uppercase transition-colors hover:bg-p-green"
-											class:bg-p-blue={currentState === stage}
-											class:text-white={currentState === stage}
+										<UniButton
+											content={stage}
+											border={false}
+											shadow={false}
+											more_style="w-full"
+											px="px-0"
+											text="text-l"
+											uppercase
 											onclick={() => {
 												currentState = stage;
 												showStateDropdown = false;
 											}}
-										>
-											{stage}
-										</button>
+											translate={false}
+										/>
 									{/each}
 								</div>
 							{/if}
@@ -174,22 +181,23 @@
 					></textarea>
 				</div>
 
-				<div class="flex items-center justify-between border-t-2 border-gray-200 pt-4">
-					<button
+				<div
+					class="border-t-2 border-gray-200 pt-4 max-md:space-y-5 md:flex md:items-center md:justify-between"
+				>
+					<UniButton
 						type="button"
 						onclick={deleteModule}
-						class="rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
-					>
-						Delete Module
-					</button>
-
-					<button
+						content="Delete Module"
+						bgcolor="bg-red-200"
+						hv_bgcolor="bg-red-400"
+					/>
+					<UniButton
 						type="submit"
 						disabled={isSaving}
-						class="rounded-lg border-2 border-s-black bg-p-green px-6 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50"
-					>
-						{isSaving ? 'Saving...' : 'Save Changes'}
-					</button>
+						content={isSaving ? 'Saving...' : 'Save Changes'}
+						bgcolor="bg-p-green"
+						hv_bgcolor="bg-green-500"
+					/>
 				</div>
 			</form>
 		</div>
