@@ -156,6 +156,7 @@
 											<div class="mb-6 border-b-2 border-gray-100 pb-4">
 												<h3 class="text-2xl font-black tracking-tight uppercase">{module.name}</h3>
 												<p class="font-bold text-gray-500 italic">{module.description}</p>
+												<!-- <p class="font-bold text-gray-500 italic">{module.description}</p> -->
 											</div>
 
 											<div class="space-y-3">

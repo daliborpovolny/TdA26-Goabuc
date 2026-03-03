@@ -9,7 +9,7 @@ export interface Course {
 
 	name: string;
 	description: string;
-	state: string; // 'preparation' | 'closed' | 'open'
+	state: 'preparation' | 'closed' | 'open'; // 'preparation' | 'closed' | 'open'
 
 	archived: boolean;
 

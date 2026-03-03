@@ -61,6 +61,24 @@
 			isSaving = false;
 		}
 	}
+
+	async function archiveCourse(e: Event) {
+		e.preventDefault();
+		const confirmed = await modal.confirm(
+			`Archive entire course "${course.name}"? This action cannot be undone.`
+		);
+		if (!confirmed) return;
+
+		isSaving = true;
+		try {
+			const res = await fetch(`/api/courses/${course.uuid}/archive`, {
+				method: 'POST'
+			});
+			if (res.ok) goto('/dashboard');
+		} finally {
+			isSaving = false;
+		}
+	}
 </script>
 
 <div class="space-y-6">
@@ -183,6 +201,15 @@
 				/>
 
 				<!-- <button
+					type="button"
+					onclick={archiveCourse}
+					disabled={isSaving}
+					class="group relative cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-yellow-400 px-8 py-3 text-xl font-black tracking-widest text-white uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
+				>
+					{isSaving ? 'Archiving...' : 'Archive'}
+				</button>
+
+				<button
 					type="button"
 					onclick={deleteCourse}
 					disabled={isSaving}

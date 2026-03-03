@@ -80,7 +80,13 @@ func (h *CourseHandler) GetCourse(c echo.Context) error {
 	}
 
 	req := c.Request()
-	courseDetail, err := h.service.GetCourse(courseId, req.Host, c.Scheme(), r.Ctx)
+
+	var isAdmin bool
+	if r.User != nil && r.User.IsAdmin {
+		isAdmin = true
+	}
+
+	courseDetail, err := h.service.GetCourse(courseId, req.Host, c.Scheme(), isAdmin, r.Ctx)
 	if err != nil {
 		if err == ErrFailedToFetchCourse {
 			return r.Error(http.StatusInternalServerError, "Failed to fetch from the database")
@@ -172,6 +178,7 @@ func (h *CourseHandler) DeleteCourse(c echo.Context) error {
 type ListAllCoursesResponse struct {
 	Uuid        string `json:"uuid"`
 	Name        string `json:"name"`
+	State       string `json:"state"`
 	Description string `json:"description"`
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
@@ -191,6 +198,7 @@ func (h *CourseHandler) ListAllCourses(c echo.Context) error {
 			Uuid:        course.Uuid,
 			Name:        course.Name,
 			Description: course.Description,
+			State:       course.State,
 			CreatedAt:   utils.UnixToIso(course.CreatedAt),
 			UpdatedAt:   utils.UnixToIso(course.UpdatedAt),
 		}
