@@ -25,26 +25,25 @@
 	);
 
 	const stateStyles = {
-        open: {
-            bg: 'bg-white group-hover:bg-p-green',
-            badge: 'bg-p-blue text-white',
-            label: 'OPEN',
-            clickable: true
-        },
-        preparation: {
-            bg: 'bg-yellow-300',
-            badge: 'bg-s-black text-white',
-            label: 'COMING SOON',
-            clickable: false
-        },
-        closed: {
-            bg: 'bg-red-400',
-            badge: 'bg-s-black text-white',
-            label: 'CLOSED',
-            clickable: false
-        }
-    };
-
+		open: {
+			bg: 'bg-white group-hover:bg-p-green',
+			badge: 'bg-p-blue text-white',
+			label: 'OPEN',
+			clickable: true
+		},
+		preparation: {
+			bg: 'bg-yellow-300',
+			badge: 'bg-s-black text-white',
+			label: 'COMING SOON',
+			clickable: false
+		},
+		closed: {
+			bg: 'bg-red-400',
+			badge: 'bg-s-black text-white',
+			label: 'CLOSED',
+			clickable: false
+		}
+	};
 </script>
 
 <svelte:head>
@@ -88,18 +87,26 @@
 			<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
 				{#each filteredCourses as course (course.uuid)}
 					{@const style = stateStyles[course.state] || stateStyles.closed}
-					
+
 					<div in:fly={{ y: 20, duration: 400 }}>
 						<svelte:element
 							this={style.clickable ? 'a' : 'div'}
 							href={style.clickable ? `/courses/${course.uuid}` : undefined}
-							class="group relative block transition-transform {style.clickable ? 'hover:-translate-x-1 hover:-translate-y-1' : 'cursor-not-allowed opacity-90'}"
+							class="group relative block transition-transform {style.clickable
+								? 'hover:-translate-x-1 hover:-translate-y-1'
+								: 'cursor-not-allowed opacity-90'}"
 						>
-							<div class="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-s-black"></div>
+							<div
+								class="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-s-black"
+							></div>
 
-							<div class="relative flex h-full flex-col border-2 border-s-black p-6 transition-colors {style.bg}">
+							<div
+								class="relative flex h-full flex-col border-2 border-s-black p-6 transition-colors {style.bg}"
+							>
 								<div class="mb-4 flex items-start justify-between">
-									<span class="rounded-lg border-2 border-s-black px-3 py-1 text-xs font-black uppercase {style.badge}">
+									<span
+										class="rounded-lg border-2 border-s-black px-3 py-1 text-xs font-black uppercase {style.badge}"
+									>
 										{style.label}
 									</span>
 									<span class="text-3xl">
@@ -107,12 +114,14 @@
 									</span>
 								</div>
 
-								<h2 class="mb-4 text-3xl font-black leading-tight text-s-black uppercase">
+								<h2 class="mb-4 text-3xl leading-tight font-black text-s-black uppercase">
 									{course.name}
 								</h2>
 
-								<div class="mt-auto pt-6 border-t-2 border-s-black/10">
-									<div class="flex items-center gap-2 font-black uppercase tracking-widest text-s-black">
+								<div class="mt-auto border-t-2 border-s-black/10 pt-6">
+									<div
+										class="flex items-center gap-2 font-black tracking-widest text-s-black uppercase"
+									>
 										{#if style.clickable}
 											Enter Course
 											<span class="transition-transform group-hover:translate-x-2">→</span>
@@ -124,8 +133,8 @@
 							</div>
 						</svelte:element>
 					</div>
-            	{/each}
-	        </div>
-		{/await}		
+				{/each}
+			</div>
+		{/await}
 	</div>
 </div>
