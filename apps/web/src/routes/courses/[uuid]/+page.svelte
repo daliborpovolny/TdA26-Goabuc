@@ -43,6 +43,8 @@
 	function isMaterial(item: Material | Heading): item is Material {
 		return !('content' in item);
 	}
+	let unassignedModule = $derived(course?.modules.find((m) => m.name === 'Unassigned'));
+	let regularModules = $derived(course?.modules.filter((m) => m.name !== 'Unassigned') ?? []);
 </script>
 
 <svelte:head>
@@ -115,44 +117,68 @@
 				>
 					<h2 class="text-3xl font-black tracking-tight text-p-blue uppercase">Learning Path</h2>
 
-					{#if course.modules.length > 0}
-						<div class="space-y-12">
-							{#each course.modules as module, i}
-								<section class="relative">
-									<div
-										class="absolute -top-3 -left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border-4 border-s-black bg-p-green font-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-									>
-										{i + 1}
-									</div>
+					<div class="space-y-12">
+						{#if unassignedModule && unassignedModule.items.length > 0}
+							<section class="space-y-4">
+								<div class="flex items-center gap-2">
+									<span class="text-2xl">🎒</span>
+									<h3 class="text-xl font-black tracking-widest text-gray-400 uppercase">
+										General Resources
+									</h3>
+								</div>
+								<div
+									class="space-y-3 rounded-2xl border-4 border-dashed border-s-black/20 bg-gray-50/50 p-6"
+								>
+									{#each unassignedModule.items as item}
+										{#if isQuiz(item)}
+											<TakeQuiz quiz={item} courseId={course.uuid} />
+										{:else if isMaterial(item)}
+											<ViewMaterial material={item} />
+										{/if}
+									{/each}
+								</div>
+							</section>
+						{/if}
 
-									<div
-										class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]"
-									>
-										<div class="mb-6 border-b-2 border-gray-100 pb-4">
-											<h3 class="text-2xl font-black tracking-tight uppercase">{module.name}</h3>
-											<p class="font-bold text-gray-500 italic">{module.description}</p>
+						{#if regularModules.length > 0}
+							<div class="space-y-12">
+								{#each regularModules as module, i}
+									<section class="relative">
+										<div
+											class="absolute -top-3 -left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border-4 border-s-black bg-p-green font-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+										>
+											{i + 1}
 										</div>
 
-										<div class="space-y-3">
-											{#each module.items as item}
-												{#if isQuiz(item)}
-													<TakeQuiz quiz={item} courseId={course.uuid} />
-												{:else if isMaterial(item)}
-													<ViewMaterial material={item} />
-												{/if}
-											{/each}
+										<div
+											class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]"
+										>
+											<div class="mb-6 border-b-2 border-gray-100 pb-4">
+												<h3 class="text-2xl font-black tracking-tight uppercase">{module.name}</h3>
+												<p class="font-bold text-gray-500 italic">{module.description}</p>
+											</div>
+
+											<div class="space-y-3">
+												{#each module.items as item}
+													{#if isQuiz(item)}
+														<TakeQuiz quiz={item} courseId={course.uuid} />
+													{:else if isMaterial(item)}
+														<ViewMaterial material={item} />
+													{/if}
+												{/each}
+											</div>
 										</div>
-									</div>
-								</section>
-							{/each}
-						</div>
-					{:else}
-						<div
-							class="rounded-2xl border-4 border-dashed border-gray-300 p-12 text-center font-bold text-gray-400"
-						>
-							No modules have been released for this path yet.
-						</div>
-					{/if}
+									</section>
+								{/each}
+							</div>
+						{:else if !unassignedModule || unassignedModule.items.length === 0}
+							<div
+								class="rounded-2xl border-4 border-dashed border-gray-300 p-12 text-center font-bold text-gray-400"
+							>
+								No modules have been released for this course yet.
+							</div>
+						{/if}
+					</div>
 				</div>
 
 				<div class="w-full space-y-8 lg:w-1/3 {activeTab === 'feed' ? 'block' : 'hidden lg:block'}">
