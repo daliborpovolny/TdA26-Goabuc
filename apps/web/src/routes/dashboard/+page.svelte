@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { auth } from '$lib/auth.svelte';
+	import UniButton from '../UniButton.svelte';
+	import UniLink from '../UniLink.svelte';
 
 	if (!auth.user?.isAdmin) {
 		goto('/login');
@@ -30,15 +32,12 @@
 				</h1>
 				<p class="font-bold tracking-widest text-p-blue uppercase">Manage your curriculum</p>
 			</div>
-
-			<a href="/dashboard/edit/courses" class="group relative inline-block w-full md:w-auto">
-				<div class="absolute inset-0 translate-x-1 translate-y-1 rounded-xl bg-s-black"></div>
-				<div
-					class="relative rounded-xl border-2 border-s-black bg-s-2 px-6 py-3 text-center text-xl font-black text-white transition-all group-hover:bg-s-1 group-hover:text-s-black group-active:translate-x-1 group-active:translate-y-1"
-				>
-					+ Create New Course
-				</div>
-			</a>
+			<UniLink
+				href="/dashboard/edit/courses"
+				more_style="md:w-auto text-white hover:text-black"
+				content="+Create New Course"
+				bgcolor="bg-s-2"
+			/>
 		</header>
 
 		<main>
@@ -73,19 +72,14 @@
 								</h2>
 
 								<div class="mt-8 flex gap-2">
-									<a
+									<UniLink
 										href="/dashboard/edit/courses/{course.uuid}"
-										class="flex-1 rounded-lg border-2 border-s-black bg-s-black py-2 text-center font-bold text-white transition-colors hover:bg-p-blue"
-									>
-										Edit Course
-									</a>
-									<a
-										href="/courses/{course.uuid}"
-										class="rounded-lg border-2 border-s-black bg-white px-3 py-2 transition-colors hover:bg-p-blue"
-										title="View Public Page"
-									>
-										👁️
-									</a>
+										content="Edit Course"
+										bgcolor="bg-[#444]"
+										hv_bgcolor="bg-p-blue"
+										more_style="text-white"
+									/>
+									<UniLink href="/courses/{course.uuid}" content="👁️" hv_bgcolor="bg-p-blue" />
 								</div>
 							</div>
 						</div>
@@ -103,7 +97,7 @@
 				<div class="rounded-xl border-4 border-s-black bg-red-500 p-6 text-white">
 					<p class="text-xl font-bold tracking-tight uppercase">Error Loading Dashboard</p>
 					<p>{error.message}</p>
-					<button onclick={() => location.reload()} class="mt-4 underline">Try Again</button>
+					<UniButton onclick={() => location.reload()} content="Try Again" />
 				</div>
 			{/await}
 		</main>

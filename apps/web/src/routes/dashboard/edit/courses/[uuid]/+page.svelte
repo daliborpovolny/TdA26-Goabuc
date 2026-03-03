@@ -16,6 +16,7 @@
 
 	import CreateModule from './CreateModule.svelte';
 	import EditModule from './EditModule.svelte';
+	import UniLink from '../../../../UniLink.svelte';
 
 	let courseId = page.params.uuid!;
 
@@ -100,13 +101,14 @@
 						Editor: <span class="text-p-blue">{course.name}</span>
 					</h1>
 				</div>
-				<a
+				<!-- <a
 					href="/courses/{course.uuid}"
 					target="_blank"
 					class="rounded-lg border-2 border-s-black bg-p-green px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition hover:shadow-none"
 				>
 					View 👁️
-				</a>
+				</a> -->
+				<UniLink href="/courses/{course.uuid}" content="View 👁️" target="_blank" />
 			</header>
 
 			<div class="grid grid-cols-1 gap-8 lg:grid-cols-12">

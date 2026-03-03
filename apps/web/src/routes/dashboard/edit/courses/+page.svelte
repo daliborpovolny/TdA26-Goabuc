@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { fade } from 'svelte/transition';
+	import UniButton from '../../../UniButton.svelte';
 
 	let course_name = $state('');
 	let course_description = $state('');
@@ -84,16 +85,9 @@
 					></textarea>
 				</div>
 
-				<button
-					type="submit"
-					disabled={isSubmitting}
-					class="group relative w-full overflow-hidden rounded-xl border-4 border-s-black bg-p-green py-4 text-2xl font-black tracking-widest uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
-				>
-					<div
-						class="absolute inset-0 translate-x-1 translate-y-1 bg-s-black opacity-0 group-hover:opacity-10"
-					></div>
+				<UniButton type="submit" disabled={isSubmitting} more_style="w-full">
 					{isSubmitting ? 'Initializing...' : 'Create Course →'}
-				</button>
+				</UniButton>
 			</form>
 
 			{#if errorMsg}

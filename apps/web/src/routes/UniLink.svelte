@@ -8,7 +8,11 @@
 		onclick,
 		bgcolor = 'bg-white',
 		hv_bgcolor = 'bg-p-green',
-		uppercase = true
+		uppercase = false,
+		children,
+		more_style = '',
+		title = '',
+		target = ''
 	}: {
 		content?: string;
 		href: string;
@@ -16,15 +20,22 @@
 		bgcolor?: string;
 		hv_bgcolor?: string;
 		uppercase?: boolean;
+		children?: () => any;
+		more_style?: string;
+		title?: string;
+		target?: string;
 	} = $props();
 </script>
 
 <a
 	{href}
 	{onclick}
+	{target}
+	{title}
 	class="cursor-pointer rounded-xl border-4 border-s-black {bgcolor} px-8 py-4 text-2xl font-black text-s-black {uppercase
 		? 'uppercase'
-		: ''} shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] transition-all hover:{hv_bgcolor} active:translate-x-1 active:translate-y-1 active:shadow-none"
+		: ''} shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] transition-all hover:{hv_bgcolor} active:translate-x-1 active:translate-y-1 active:shadow-none {more_style}"
 >
 	{content}
+	{@render children?.()}
 </a>
