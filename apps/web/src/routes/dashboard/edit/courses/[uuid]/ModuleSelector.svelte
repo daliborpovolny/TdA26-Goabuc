@@ -2,6 +2,7 @@
 	import { slide } from 'svelte/transition';
 
 	import type { Module } from '$lib/types';
+	import UniButton from '../../../../UniButton.svelte';
 
 	let {
 		modules,
@@ -30,7 +31,7 @@
 <div class="relative w-full max-w-xs">
 	<span class="mb-1 block text-xs font-black tracking-widest text-gray-500 uppercase">{label}</span>
 
-	<button
+	<!-- <button
 		type="button"
 		onclick={() => (isOpen = !isOpen)}
 		class="relative flex w-full items-center justify-between rounded-xl border-4 border-s-black bg-white p-3 font-bold transition-all hover:bg-gray-50 active:translate-y-1 active:shadow-none"
@@ -38,7 +39,19 @@
 	>
 		<span class="truncate">{selectedModuleName}</span>
 		<span class="transition-transform duration-200 {isOpen ? 'rotate-180' : ''}">▼</span>
-	</button>
+	</button> -->
+
+	<UniButton
+		type="button"
+		onclick={() => (isOpen = !isOpen)}
+		more_style="flex justify-between tracking-tight w-full flex items-center"
+		text="text-l"
+		uppercase
+		px="px-4"
+	>
+		<span class="truncate">{selectedModuleName}</span>
+		<span class="transition-transform duration-200 {isOpen ? 'rotate-180' : ''}">▼</span>
+	</UniButton>
 
 	{#if isOpen}
 		<div

@@ -3,6 +3,7 @@
 
 	import type { Module } from '$lib/types';
 	import ModuleSelector from './ModuleSelector.svelte';
+	import UniButton from '../../../../UniButton.svelte';
 
 	let {
 		courseUuid,
@@ -53,25 +54,27 @@
 
 <div class="space-y-4">
 	<div class="flex flex-wrap gap-4">
-		<button
+		<UniButton 
 			onclick={() => (materialType = materialType === 'file' ? '' : 'file')}
-			class="group relative flex cursor-pointer items-center gap-2 rounded-xl border-4 border-s-black px-6 py-3 font-black tracking-widest uppercase transition-all
-            {materialType === 'file'
-				? 'translate-x-1 translate-y-1 bg-p-blue text-white shadow-none'
-				: 'bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green'}"
+			more_style={materialType === 'file' ? 'translate-x-1 translate-y-1 text-white shadow-none tracking-widest gap-2' : 'tracking-widest gap-2'}
+			bgcolor={materialType === 'file' ? 'bg-p-blue' : undefined}
+			hv_bgcolor={materialType === 'file' ? '' : undefined}
+			uppercase
+			text={'text-l'}
 		>
 			<span>📁</span> File
-		</button>
+		</UniButton>
 
-		<button
+		<UniButton
 			onclick={() => (materialType = materialType === 'url' ? '' : 'url')}
-			class="group relative flex cursor-pointer items-center gap-2 rounded-xl border-4 border-s-black px-6 py-3 font-black tracking-widest uppercase transition-all
-            {materialType === 'url'
-				? 'translate-x-1 translate-y-1 bg-p-blue text-white shadow-none'
-				: 'bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green'}"
+			more_style={materialType === 'url' ? 'translate-x-1 translate-y-1 text-white shadow-none tracking-widest gap-2' : 'tracking-widest gap-2'}
+			bgcolor={materialType === 'url' ? 'bg-p-blue' : undefined}
+			hv_bgcolor={materialType === 'file' ? '' : undefined}
+			uppercase
+			text={'text-l'}
 		>
 			<span>🔗</span> Link
-		</button>
+		</UniButton>
 
 		<ModuleSelector {modules} bind:selectedId={selectedModuleUuid} />
 

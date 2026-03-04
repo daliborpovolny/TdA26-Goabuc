@@ -104,13 +104,6 @@
 						Editor: <span class="text-p-blue">{course.name}</span>
 					</h1>
 				</div>
-				<!-- <a
-					href="/courses/{course.uuid}"
-					target="_blank"
-					class="rounded-lg border-2 border-s-black bg-p-green px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition hover:shadow-none"
-				>
-					View 👁️
-				</a> -->
 				<UniLink href="/courses/{course.uuid}" content="View 👁️" target="_blank" />
 			</header>
 
@@ -120,8 +113,10 @@
 						<UniButton
 							onclick={() => (activeSection = section.id)}
 							more_style={activeSection === section.id
-								? 'translate-x-1 bg-p-blue text-white shadow-none w-full'
+								? 'translate-x-1 translate-y-1 text-white shadow-none w-full'
 								: 'w-full'}
+							bgcolor={activeSection === section.id ? 'bg-p-blue' : undefined}
+							hv_bgcolor={activeSection === section.id ? '' : undefined}
 						>
 							<span>{section.icon}</span>
 							{section.label}

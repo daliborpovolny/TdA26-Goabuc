@@ -5,7 +5,7 @@
 	let {
 		content,
 		onclick,
-		bgcolor = 'bg_white',
+		bgcolor = 'bg-white',
 		hv_bgcolor = 'bg-p-green',
 		uppercase = false,
 		children,
