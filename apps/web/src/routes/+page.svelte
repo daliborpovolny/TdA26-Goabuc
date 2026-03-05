@@ -42,10 +42,7 @@
 								Open Dashboard
 							</a> -->
 
-							<SimpleGreenLink link="/dashboard" >
-								Open Dashboard
-							</SimpleGreenLink>
-
+							<SimpleGreenLink link="/dashboard">Open Dashboard</SimpleGreenLink>
 						</div>
 					</div>
 				{:else}
@@ -69,14 +66,10 @@
 								Lecturer Login
 							</a> -->
 
-							<SimpleGreenLink link="/courses">
-								Courses
-							</SimpleGreenLink>
+							<SimpleGreenLink link="/courses">Courses</SimpleGreenLink>
 
-							<SimpleGreenLink link="/login">
-								Lecturer Login
-							</SimpleGreenLink>
-							
+							<SimpleGreenLink link="/login">Lecturer Login</SimpleGreenLink>
+
 							<!-- <UniLink href="/register" content="Get Started" uppercase={true} /> -->
 							<!-- <UniLink href="/login" content="Member Login" uppercase={true} /> -->
 						</div>

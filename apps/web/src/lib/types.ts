@@ -32,6 +32,8 @@ export interface BaseMaterial {
 	description: string;
 	type: 'file' | 'url';
 
+	timesAccessed: number;
+
 	moduleId: string;
 	moduleOrder: number;
 }

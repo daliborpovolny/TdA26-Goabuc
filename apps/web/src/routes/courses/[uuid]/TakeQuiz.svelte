@@ -16,8 +16,7 @@
 	let attempsCount: number = $state(quiz.attemptsCount);
 	let isSubmitting = $state(false);
 
-	// Your conditional property
-	let showResultsButton = $state(true);
+	let showResultsButton = auth.user?.isAdmin;
 
 	// initialize answers
 	for (let question of quiz.questions) {
@@ -95,17 +94,17 @@
 <div
 	class="overflow-hidden rounded-xl border-4 border-s-black bg-p-green shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] transition-all"
 >
-	<div class="flex w-full items-center bg-p-green">
+	<div class="flex w-full items-center bg-p-green hover:bg-black/5">
 		<button
 			type="button"
-			class="flex flex-1 cursor-pointer items-center justify-between p-4 text-left hover:bg-black/5"
+			class="flex flex-1 cursor-pointer items-center justify-between p-4 text-left"
 			onclick={() => (collapsed = !collapsed)}
 		>
 			<div class="flex items-center gap-3">
 				<span class="text-2xl">📝</span>
 				<span class="text-xl font-black tracking-tight uppercase md:text-2xl">{quiz.title}</span>
 				<span
-					class="rounded-lg border-2 border-s-black bg-white/30 px-2 py-1 text-xs font-bold uppercase"
+					class="rounded-lg border-2 border-s-black bg-p-blue px-2 py-1 text-xs font-bold text-white uppercase"
 				>
 					Attempts: {attempsCount}
 				</span>

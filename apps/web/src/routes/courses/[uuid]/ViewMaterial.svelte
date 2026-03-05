@@ -4,6 +4,8 @@
 
 	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
 	import SecondaryButton from '$lib/components/SecondaryButton.svelte';
+	import { page } from '$app/state';
+	import { auth } from '$lib/auth.svelte';
 
 	let { material }: { material: Material } = $props();
 
@@ -16,6 +18,14 @@
 		} catch {
 			return `https://www.google.com/s2/favicons?domain=google.com&sz=64`;
 		}
+	}
+
+	async function incrementAccessedCounter() {
+		// console.log('incrementing')
+		await fetch(
+			`/api/courses/${page.params.uuid}/modules/${material.moduleId}/materials/${material.uuid}/increment`,
+			{ method: 'POST' }
+		);
 	}
 </script>
 
@@ -38,6 +48,13 @@
 				{/if}
 			</span>
 			<span class="text-xl font-black tracking-tight uppercase md:text-2xl">{material.name}</span>
+			{#if auth.user?.isAdmin}
+				<span
+					class="rounded-lg border-2 border-s-black bg-p-blue px-2 py-1 text-xs font-bold text-white uppercase"
+				>
+					Times Accessed: {material.timesAccessed}
+				</span>
+			{/if}
 		</div>
 
 		<span class="text-xl transition-transform duration-300 {collapsed ? '' : 'rotate-180'}">
@@ -53,7 +70,7 @@
 				</p>
 			{/if}
 
-			<div class="flex flex-wrap gap-4">
+			<div class="flex flex-wrap gap-4" onclick={incrementAccessedCounter}>
 				{#if material.type === 'file'}
 					<SecondaryButton href={material.fileUrl} target="_blank" class="!text-sm md:!text-base">
 						<span>👁️</span> View File
