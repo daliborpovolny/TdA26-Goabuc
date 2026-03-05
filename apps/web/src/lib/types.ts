@@ -19,6 +19,9 @@ export interface Course {
 	feed: FeedPost[];
 
 	modules: FullModule[];
+
+	highlightedModuleId: string | null;
+	highlightedModuleMessage: string | null;
 }
 
 // Materials

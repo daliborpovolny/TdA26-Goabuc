@@ -7,11 +7,13 @@
 	let {
 		modules,
 		selectedId = $bindable(),
-		label = 'Select Module'
+		label = 'Select Module',
+		onChange // Define it in the props
 	}: {
 		modules: Module[];
 		selectedId: string;
 		label?: string;
+		onChange?: (id: string) => void; // Type it to accept the ID
 	} = $props();
 
 	let isOpen = $state(false);
@@ -23,6 +25,8 @@
 	function selectModule(uuid: string) {
 		selectedId = uuid;
 		isOpen = false;
+		// Call it immediately after the state change
+		if (onChange) onChange(uuid);
 	}
 
 	selectedId = modules[0].uuid; // this could be included only if we can always be certain that there's allways a module present

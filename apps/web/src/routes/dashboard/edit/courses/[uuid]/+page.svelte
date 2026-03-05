@@ -121,6 +121,45 @@
 			isSavingOrder = false;
 		}
 	}
+
+	import ModuleSelector from './ModuleSelector.svelte';
+
+	let highlightedModuleId = $state(course?.highlightedModuleId || '');
+	let highlightedMessage = $state(course?.highlightedModuleMessage || '');
+	let originalMessage = course?.highlightedModuleMessage || '';
+
+	let isSavingHighlight = $state(false);
+
+	// Derived to check if the message has been edited
+	// let messageChanged = $derived(highlightedMessage !== originalMessage);
+
+	async function updateHighlight(newUuid?: string) {
+		isSavingHighlight = true;
+
+		// Use the newUuid if provided (from the selector), otherwise use the current state
+		const targetUuid = newUuid || highlightedModuleId;
+
+		try {
+			const res = await fetch(`/api/courses/${courseId}/state`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					moduleUuid: targetUuid,
+					message: highlightedMessage
+				})
+			});
+
+			if (res.ok) {
+				originalMessage = highlightedMessage; // Sync original to hide save button
+				if (newUuid) highlightedModuleId = newUuid;
+				loadCourse();
+			}
+		} finally {
+			isSavingHighlight = false;
+		}
+	}
+	// Derived to find the full module object for the "Preview" card
+	let activeHighlight = $derived(course?.modules.find((m) => m.uuid === highlightedModuleId));
 </script>
 
 <svelte:head>
@@ -266,8 +305,85 @@
 							</div>
 						{:else if activeSection === 'modules'}
 							<div in:fade class="space-y-8">
+								<section
+									class="rounded-2xl border-4 border-s-black bg-p-blue/5 p-6 shadow-[4px_4px_0px_0px_rgba(2,87,165,1)]"
+								>
+									<div
+										class="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center"
+									>
+										<div>
+											<h2 class="text-xl font-black tracking-tight text-p-blue uppercase">
+												Featured Module
+											</h2>
+											<p class="text-xs font-bold text-gray-500 uppercase">
+												Direct student focus to a specific module
+											</p>
+										</div>
+
+										<ModuleSelector
+											modules={localModules}
+											bind:selectedId={highlightedModuleId}
+											label="Choose Highlight"
+										/>
+									</div>
+
+									{#if activeHighlight}
+										<div transition:slide class="space-y-4">
+											<div
+												class="flex items-center gap-4 rounded-xl border-4 border-s-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+											>
+												<span class="text-4xl">🌟</span>
+												<div>
+													<p class="text-xs font-black text-p-blue uppercase">Target:</p>
+													<h3 class="text-xl font-black tracking-tighter uppercase">
+														{activeHighlight.name}
+													</h3>
+												</div>
+											</div>
+
+											<div class="relative space-y-2">
+												<label
+													for="highlight_msg"
+													class="text-[10px] font-black tracking-widest text-gray-400 uppercase"
+												>
+													Lecturer's Note (Explain why this is featured)
+												</label>
+												<div class="flex flex-col gap-3 sm:flex-row">
+													<input
+														id="highlight_msg"
+														type="text"
+														bind:value={highlightedMessage}
+														placeholder="e.g., Focus on this module for this week's midterm!"
+														class="flex-1 rounded-xl border-4 border-s-black bg-white p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
+													/>
+
+													<!-- {#if messageChanged} -->
+													<div in:fade>
+														<SuccessButton
+															onclick={() => updateHighlight()}
+															isSaving={isSavingHighlight}
+															class="!py-3 !text-sm whitespace-nowrap"
+														>
+															Highlight
+														</SuccessButton>
+													</div>
+													<!-- {/if} -->
+												</div>
+											</div>
+										</div>
+									{:else}
+										<p
+											class="rounded-xl border-2 border-dashed border-p-blue/30 p-4 text-center text-sm font-bold text-p-blue/50 italic"
+										>
+											No module currently featured. Use the selector above to pin one.
+										</p>
+									{/if}
+								</section>
+
+								<hr class="border-2 border-dashed border-gray-200" />
+
 								<div class="flex items-center justify-between">
-									<h2 class="text-3xl font-black text-p-blue uppercase">Modules</h2>
+									<h2 class="text-3xl font-black text-s-black uppercase">All Modules</h2>
 									<div class="flex gap-2">
 										{#if orderChanged}
 											<div in:fade>
@@ -299,7 +415,7 @@
 									{#each localModules as module, i (module.uuid)}
 										<div animate:flip={{ duration: 300 }} class="group relative">
 											<div
-												class="absolute top-1/2 -left-12 flex hidden -translate-y-1/2 flex-col gap-1 opacity-0 transition-opacity group-hover:opacity-100 md:flex"
+												class="absolute top-1/2 -left-12 hidden -translate-y-1/2 flex-col gap-1 opacity-0 transition-opacity group-hover:opacity-100 md:flex"
 											>
 												<button
 													disabled={i === 0}
@@ -317,7 +433,16 @@
 												</button>
 											</div>
 
-											<EditModule {module} courseId={course.uuid} onchange={loadCourse} />
+											<div class="relative">
+												{#if highlightedModuleId === module.uuid}
+													<div
+														class="absolute -top-2 -right-2 z-10 rounded-full border-2 border-s-black bg-p-blue px-2 py-0.5 text-[10px] font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+													>
+														Featured
+													</div>
+												{/if}
+												<EditModule {module} courseId={course.uuid} onchange={loadCourse} />
+											</div>
 										</div>
 									{/each}
 								</div>
