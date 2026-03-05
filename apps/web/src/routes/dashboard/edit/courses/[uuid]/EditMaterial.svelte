@@ -178,15 +178,7 @@
 						{/if}
 					</div>
 
-					<div class="flex gap-3">
-						<!-- <button
-							type="button"
-							onclick={remove}
-							class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
-						>
-							Delete
-						</button> -->
-
+					<div class="gap-3 max-md:space-y-3 md:flex">
 						<UniButton
 							type="button"
 							onclick={remove}
@@ -195,14 +187,6 @@
 							bgcolor="bg-red-400"
 							hv_bgcolor="bg-red-500"
 						/>
-
-						<!-- <button
-							type="submit"
-							disabled={isSaving}
-							class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-6 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50"
-						>
-							{isSaving ? 'Saving...' : 'Save Changes'}
-						</button> -->
 
 						<UniButton
 							type="submit"

@@ -188,7 +188,7 @@
 						type="button"
 						onclick={deleteModule}
 						content="Delete Module"
-						bgcolor="bg-red-200"
+						bgcolor="bg-red-300"
 						hv_bgcolor="bg-red-400"
 					/>
 					<UniButton

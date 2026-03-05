@@ -6,6 +6,7 @@
 
 	import { fade, slide } from 'svelte/transition';
 	import ModuleSelector from './ModuleSelector.svelte';
+	import UniButton from '../../../../UniButton.svelte';
 
 	const props = $props<{
 		edit: boolean;
@@ -185,13 +186,24 @@
 								<span class="text-xs font-black tracking-widest text-p-blue uppercase">
 									Question {qi + 1} — {q.type === 'singleChoice' ? 'Single' : 'Multi'}
 								</span>
-								<button
+								<!-- <button
 									type="button"
 									onclick={() => removeQuestion(qi)}
 									class="cursor-pointer text-xs font-bold text-red-500 hover:underline"
 								>
 									Remove Question
-								</button>
+								</button> -->
+								<UniButton
+									type="button"
+									onclick={() => removeQuestion(qi)}
+									content="- Remove Question"
+									text="text-xs"
+									text_color="text-red-500"
+									px="px-4"
+									py="py-2"
+									more_style="hover:text-white hover:bg-red-500 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+									shadow={false}
+								/>
 							</div>
 
 							<input
@@ -244,34 +256,48 @@
 										>
 									</div>
 								{/each}
-
-								<button
+								<UniButton
 									type="button"
 									onclick={() => addOption(q)}
-									class="cursor-pointer text-xs font-black tracking-widest text-p-blue uppercase hover:text-s-2"
-								>
-									+ Add Option
-								</button>
+									content="+ Add Option"
+									text="text-xs"
+									text_color="text-green-500"
+									px="px-4"
+									py="py-2"
+									more_style="hover:text-black hover:bg-green-500 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+									shadow={false}
+								/>
 							</div>
 						</div>
 					{/each}
 				</div>
 
 				<div class="flex flex-wrap gap-3 border-t-4 border-s-black pt-6">
-					<button
-						type="button"
+					<UniButton
+						bgcolor="bg-s-3"
+						text_color="text-white"
+						text="text-xs"
+						px="px-4"
+						py="py-2"
+						more_style="hover:text-black hover:bg-green-700 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+						shadow={false}
 						onclick={() => addQuestion('singleChoice')}
-						class="cursor-pointer rounded-lg border-2 border-s-black bg-s-3 px-4 py-2 text-xs font-black text-white uppercase hover:bg-s-2"
-					>
-						+ Single Choice
-					</button>
-					<button
-						type="button"
+						content="+ Single Choice"
+						uppercase
+					/>
+
+					<UniButton
+						bgcolor="bg-s-3"
+						text_color="text-white"
+						text="text-xs"
+						px="px-4"
+						py="py-2"
+						more_style="hover:text-black hover:bg-green-700 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+						shadow={false}
 						onclick={() => addQuestion('multipleChoice')}
-						class="cursor-pointer rounded-lg border-2 border-s-black bg-s-3 px-4 py-2 text-xs font-black text-white uppercase hover:bg-s-2"
-					>
-						+ Multiple Choice
-					</button>
+						content="+ Multiple Choice"
+						uppercase
+					/>
 
 					<div class="ml-auto flex-1 gap-3 space-y-1">
 						{#if props.edit}
@@ -287,21 +313,47 @@
 								Results
 							</a>
 
-							<button
+							<!-- <button
 								type="button"
 								onclick={deleteQuiz}
 								class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
 							>
 								Delete Quiz
-							</button>
+							</button> -->
+
+							<UniButton
+								bgcolor="bg-red-500"
+								text_color="text-white"
+								text="text-xs"
+								px="px-4"
+								py="py-2"
+								more_style="hover:text-white hover:bg-red-600 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+								shadow={false}
+								onclick={deleteQuiz}
+								content="Delete Quiz"
+								uppercase
+							/>
 						{/if}
-						<button
+						<!-- <button
 							type="submit"
 							disabled={isSaving}
 							class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-8 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
 						>
 							{isSaving ? 'Saving...' : 'Save Quiz'}
-						</button>
+						</button> -->
+						<UniButton
+							type="submit"
+							disabled={isSaving}
+							bgcolor="bg-p-green"
+							text_color="text-s-black"
+							text="text-xs"
+							px="px-4"
+							py="py-2"
+							more_style="kshadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+							shadow={false}
+							content={isSaving ? 'Saving...' : 'Save Quiz'}
+							uppercase
+						/>
 					</div>
 				</div>
 			</form>
