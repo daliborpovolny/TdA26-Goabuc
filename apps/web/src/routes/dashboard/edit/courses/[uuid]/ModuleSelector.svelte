@@ -29,7 +29,9 @@
 		if (onChange) onChange(uuid);
 	}
 
-	selectedId = modules[0].uuid; // this could be included only if we can always be certain that there's allways a module present
+	if (selectedId == '') {
+		selectedId = modules[0].uuid; // this could be included only if we can always be certain that there's allways a module present
+	}
 </script>
 
 <div class="relative w-full max-w-xs">
