@@ -5,26 +5,42 @@
 	import { modal } from '$lib/modal.svelte';
 	import UniButton from '../../../../UniButton.svelte';
 
+	import DangerButton from '$lib/components/DangerButton.svelte';
+	import SuccessButton from '$lib/components/SuccessButton.svelte';
+
 	let { course, onchange }: { course: Course; onchange: () => void } = $props();
 
 	const STAGES = ['preparation', 'open', 'closed'] as const;
 
-	let isSaving = $state(false);
 	let showSuccess = $state(false);
 	let showStateDropdown = $state(false);
 	let currentState = $state(course.state);
 
+	let isScheduled = $state(false);
+	let scheduledTime = $state('');
+
+	function getISOTime() {
+		if (!isScheduled || !scheduledTime) return null;
+		try {
+			return new Date(scheduledTime).toISOString();
+		} catch (e) {
+			return null;
+		}
+	}
+
+	let isUpdating = $state(false);
 	async function updateCourse(e: Event) {
 		e.preventDefault();
-		isSaving = true;
+		isUpdating = true;
 
 		let formData = new FormData(e.target as HTMLFormElement);
 		let formEntries = Object.fromEntries(formData);
 
-		// Ensure the current state is included in the payload
+		// Include the current state AND the scheduled time
 		let formJson = JSON.stringify({
 			...formEntries,
-			state: currentState
+			state: currentState,
+			execute_at: getISOTime() // This maps to your Go struct
 		});
 
 		try {
@@ -38,45 +54,29 @@
 				onchange();
 				showSuccess = true;
 				setTimeout(() => (showSuccess = false), 2000);
+				// Reset scheduling after success
+				isScheduled = false;
+				scheduledTime = '';
 			}
 		} finally {
-			isSaving = false;
+			isUpdating = false;
 		}
 	}
 
+	let isDeleting = $state(false);
 	async function deleteCourse(e: Event) {
 		e.preventDefault();
-		const confirmed = await modal.confirm(
-			`Delete entire course "${course.name}"? This action cannot be undone.`
-		);
-		if (!confirmed) return;
 
-		isSaving = true;
+		isDeleting = true;
+
+		const confirmed = await modal.confirm(`Delete entire course "${course.name}"?`);
+		if (!confirmed) return;
+		isUpdating = true;
 		try {
-			const res = await fetch(`/api/courses/${course.uuid}`, {
-				method: 'DELETE'
-			});
+			const res = await fetch(`/api/courses/${course.uuid}`, { method: 'DELETE' });
 			if (res.ok) goto('/dashboard');
 		} finally {
-			isSaving = false;
-		}
-	}
-
-	async function archiveCourse(e: Event) {
-		e.preventDefault();
-		const confirmed = await modal.confirm(
-			`Archive entire course "${course.name}"? This action cannot be undone.`
-		);
-		if (!confirmed) return;
-
-		isSaving = true;
-		try {
-			const res = await fetch(`/api/courses/${course.uuid}/archive`, {
-				method: 'POST'
-			});
-			if (res.ok) goto('/dashboard');
-		} finally {
-			isSaving = false;
+			isDeleting = false;
 		}
 	}
 </script>
@@ -100,9 +100,9 @@
 		<form onsubmit={updateCourse} class="space-y-6">
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
 				<div class="space-y-2 md:col-span-2">
-					<label class="block text-lg font-black tracking-wide text-s-black uppercase" for="name">
-						Course Name
-					</label>
+					<label class="block text-lg font-black tracking-wide text-s-black uppercase" for="name"
+						>Course Name</label
+					>
 					<input
 						type="text"
 						id="name"
@@ -114,9 +114,9 @@
 				</div>
 
 				<div class="relative space-y-2 md:col-span-1">
-					<label class="block text-lg font-black tracking-wide text-s-black uppercase">
-						Course State
-					</label>
+					<label class="block text-lg font-black tracking-wide text-s-black uppercase"
+						>Course State</label
+					>
 					<div class="relative">
 						<UniButton
 							type="button"
@@ -153,13 +153,38 @@
 										px="px-0"
 										text="text-l"
 										uppercase
+										translate={false}
 										onclick={() => {
 											currentState = stage;
 											showStateDropdown = false;
 										}}
-										translate={false}
 									/>
 								{/each}
+							</div>
+						{/if}
+					</div>
+
+					<div class="mt-4 space-y-3">
+						<label class="flex cursor-pointer items-center gap-3">
+							<input
+								type="checkbox"
+								bind:checked={isScheduled}
+								class="h-6 w-6 cursor-pointer appearance-none border-4 border-s-black bg-white checked:bg-p-green"
+							/>
+							<span class="text-sm font-black tracking-wide uppercase">Schedule Change?</span>
+						</label>
+
+						{#if isScheduled}
+							<div transition:slide={{ duration: 150 }} class="space-y-1">
+								<label class="block text-xs font-black text-s-black/60 uppercase"
+									>Execution Time</label
+								>
+								<input
+									type="datetime-local"
+									bind:value={scheduledTime}
+									required={isScheduled}
+									class="w-full rounded-xl border-4 border-s-black bg-white p-2 font-bold shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] focus:outline-none"
+								/>
 							</div>
 						{/if}
 					</div>
@@ -169,10 +194,8 @@
 			<div class="space-y-2">
 				<label
 					class="block text-lg font-black tracking-wide text-s-black uppercase"
-					for="description"
+					for="description">Detailed Description</label
 				>
-					Detailed Description
-				</label>
 				<textarea
 					id="description"
 					name="description"
@@ -184,31 +207,25 @@
 			</div>
 
 			<div class="flex flex-wrap gap-4 pt-4">
-				<UniButton
+				<!-- <UniButton
 					type="submit"
 					disabled={isSaving}
 					content={isSaving ? 'Syncing...' : 'Save Settings'}
 					bgcolor="bg-p-green"
 					hv_bgcolor="bg-green-400"
-				/>
-
-				<!-- <button
-					type="button"
-					onclick={archiveCourse}
-					disabled={isSaving}
-					class="group relative cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-yellow-400 px-8 py-3 text-xl font-black tracking-widest text-white uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
-				>
-					{isSaving ? 'Archiving...' : 'Archive'}
-				</button>-->
-
-				<UniButton
+				/> -->
+				<!-- <UniButton
 					type="button"
 					onclick={deleteCourse}
 					disabled={isSaving}
 					content={isSaving ? 'Deleting...' : 'Delete'}
 					bgcolor="bg-red-400"
 					hv_bgcolor="bg-red-500"
-				/>
+				/> -->
+
+				<SuccessButton isSaving={isUpdating} type="submit">Save Changes</SuccessButton>
+
+				<DangerButton isSaving={isUpdating} onclick={deleteCourse}>Delete Course</DangerButton>
 			</div>
 		</form>
 	</div>
@@ -216,6 +233,7 @@
 
 {#if showStateDropdown}
 	<button
+		title="show dropdown"
 		tabindex="-1"
 		class="fixed inset-0 z-40 h-full w-full cursor-default bg-transparent outline-none"
 		onclick={() => (showStateDropdown = false)}

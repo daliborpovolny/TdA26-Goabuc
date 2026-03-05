@@ -5,13 +5,15 @@
 	import UniButton from '../../../../UniButton.svelte';
 	import UniLink from '../../../../UniLink.svelte';
 
+	import SuccessButton from '$lib/components/SuccessButton.svelte';
+	import DangerButton from '$lib/components/DangerButton.svelte';
+
 	let { module, courseId, onchange }: { module: Module; courseId: string; onchange: () => void } =
 		$props();
 
 	const STAGES = ['preparation', 'open', 'closed'] as const;
 
 	let collapsed = $state(true);
-	let isSaving = $state(false);
 	let showSuccess = $state(false);
 	let showStateDropdown = $state(false);
 
@@ -20,9 +22,10 @@
 	let description = $state(module.description);
 	let currentState = $state(module.state);
 
+	let isUpdating = $state(false);
 	async function handleUpdate(e: Event) {
 		e.preventDefault();
-		isSaving = true;
+		isUpdating = true;
 
 		try {
 			const res = await fetch(`/api/courses/${courseId}/modules/${module.uuid}`, {
@@ -33,21 +36,31 @@
 
 			if (res.ok) {
 				showSuccess = true;
-				onchange();
 				setTimeout(() => (showSuccess = false), 2000);
 			}
 		} finally {
-			isSaving = false;
+			isUpdating = false;
 		}
+
+		onchange();
 	}
 
-	async function deleteModule() {
-		const confirmed = await modal.confirm(
-			`Delete module "${module.name}"? This action cannot be undone.`
-		);
-		if (!confirmed) return;
+	let isDeleting = $state(false)
+	async function deleteModule(e: Event) {
+		e.preventDefault()
+		isDeleting = true
 
-		await fetch(`/api/courses/${courseId}/modules/${module.uuid}`, { method: 'DELETE' });
+		try {
+			const confirmed = await modal.confirm(
+				`Delete module "${module.name}"? This action cannot be undone.`
+			);
+			if (!confirmed) return;
+
+			await fetch(`/api/courses/${courseId}/modules/${module.uuid}`, { method: 'DELETE' });
+		} finally {
+			isDeleting = false
+		}
+		
 		onchange();
 	}
 
@@ -184,7 +197,7 @@
 				<div
 					class="border-t-2 border-gray-200 pt-4 max-md:space-y-5 md:flex md:items-center md:justify-between"
 				>
-					<UniButton
+					<!-- <UniButton
 						type="button"
 						onclick={deleteModule}
 						content="Delete Module"
@@ -197,7 +210,13 @@
 						content={isSaving ? 'Saving...' : 'Save Changes'}
 						bgcolor="bg-p-green"
 						hv_bgcolor="bg-green-500"
-					/>
+					/> -->
+
+
+				<SuccessButton isSaving={isUpdating} type="submit">Save Changes</SuccessButton>
+
+				<DangerButton isSaving={isUpdating} onclick={deleteModule}>Delete Course</DangerButton>
+
 				</div>
 			</form>
 		</div>
@@ -206,6 +225,7 @@
 
 {#if showStateDropdown}
 	<button
+		title="show dropdown"
 		tabindex="-1"
 		class="fixed inset-0 z-0 h-full w-full cursor-default bg-transparent outline-none"
 		onclick={() => (showStateDropdown = false)}
