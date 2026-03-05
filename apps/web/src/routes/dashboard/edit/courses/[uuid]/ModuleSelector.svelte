@@ -50,10 +50,10 @@
 		>
 			<div class="max-h-60 overflow-y-auto">
 				{#each modules as module}
-					<UniButton 
+					<UniButton
 						type="button"
 						onclick={() => selectModule(module.uuid)}
-						more_style={"w-full"}
+						more_style={'w-full'}
 						px="px-3"
 						py="py-2"
 						bgcolor={selectedId === module.uuid ? 'bg-p-blue' : undefined}
