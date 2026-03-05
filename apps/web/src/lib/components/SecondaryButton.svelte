@@ -36,6 +36,8 @@
         shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]
         hover:translate-x-1 hover:translate-y-1 hover:shadow-none
         hover:bg-gray-100
+
+		hover:bg-p-green
         
         active:translate-x-1.5 active:translate-y-1.5
         
