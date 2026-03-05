@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatTime } from '$lib/helpers';
 	import type { FeedPost } from '$lib/types';
 
 	let { post }: { post: FeedPost } = $props();
@@ -16,7 +17,7 @@
 		</span>
 
 		<div class="text-right text-xs font-medium text-gray-500">
-			{post.createdAt}
+			{formatTime(post.createdAt)}
 		</div>
 	</div>
 
@@ -26,7 +27,7 @@
 
 	<div class="mt-2 flex items-center gap-3 pt-2 text-[10px] font-bold text-gray-400 uppercase">
 		{#if post.edited}
-			<span>Edited: {post.updatedAt}</span>
+			<span>Edited: {formatTime(post.updatedAt)}</span>
 		{/if}
 	</div>
 </div>
