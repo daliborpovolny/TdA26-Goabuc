@@ -156,6 +156,7 @@
 			isSavingHighlight = false;
 		}
 	}
+
 	// Derived to find the full module object for the "Preview" card
 	let activeHighlight = $derived(course?.modules.find((m) => m.uuid === highlightedModuleId));
 </script>
