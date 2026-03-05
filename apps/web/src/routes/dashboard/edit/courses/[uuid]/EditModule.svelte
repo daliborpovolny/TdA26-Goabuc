@@ -45,10 +45,10 @@
 		onchange();
 	}
 
-	let isDeleting = $state(false)
+	let isDeleting = $state(false);
 	async function deleteModule(e: Event) {
-		e.preventDefault()
-		isDeleting = true
+		e.preventDefault();
+		isDeleting = true;
 
 		try {
 			const confirmed = await modal.confirm(
@@ -58,9 +58,9 @@
 
 			await fetch(`/api/courses/${courseId}/modules/${module.uuid}`, { method: 'DELETE' });
 		} finally {
-			isDeleting = false
+			isDeleting = false;
 		}
-		
+
 		onchange();
 	}
 
@@ -212,11 +212,9 @@
 						hv_bgcolor="bg-green-500"
 					/> -->
 
+					<SuccessButton isSaving={isUpdating} type="submit">Save Changes</SuccessButton>
 
-				<SuccessButton isSaving={isUpdating} type="submit">Save Changes</SuccessButton>
-
-				<DangerButton isSaving={isUpdating} onclick={deleteModule}>Delete Module</DangerButton>
-
+					<DangerButton isSaving={isUpdating} onclick={deleteModule}>Delete Module</DangerButton>
 				</div>
 			</form>
 		</div>

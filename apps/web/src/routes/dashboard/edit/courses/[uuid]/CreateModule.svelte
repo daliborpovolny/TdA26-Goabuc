@@ -92,12 +92,6 @@
 			{isSaving ? 'Creating...' : 'Launch Module'}
 		</button> -->
 
-		<SuccessButton
-			isSaving={isSaving}
-			type="submit"
-		>
-		Create Module
-		</SuccessButton>
-
+		<SuccessButton {isSaving} type="submit">Create Module</SuccessButton>
 	</div>
 </form>

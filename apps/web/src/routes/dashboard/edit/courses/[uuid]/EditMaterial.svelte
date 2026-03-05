@@ -27,12 +27,12 @@
 		uuid: 'm uuid'
 	};
 
-	let isDeleting = $state(false)
+	let isDeleting = $state(false);
 	async function remove(e: Event) {
 		e.preventDefault();
 		isDeleting = true;
 
-		try{
+		try {
 			const confirmed = await modal.confirm(
 				`Delete materail "${material.name}"? This action cannot be undone.`
 			);
@@ -43,7 +43,7 @@
 				method: 'DELETE'
 			});
 		} finally {
-			isDeleting = false
+			isDeleting = false;
 		}
 		onchange();
 	}
@@ -186,10 +186,10 @@
 							</a>
 						{/if}
 					</div>
+				</div>
 
-				<div
-					class="border-t-2 border-gray-200 pt-4 max-md:space-y-5 md:flex md:items-center md:justify-between"
-				>						<!-- <button
+				<div class="max-md:space-y-5 md:flex md:items-center md:justify-between">
+					<!-- <button
 							type="button"
 							onclick={remove}
 							class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
@@ -197,7 +197,7 @@
 							Delete
 						</button> -->
 
-						<!-- <UniButton
+					<!-- <UniButton
 							type="button"
 							onclick={remove}
 							disabled={isUpdating}
@@ -206,22 +206,11 @@
 							hv_bgcolor="bg-red-500"
 						/> -->
 
-						<SuccessButton
-							type="submit"
-							isSaving={isUpdating}
-						>
-						Save Changes
+					<SuccessButton type="submit" isSaving={isUpdating}>Save Changes</SuccessButton>
 
-						</SuccessButton>
+					<DangerButton isSaving={isDeleting} onclick={remove}>Delete</DangerButton>
 
-						<DangerButton
-						isSaving={isDeleting}
-						onclick={remove}>
-						Delete
-						</DangerButton>
-
-
-						<!-- <button
+					<!-- <button
 							type="submit"
 							disabled={isSaving}
 							class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-6 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50"
@@ -229,14 +218,14 @@
 							{isSaving ? 'Saving...' : 'Save Changes'}
 						</button> -->
 
-						<!-- <UniButton
+					<!-- <UniButton
 							type="submit"
 							disabled={isSaving}
 							content={isSaving ? 'Saving...' : 'Save Changes'}
 							bgcolor="bg-p-green"
 							hv_bgcolor="bg-green-400"
 						/> -->
-					</div>
+					<!-- </div> -->
 				</div>
 			</form>
 		</div>
