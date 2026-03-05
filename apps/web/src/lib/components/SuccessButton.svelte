@@ -30,7 +30,7 @@
         font-black tracking-widest text-s-black uppercase shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]
         transition-all duration-100
         
-        hover:translate-x-1 hover:translate-y-1 hover:bg-[#7ce499] hover:shadow-none active:translate-x-1.5 active:translate-y-1.5
+        active:translate-x-1 active:translate-y-1 hover:bg-[#7ce499] active:shadow-none
         disabled:translate-x-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50
     `;
 </script>
