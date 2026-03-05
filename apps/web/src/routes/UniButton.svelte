@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { disableScrollHandling } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { Snippet }  from 'svelte';
 
 	let {
 		content,
@@ -25,7 +26,7 @@
 		bgcolor?: string;
 		hv_bgcolor?: string;
 		uppercase?: boolean;
-		children?: () => any;
+		children?: Snippet;
 		more_style?: string;
 		type?: any;
 		disabled?: boolean;

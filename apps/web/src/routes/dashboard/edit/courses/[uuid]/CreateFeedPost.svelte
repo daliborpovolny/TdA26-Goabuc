@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
+	import UniButton from '../../../../UniButton.svelte';
 
 	let { courseId }: { courseId: string } = $props();
 
@@ -36,17 +37,21 @@
 
 <div class="mb-6">
 	<div class="flex items-center gap-4">
-		<button
-			type="button"
-			class="group relative flex cursor-pointer items-center gap-2 rounded-xl border-4 border-s-black px-6 py-3 font-black tracking-widest uppercase transition-all
-            {collapsed
-				? 'bg-white shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-p-green'
+		<UniButton 
+			type="button" 
+			more_style="flex items-center gap-2 tracking-widest {collapsed
+				? 'shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]'
 				: 'translate-x-1 translate-y-1 bg-p-blue text-white shadow-none'}"
+			shadow={collapsed}
+			uppercase
+			text="text-l"
+			bgcolor={collapsed ? undefined : "bg-p-blue"}
+			hv_bgcolor={collapsed ? undefined : ""}
 			onclick={() => (collapsed = !collapsed)}
 		>
 			<span>📢</span>
 			{collapsed ? 'New Announcement' : 'Cancel Post'}
-		</button>
+		</UniButton>
 
 		{#if showSuccess}
 			<span transition:fade class="font-bold tracking-tighter text-p-green uppercase">

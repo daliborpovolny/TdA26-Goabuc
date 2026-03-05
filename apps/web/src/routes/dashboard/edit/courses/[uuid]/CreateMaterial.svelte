@@ -63,6 +63,8 @@
 			hv_bgcolor={materialType === 'file' ? '' : undefined}
 			uppercase
 			text={'text-l'}
+			px="px-5"
+			py="py-2"
 		>
 			<span>📁</span> File
 		</UniButton>
@@ -76,6 +78,8 @@
 			hv_bgcolor={materialType === 'file' ? '' : undefined}
 			uppercase
 			text={'text-l'}
+			px="px-5"
+			py="py-2"
 		>
 			<span>🔗</span> Link
 		</UniButton>

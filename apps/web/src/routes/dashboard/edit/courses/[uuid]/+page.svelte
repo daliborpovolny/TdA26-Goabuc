@@ -184,8 +184,8 @@
 				onclick={loadCourse}
 				content="Retry Connection"
 				bgcolor="bg-[#444]"
-				hv_bgcolor="bg-white"
-				more_style="text-white hover:text-s-black"
+				hv_bgcolor=""
+				more_style="text-white hover:text-s-black hover:bg-white"
 			/>
 		</div>
 	{:else if course}

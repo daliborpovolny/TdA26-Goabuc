@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import type { Snippet } from 'svelte';
 	import { on } from 'svelte/events';
 
 	let {
@@ -22,7 +23,7 @@
 		bgcolor?: string;
 		hv_bgcolor?: string;
 		uppercase?: boolean;
-		children?: () => any;
+		children?: Snippet;
 		more_style?: string;
 		title?: string;
 		target?: string;

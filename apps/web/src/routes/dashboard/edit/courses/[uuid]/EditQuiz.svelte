@@ -7,6 +7,10 @@
 	import { fade, slide } from 'svelte/transition';
 	import ModuleSelector from './ModuleSelector.svelte';
 	import UniButton from '../../../../UniButton.svelte';
+	import SuccessButton from '$lib/components/SuccessButton.svelte';
+	import SecondaryButton from '$lib/components/SecondaryButton.svelte';
+	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
+	import DangerButton from '$lib/components/DangerButton.svelte';
 
 	const props = $props<{
 		edit: boolean;
@@ -186,13 +190,6 @@
 								<span class="text-xs font-black tracking-widest text-p-blue uppercase">
 									Question {qi + 1} — {q.type === 'singleChoice' ? 'Single' : 'Multi'}
 								</span>
-								<!-- <button
-									type="button"
-									onclick={() => removeQuestion(qi)}
-									class="cursor-pointer text-xs font-bold text-red-500 hover:underline"
-								>
-									Remove Question
-								</button> -->
 								<UniButton
 									type="button"
 									onclick={() => removeQuestion(qi)}
@@ -273,88 +270,41 @@
 				</div>
 
 				<div class="flex flex-wrap gap-3 border-t-4 border-s-black pt-6">
-					<UniButton
-						bgcolor="bg-s-3"
-						text_color="text-white"
-						text="text-xs"
-						px="px-4"
-						py="py-2"
-						more_style="hover:text-black hover:bg-green-700 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
-						shadow={false}
-						onclick={() => addQuestion('singleChoice')}
-						content="+ Single Choice"
-						uppercase
-					/>
+					<PrimaryButton onclick={() => addQuestion('singleChoice')} class="text-xs">
+						+ Single Choice
+					</PrimaryButton>
 
-					<UniButton
-						bgcolor="bg-s-3"
-						text_color="text-white"
-						text="text-xs"
-						px="px-4"
-						py="py-2"
-						more_style="hover:text-black hover:bg-green-700 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
-						shadow={false}
-						onclick={() => addQuestion('multipleChoice')}
-						content="+ Multiple Choice"
-						uppercase
-					/>
+					<PrimaryButton onclick={() => addQuestion('multipleChoice')} class="text-xs">
+						+ Multiple Choice
+					</PrimaryButton>
 
-					<div class="ml-auto flex-1 gap-3 space-y-1">
-						{#if props.edit}
-							<a
-								href={'/dashboard/edit/courses/' +
-									page.params.uuid +
-									'/modules/' +
-									module?.uuid +
-									'/quizzes/' +
-									quiz.uuid}
-								class="rounded-lg border-2 border-s-black bg-s-2 px-8 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
-							>
-								Results
-							</a>
-
-							<!-- <button
-								type="button"
-								onclick={deleteQuiz}
-								class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
-							>
-								Delete Quiz
-							</button> -->
-
-							<UniButton
-								bgcolor="bg-red-500"
-								text_color="text-white"
-								text="text-xs"
-								px="px-4"
-								py="py-2"
-								more_style="hover:text-white hover:bg-red-600 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
-								shadow={false}
-								onclick={deleteQuiz}
-								content="Delete Quiz"
-								uppercase
-							/>
-						{/if}
-						<!-- <button
-							type="submit"
-							disabled={isSaving}
-							class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-8 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+					{#if props.edit}
+						<PrimaryButton
+							href={'/dashboard/edit/courses/' +
+								page.params.uuid +
+								'/modules/' +
+								module?.uuid +
+								'/quizzes/' +
+								quiz.uuid}
+							class="text-xs px-4 py-2"
 						>
-							{isSaving ? 'Saving...' : 'Save Quiz'}
-						</button> -->
-						<UniButton
-							type="submit"
-							disabled={isSaving}
-							bgcolor="bg-p-green"
-							text_color="text-s-black"
-							text="text-xs"
-							px="px-4"
-							py="py-2"
-							more_style="kshadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
-							shadow={false}
-							content={isSaving ? 'Saving...' : 'Save Quiz'}
-							uppercase
-						/>
-					</div>
+							Results
+						</PrimaryButton>
+
+						<DangerButton
+							type="button"
+							onclick={deleteQuiz}
+							class="text-xs"
+						>
+							Delete Quiz
+						</DangerButton>
+					{/if}
+					<SuccessButton
+						type="submit"
+						class="text-xs"
+					>
+						Submit
+					</SuccessButton>
 				</div>
 			</form>
 		</div>
