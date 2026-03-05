@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { disableScrollHandling } from '$app/navigation';
 	import { page } from '$app/state';
-	import type { Snippet }  from 'svelte';
+	import type { Snippet } from 'svelte';
 
 	let {
 		content,
