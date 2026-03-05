@@ -37,19 +37,18 @@
 		let formData = new FormData(e.target as HTMLFormElement);
 		let formEntries = Object.fromEntries(formData);
 
-		let formJson
+		let formJson;
 		if (isScheduled) {
-
 			formJson = JSON.stringify({
-			...formEntries,
-			state: currentState,
-			openTime: getISOTime() // This maps to your Go struct
-		})
+				...formEntries,
+				state: currentState,
+				openTime: getISOTime() // This maps to your Go struct
+			});
 		} else {
 			formJson = JSON.stringify({
-			...formEntries,
-			state: currentState,
-		})	
+				...formEntries,
+				state: currentState
+			});
 		}
 
 		try {
@@ -89,23 +88,20 @@
 		}
 	}
 
-
 	import StateController from '$lib/components/StateController.svelte';
-    
-    async function updateCourseStatus(newState: Course["state"], date?: string) {
 
-		let body = {state: newState, openTime: date}
+	async function updateCourseStatus(newState: Course['state'], date?: string) {
+		let body = { state: newState, openTime: date };
 
 		await fetch(`/api/courses/${course.uuid}/state`, {
 			method: 'PUT',
 			body: JSON.stringify(body),
 
-			headers: { 'Content-type': 'application/json' },
-		})
-    
-		onchange()
-	}
+			headers: { 'Content-type': 'application/json' }
+		});
 
+		onchange();
+	}
 </script>
 
 <div class="space-y-6">
@@ -124,13 +120,13 @@
 	<div
 		class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] md:p-8"
 	>
-	<StateController 
-		bind:currentState={course.state} 
-		onchange={updateCourseStatus} 
-		enableTimer={true} 
-	/>
+		<StateController
+			bind:currentState={course.state}
+			onchange={updateCourseStatus}
+			enableTimer={true}
+		/>
 
-	<br>
+		<br />
 
 		<form onsubmit={updateCourse} class="space-y-6">
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-3">

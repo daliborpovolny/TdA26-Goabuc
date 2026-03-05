@@ -143,33 +143,36 @@
 						{#if regularModules.length > 0}
 							<div class="space-y-12">
 								{#each regularModules as module, i}
-									<section class="relative">
-										<div
-											class="absolute -top-3 -left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border-4 border-s-black bg-p-green font-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-										>
-											{i + 1}
-										</div>
-
-										<div
-											class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]"
-										>
-											<div class="mb-6 border-b-2 border-gray-100 pb-4">
-												<h3 class="text-2xl font-black tracking-tight uppercase">{module.name}</h3>
-												<p class="font-bold text-gray-500 italic">{module.description}</p>
-												<!-- <p class="font-bold text-gray-500 italic">{module.description}</p> -->
+									{#if module.state == 'open'}
+										<section class="relative">
+											<div
+												class="absolute -top-3 -left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border-4 border-s-black bg-p-green font-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+											>
+												{i + 1}
 											</div>
 
-											<div class="space-y-3">
-												{#each module.items as item}
-													{#if isQuiz(item)}
-														<TakeQuiz quiz={item} courseId={course.uuid} />
-													{:else if isMaterial(item)}
-														<ViewMaterial material={item} />
-													{/if}
-												{/each}
+											<div
+												class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]"
+											>
+												<div class="mb-6 border-b-2 border-gray-100 pb-4">
+													<h3 class="text-2xl font-black tracking-tight uppercase">
+														{module.name}
+													</h3>
+													<p class="font-bold text-gray-500 italic">{module.description}</p>
+												</div>
+
+												<div class="space-y-3">
+													{#each module.items as item}
+														{#if isQuiz(item)}
+															<TakeQuiz quiz={item} courseId={course.uuid} />
+														{:else if isMaterial(item)}
+															<ViewMaterial material={item} />
+														{/if}
+													{/each}
+												</div>
 											</div>
-										</div>
-									</section>
+										</section>
+									{/if}
 								{/each}
 							</div>
 						{:else if !unassignedModule || unassignedModule.items.length === 0}
