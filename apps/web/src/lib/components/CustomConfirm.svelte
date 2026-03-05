@@ -6,7 +6,7 @@
 {#if modal.show}
 	<div
 		transition:fade={{ duration: 150 }}
-		class="fixed inset-0 z-[100] flex items-center justify-center bg-s-black/60 p-4 backdrop-blur-sm"
+		class="fixed inset-0 z-100 flex items-center justify-center bg-s-black/60 p-4 backdrop-blur-sm"
 	>
 		<div
 			transition:scale={{ start: 0.9, duration: 200 }}
