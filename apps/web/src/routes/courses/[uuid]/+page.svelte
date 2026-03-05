@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { slide, fade } from 'svelte/transition';
-	import type { Course, FullModule, Quiz, Material, Heading } from '$lib/types';
+	import type { Course, FullModule, Quiz, Material, Heading, Module } from '$lib/types';
 
 	import ViewMaterial from './ViewMaterial.svelte';
 	import TakeQuiz from './TakeQuiz.svelte';
@@ -44,7 +44,11 @@
 		return !('content' in item);
 	}
 	let unassignedModule = $derived(course?.modules.find((m) => m.name === 'Unassigned'));
-	let regularModules = $derived(course?.modules.filter((m) => m.name !== 'Unassigned') ?? []);
+	let regularModules = $derived(
+		(course?.modules ?? [])
+			.filter((m) => m.name !== 'Unassigned')
+			.sort((a: Module, b: Module) => a.order - b.order)
+	);
 </script>
 
 <svelte:head>

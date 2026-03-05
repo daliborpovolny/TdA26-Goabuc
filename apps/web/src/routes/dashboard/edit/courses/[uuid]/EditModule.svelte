@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Module } from '$lib/types';
+	import type { FullModule, Module } from '$lib/types';
 	import { fade, slide } from 'svelte/transition';
 	import { modal } from '$lib/modal.svelte';
 	import UniButton from '../../../../UniButton.svelte';

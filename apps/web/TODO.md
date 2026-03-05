@@ -2,7 +2,7 @@
 
 ## TODO
 
-- [X] fix outcomes page not working + add a link to it on the course detail page - only for lecturers (`isAdmin === true`)
+- [x] fix outcomes page not working + add a link to it on the course detail page - only for lecturers (`isAdmin === true`)
 - [ ] low - clean up warnings
 - [ ] ui passover, clean up incosistencies etc...
 - [x] rewrite the view course page to respect modules
@@ -16,3 +16,4 @@ search courses by name -- DONE
 favicon of target site -- DONE
 user sees the right asnwers after taking a quiz -- DONE
 teacher sees the details of attempts taken -- DONE
+module ordering and reordering -- DONE

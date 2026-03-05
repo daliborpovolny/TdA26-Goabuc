@@ -63,6 +63,64 @@
 		loadCourse();
 		showCreateModule = false;
 	}
+
+	import { flip } from 'svelte/animate';
+	// ... other imports
+	import SuccessButton from '$lib/components/SuccessButton.svelte';
+	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
+
+	// ... existing loadCourse logic
+
+	let localModules = $state<Module[]>([]);
+	let orderChanged = $state(false);
+	let isSavingOrder = $state(false);
+
+	// Sync localModules whenever course updates
+	$effect(() => {
+		if (course) {
+			// Filter out Unassigned and sort by current order
+			localModules = course.modules
+				.filter((m) => m.name !== 'Unassigned')
+				.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+		}
+	});
+
+	function moveModule(index: number, direction: 'up' | 'down') {
+		const newIndex = direction === 'up' ? index - 1 : index + 1;
+		if (newIndex < 0 || newIndex >= localModules.length) return;
+
+		const temp = localModules[index];
+		localModules[index] = localModules[newIndex];
+		localModules[newIndex] = temp;
+		orderChanged = true;
+	}
+
+	async function saveModuleOrder() {
+		isSavingOrder = true;
+		try {
+			for (let i = 0; i < localModules.length; i++) {
+				const mod = localModules[i];
+
+				const res = await fetch(`/api/courses/${courseId}/modules/${mod.uuid}/state`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						state: mod.state,
+						order: i + 2 // The new index
+					})
+				});
+
+				if (!res.ok) throw new Error(`Failed to update module ${mod.name}`);
+			}
+
+			orderChanged = false;
+			loadCourse();
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to save order';
+		} finally {
+			isSavingOrder = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -208,25 +266,59 @@
 							</div>
 						{:else if activeSection === 'modules'}
 							<div in:fade class="space-y-8">
-								<div class="flex items-center justify-between space-x-1">
+								<div class="flex items-center justify-between">
 									<h2 class="text-3xl font-black text-p-blue uppercase">Modules</h2>
-									<UniButton
-										onclick={() => (showCreateModule = !showCreateModule)}
-										content={showCreateModule ? 'Cancel' : '+ New Module'}
-									/>
+									<div class="flex gap-2">
+										{#if orderChanged}
+											<div in:fade>
+												<SuccessButton
+													onclick={saveModuleOrder}
+													isSaving={isSavingOrder}
+													class="!py-2 !text-sm"
+												>
+													Save New Order
+												</SuccessButton>
+											</div>
+										{/if}
+										<PrimaryButton
+											onclick={() => (showCreateModule = !showCreateModule)}
+											class="!py-2 !text-sm"
+										>
+											{showCreateModule ? 'Cancel' : '+ New Module'}
+										</PrimaryButton>
+									</div>
 								</div>
 
 								{#if showCreateModule}
-									<div transition:slide class="rounded-xl border-2 border-s-black bg-gray-50 p-4">
+									<div transition:slide class="rounded-xl border-4 border-s-black bg-gray-50 p-4">
 										<CreateModule courseId={course.uuid} onchange={onCreateModuleSubmit} />
 									</div>
 								{/if}
 
 								<div class="space-y-4">
-									{#each course.modules as module}
-										{#if module.name !== 'Unassigned'}
+									{#each localModules as module, i (module.uuid)}
+										<div animate:flip={{ duration: 300 }} class="group relative">
+											<div
+												class="absolute top-1/2 -left-12 flex hidden -translate-y-1/2 flex-col gap-1 opacity-0 transition-opacity group-hover:opacity-100 md:flex"
+											>
+												<button
+													disabled={i === 0}
+													onclick={() => moveModule(i, 'up')}
+													class="rounded border-2 border-s-black bg-white p-1 hover:bg-p-green disabled:opacity-30"
+												>
+													▲
+												</button>
+												<button
+													disabled={i === localModules.length - 1}
+													onclick={() => moveModule(i, 'down')}
+													class="rounded border-2 border-s-black bg-white p-1 hover:bg-p-green disabled:opacity-30"
+												>
+													▼
+												</button>
+											</div>
+
 											<EditModule {module} courseId={course.uuid} onchange={loadCourse} />
-										{/if}
+										</div>
 									{/each}
 								</div>
 							</div>

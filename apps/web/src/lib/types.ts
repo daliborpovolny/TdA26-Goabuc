@@ -151,6 +151,8 @@ export interface Module {
 	description: string;
 	state: 'preparation' | 'open' | 'closed';
 
+	order: number;
+
 	createdAt: string;
 	updatedAt: string;
 }
