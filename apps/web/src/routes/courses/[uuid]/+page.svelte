@@ -7,6 +7,8 @@
 	import TakeQuiz from './TakeQuiz.svelte';
 	import ViewFeed from './ViewFeed.svelte';
 	import { goto } from '$app/navigation';
+	import SecondaryButton from '$lib/components/SecondaryButton.svelte';
+	import { auth } from '$lib/auth.svelte';
 
 	let activeTab = $state('modules');
 
@@ -87,9 +89,23 @@
 	{:else if course}
 		<div class="mx-auto flex w-full flex-col gap-8 md:max-w-[90%]">
 			<header class="space-y-4">
-				<h1 class="text-5xl font-black tracking-tighter text-s-black uppercase md:text-7xl">
-					{course.name}
-				</h1>
+				<div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+					<h1 class="text-5xl font-black tracking-tighter text-s-black uppercase md:text-7xl">
+						{course.name}
+					</h1>
+
+					{#if auth.user?.isAdmin}
+						<div in:fade>
+							<SecondaryButton
+								href={`/dashboard/edit/courses/${course.uuid}`}
+								class="!px-4 !py-2 !text-sm md:!text-base"
+							>
+								Edit Course ✏️
+							</SecondaryButton>
+						</div>
+					{/if}
+				</div>
+
 				<div class="relative">
 					<div class="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-s-black"></div>
 					<div class="relative rounded-2xl border-4 border-s-black bg-p-green p-6">
