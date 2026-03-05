@@ -106,7 +106,7 @@
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						state: mod.state,
-						order: i + 2 // The new index
+						order: i + 2 // offset by 2 because buffer module has order 1
 					})
 				});
 
@@ -129,9 +129,6 @@
 	let originalMessage = course?.highlightedModuleMessage || '';
 
 	let isSavingHighlight = $state(false);
-
-	// Derived to check if the message has been edited
-	// let messageChanged = $derived(highlightedMessage !== originalMessage);
 
 	async function updateHighlight(newUuid?: string) {
 		isSavingHighlight = true;
