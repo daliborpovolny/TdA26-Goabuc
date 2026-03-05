@@ -98,7 +98,7 @@ func (h *Handler) DeleteFeedPost(c echo.Context) error {
 // GET /courses/{courseId}/feed/stream
 func (h *Handler) StreamFeed(c echo.Context) error {
 
-	fmt.Println("in streamFeed")
+	// fmt.Println("in streamFeed")
 
 	courseID := c.Param("courseId")
 

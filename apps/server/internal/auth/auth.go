@@ -148,10 +148,10 @@ type PublicUser struct {
 func (h *AuthHandler) Profile(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
-	fmt.Println("in profile")
+	// fmt.Println("in profile")
 
 	if r.User == nil {
-		fmt.Println("rejected")
+		// fmt.Println("rejected")
 		return r.Error(http.StatusUnauthorized, "authentication required")
 	}
 
@@ -193,11 +193,11 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 }
 
 func validateToken(token string, queries *db.Queries, ctx context.Context) (*handlers.User, error) {
-	fmt.Println("validating token")
+	// fmt.Println("validating token")
 
 	authInfo, err := queries.GetUserBySessionToken(ctx, token)
 	if err != nil {
-		fmt.Println("db fail", err)
+		// fmt.Println("db fail", err)
 		return nil, err
 	}
 
@@ -206,7 +206,7 @@ func validateToken(token string, queries *db.Queries, ctx context.Context) (*han
 		return nil, errors.New("session expired")
 	}
 
-	fmt.Println("valid")
+	// fmt.Println("valid")
 
 	return &handlers.User{
 		ID:        int(authInfo.ID),

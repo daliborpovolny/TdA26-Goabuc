@@ -106,6 +106,8 @@ func main() {
 	e.PUT("/courses/:courseId", coursesHandler.UpdateCourse, auth.AdminRequired())
 	e.DELETE("/courses/:courseId", coursesHandler.DeleteCourse, auth.AdminRequired())
 
+	e.PUT("/courses/:courseId/state", coursesHandler.ChangeCourseState, auth.AdminRequired())
+
 	// modules
 	e.POST("/courses/:courseId/modules", coursesHandler.CreateModule, auth.AdminRequired())
 	e.PUT("/courses/:courseId/modules/:moduleId", coursesHandler.UpdateModule, auth.AdminRequired())

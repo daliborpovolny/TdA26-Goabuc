@@ -156,6 +156,11 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		fmt.Println("assign quiz to course 1 module 1 failed")
 	}
 
+	_, err = cs.ChangeCourseState(course1.Uuid, "open", nil, ctx)
+	if err != nil {
+		fmt.Println("failed to change course 1 state")
+	}
+
 	return nil
 
 	//* Course 2
@@ -169,6 +174,11 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 	}, ctx)
 	if err != nil {
 		return err
+	}
+
+	module, err = cs.CreateModule(course2.Uuid, uuid.NewString(), "Module 1", "light introduction to the course", ctx)
+	if err != nil {
+		fmt.Println("create course 2 module failed")
 	}
 
 	_, err = ms.CreateUrlMaterial(materials.CreateUrlMaterialRequest{

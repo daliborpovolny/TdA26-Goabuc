@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS module (
 
     name TEXT NOT NULL,
     description TEXT NOT NULL,
-    state TEXT NOT NULL DEFAULT 'preparation',  -- preparation | open | closed
+    state TEXT NOT NULL DEFAULT 'open',  -- preparation | open | closed
     
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
