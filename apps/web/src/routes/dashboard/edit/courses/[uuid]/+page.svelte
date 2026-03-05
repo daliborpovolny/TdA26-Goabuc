@@ -144,8 +144,9 @@
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					moduleUuid: targetUuid,
-					message: highlightedMessage
+					highlightedModuleId: targetUuid,
+					highlightedModuleMessage: highlightedMessage,
+					state: course?.modules.filter((m) => m.uuid !== targetUuid)[0].state
 				})
 			});
 
@@ -434,7 +435,7 @@
 											</div>
 
 											<div class="relative">
-												{#if highlightedModuleId === module.uuid}
+												{#if course.highlightedModuleId === module.uuid}
 													<div
 														class="absolute -top-2 -right-2 z-10 rounded-full border-2 border-s-black bg-p-blue px-2 py-0.5 text-[10px] font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
 													>
