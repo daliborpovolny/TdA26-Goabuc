@@ -23,13 +23,15 @@ type Answer struct {
 }
 
 type Course struct {
-	Uuid        string `json:"uuid"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	CreatedAt   int64  `json:"created_at"`
-	UpdatedAt   int64  `json:"updated_at"`
-	Archived    int64  `json:"archived"`
-	State       string `json:"state"`
+	Uuid                     string         `json:"uuid"`
+	Name                     string         `json:"name"`
+	Description              string         `json:"description"`
+	CreatedAt                int64          `json:"created_at"`
+	UpdatedAt                int64          `json:"updated_at"`
+	HighlightedModuleUuid    sql.NullString `json:"highlighted_module_uuid"`
+	HighlightedModuleMessage sql.NullString `json:"highlighted_module_message"`
+	Archived                 int64          `json:"archived"`
+	State                    string         `json:"state"`
 }
 
 type FeedPost struct {

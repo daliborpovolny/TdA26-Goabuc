@@ -7,6 +7,8 @@
 	import TakeQuiz from './TakeQuiz.svelte';
 	import ViewFeed from './ViewFeed.svelte';
 	import { goto } from '$app/navigation';
+	import SecondaryButton from '$lib/components/SecondaryButton.svelte';
+	import { auth } from '$lib/auth.svelte';
 
 	let activeTab = $state('modules');
 
@@ -49,6 +51,10 @@
 			.filter((m) => m.name !== 'Unassigned')
 			.sort((a: Module, b: Module) => a.order - b.order)
 	);
+
+	let highlightedModule = $derived(
+		course?.modules.find((m) => m.uuid === course?.highlightedModuleId)
+	);
 </script>
 
 <svelte:head>
@@ -83,9 +89,23 @@
 	{:else if course}
 		<div class="mx-auto flex w-full flex-col gap-8 md:max-w-[90%]">
 			<header class="space-y-4">
-				<h1 class="text-5xl font-black tracking-tighter text-s-black uppercase md:text-7xl">
-					{course.name}
-				</h1>
+				<div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+					<h1 class="text-5xl font-black tracking-tighter text-s-black uppercase md:text-7xl">
+						{course.name}
+					</h1>
+
+					{#if auth.user?.isAdmin}
+						<div in:fade>
+							<SecondaryButton
+								href={`/dashboard/edit/courses/${course.uuid}`}
+								class="!px-4 !py-2 !text-sm md:!text-base"
+							>
+								Edit Course ✏️
+							</SecondaryButton>
+						</div>
+					{/if}
+				</div>
+
 				<div class="relative">
 					<div class="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-s-black"></div>
 					<div class="relative rounded-2xl border-4 border-s-black bg-p-green p-6">
@@ -119,6 +139,31 @@
 				<div
 					class="w-full space-y-8 lg:w-2/3 {activeTab === 'modules' ? 'block' : 'hidden lg:block'}"
 				>
+					{#if highlightedModule && course?.highlightedModuleMessage}
+						<section in:fade class="relative mb-12">
+							<div
+								class="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-s-black"
+							></div>
+							<div class="relative rounded-2xl border-4 border-s-black bg-p-blue p-6 text-white">
+								<div class="mb-4 flex items-center gap-3">
+									<span class="animate-bounce text-4xl">🌟</span>
+									<div>
+										<h2 class="text-xs font-black tracking-[0.2em] text-p-green uppercase">
+											Current Focus
+										</h2>
+										<h3 class="text-2xl font-black tracking-tight uppercase">
+											{highlightedModule.name}
+										</h3>
+									</div>
+								</div>
+
+								<div class="rounded-xl border-2 border-white/20 bg-s-black/20 p-4 font-bold italic">
+									"{course.highlightedModuleMessage}"
+								</div>
+							</div>
+						</section>
+					{/if}
+
 					<h2 class="text-3xl font-black tracking-tight text-p-blue uppercase">Learning Path</h2>
 
 					<div class="space-y-12">

@@ -208,8 +208,10 @@ func (h *CourseHandler) ListAllCourses(c echo.Context) error {
 }
 
 type ChangeCourseStateRequest struct {
-	State    string  `json:"state"`
-	OpenTime *string `json:"openTime"`
+	State                    string  `json:"state"`
+	OpenTime                 *string `json:"openTime"`
+	HighligtedModuleId       *string `json:"highlightedModuleId"`
+	HighlightedModuleMessage *string `json:"highlightedModuleMessage"`
 }
 
 func (h *CourseHandler) ChangeCourseState(c echo.Context) error {
@@ -222,7 +224,7 @@ func (h *CourseHandler) ChangeCourseState(c echo.Context) error {
 
 	courseId := r.Echo.Param("courseId")
 
-	_, err := h.service.ChangeCourseState(courseId, req.State, req.OpenTime, r.Ctx)
+	_, err := h.service.ChangeCourseState(courseId, req.State, req.OpenTime, req.HighligtedModuleId, req.HighlightedModuleMessage, r.Ctx)
 	if err != nil {
 		if err == ErrBadCourseState {
 			return r.Error(http.StatusBadRequest, "Invalid course state")

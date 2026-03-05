@@ -73,9 +73,11 @@ SELECT EXISTS (SELECT 1 FROM course WHERE uuid = ?) AS course_exists;
 -- name: ChangeCourseState :one
 UPDATE course
 SET
-    state = ?,
-    updated_at = ?
-WHERE uuid = ? RETURNING *;
+    state = sqlc.arg(state),
+    updated_at = sqlc.arg(updated_at),
+    highlighted_module_message = sqlc.narg(module_message),
+    highlighted_module_uuid = sqlc.narg(module_uuid)
+WHERE uuid = sqlc.arg(uuid) RETURNING *;
 
 
 --* Module

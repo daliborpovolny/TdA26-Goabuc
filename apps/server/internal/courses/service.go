@@ -126,6 +126,9 @@ type GetCourseResponse struct {
 	State       string `json:"state"`
 	Archived    bool   `json:"archived"`
 
+	HighligtedModuleId       *string `json:"highlightedModuleId"`
+	HighlightedModuleMessage *string `json:"highlightedModuleMessage"`
+
 	Materials []materials.Material `json:"materials"`
 	Quizzes   []quizzes.Quiz       `json:"quizzes"`
 
@@ -247,6 +250,14 @@ func (s *Service) GetCourse(courseId string, host string, scheme string, isAdmin
 		Modules: fullModules,
 	}
 
+	if course.HighlightedModuleMessage.Valid {
+		courseDetail.HighlightedModuleMessage = &course.HighlightedModuleMessage.String
+	}
+
+	if course.HighlightedModuleUuid.Valid {
+		courseDetail.HighligtedModuleId = &course.HighlightedModuleUuid.String
+	}
+
 	return &courseDetail, nil
 }
 
@@ -292,7 +303,7 @@ func (s *Service) ListAllCourses(ctx context.Context) ([]db.Course, error) {
 	return courses, nil
 }
 
-func (s *Service) ChangeCourseState(courseId string, state string, openTime *string, ctx context.Context) (db.Course, error) {
+func (s *Service) ChangeCourseState(courseId string, state string, openTime *string, hmId *string, hmM *string, ctx context.Context) (db.Course, error) {
 
 	now := time.Now().Unix()
 
@@ -314,10 +325,24 @@ func (s *Service) ChangeCourseState(courseId string, state string, openTime *str
 		time.AfterFunc(time.Until(openingTime), func() {
 			fmt.Println("preping for change")
 
+			var mM sql.NullString
+			if hmM != nil {
+				mM.Valid = true
+				mM.String = *hmM
+			}
+
+			var mId sql.NullString
+			if hmId != nil {
+				mId.Valid = true
+				mId.String = *hmId
+			}
+
 			_, err = s.q.ChangeCourseState(context.Background(), db.ChangeCourseStateParams{
-				State:     state,
-				UpdatedAt: time.Now().Unix(),
-				Uuid:      courseId,
+				State:         state,
+				UpdatedAt:     time.Now().Unix(),
+				Uuid:          courseId,
+				ModuleMessage: mM,
+				ModuleUuid:    mId,
 			})
 			if err != nil {
 				fmt.Println(err)
@@ -333,10 +358,24 @@ func (s *Service) ChangeCourseState(courseId string, state string, openTime *str
 		return db.Course{}, ErrBadCourseState
 	}
 
+	var mM sql.NullString
+	if hmM != nil {
+		mM.Valid = true
+		mM.String = *hmM
+	}
+
+	var mId sql.NullString
+	if hmId != nil {
+		mId.Valid = true
+		mId.String = *hmId
+	}
+
 	course, err := s.q.ChangeCourseState(ctx, db.ChangeCourseStateParams{
-		State:     state,
-		Uuid:      courseId,
-		UpdatedAt: now,
+		State:         state,
+		Uuid:          courseId,
+		UpdatedAt:     now,
+		ModuleMessage: mM,
+		ModuleUuid:    mId,
 	})
 	if err != nil {
 		return db.Course{}, err

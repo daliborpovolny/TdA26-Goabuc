@@ -36,6 +36,9 @@ CREATE TABLE IF NOT EXISTS course (
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
 
+    highlighted_module_uuid TEXT,
+    highlighted_module_message TEXT,
+
     archived INTEGER NOT NULL DEFAULT 0,
     state TEXT NOT NULL DEFAULT 'preparation' -- preparation | open | closed
 
