@@ -82,17 +82,34 @@ WHERE uuid = ? RETURNING *;
 
 -- name: CreateModule :one
 INSERT INTO module (
-    uuid, course_uuid, name, description, created_at, updated_at
-) VALUES (
-    ?, ?, ?, ?, ?, ?
-) RETURNING *;
+    uuid,
+    course_uuid,
+    name,
+    description,
+    module_order,
+    created_at,
+    updated_at
+)
+SELECT
+    ?,
+    ?,
+    ?,
+    ?,
+    COALESCE(MAX(module_order), 0) + 1,
+    ?,
+    ?
+FROM module
+WHERE module.course_uuid = ?
+RETURNING *;
 
 -- name: ChangeModuleState :one
 UPDATE module
 SET
-    state = ?,
-    updated_at = ?
-WHERE uuid = ? RETURNING *;
+    module_order = COALESCE(sqlc.narg(module_order), module_order),
+    state = sqlc.arg(state),
+    updated_at = sqlc.arg(updated_at)
+WHERE uuid = sqlc.arg(uuid)
+RETURNING *;
 
 -- name: CheckModuleExists :one
 SELECT EXISTS (SELECT 1 FROM module WHERE uuid = ?) AS module_exists;

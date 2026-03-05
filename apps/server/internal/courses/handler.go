@@ -237,6 +237,7 @@ func (h *CourseHandler) ChangeCourseState(c echo.Context) error {
 
 type ChangeModuleStateRequest struct {
 	State string `json:"state"`
+	Order *int   `json:"order"`
 }
 
 func (h *CourseHandler) ChangeModuleState(c echo.Context) error {
@@ -250,7 +251,7 @@ func (h *CourseHandler) ChangeModuleState(c echo.Context) error {
 	courseId := r.Echo.Param("courseId")
 	moduleId := r.Echo.Param("moduleId")
 
-	_, err := h.service.ChangeModuleState(courseId, moduleId, req.State, r.Ctx)
+	_, err := h.service.ChangeModuleState(courseId, moduleId, req.State, req.Order, r.Ctx)
 	if err != nil {
 		if err == ErrBadModuleState {
 			return r.Error(http.StatusBadRequest, "Invalid module state")

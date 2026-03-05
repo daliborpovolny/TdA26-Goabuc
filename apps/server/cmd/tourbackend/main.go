@@ -116,6 +116,8 @@ func main() {
 	e.GET("/courses/:courseId/modules/:moduleId", coursesHandler.GetModule)
 	e.GET("/courses/:courseId/modules/:moduleId", coursesHandler.ListAllModules)
 
+	e.PUT("/courses/:courseId/modules/:moduleId/state", coursesHandler.ChangeModuleState, auth.AdminRequired())
+
 	//* Course materials
 	materialsHandler := materials.NewHandler(STATIC_PATH, matsService, queries, IS_DEPLOYED)
 

@@ -3,6 +3,7 @@ package courses
 import (
 	"cmp"
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"slices"
@@ -54,6 +55,8 @@ type Module struct {
 	Description string `json:"description"`
 	State       string `json:"state"` // one of ALLOWED_MODULE_STATES
 
+	Order int `json:"order"`
+
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
 
@@ -75,6 +78,8 @@ func (s *Service) dbModuleToModule(dbM db.Module) Module {
 		Name:        dbM.Name,
 		Description: dbM.Description,
 		State:       dbM.State,
+
+		Order: int(dbM.ModuleOrder),
 
 		CreatedAt: utils.UnixToIso(dbM.CreatedAt),
 		UpdatedAt: utils.UnixToIso(dbM.UpdatedAt),
@@ -105,7 +110,7 @@ func (s *Service) CreateCourse(params db.CreateCourseParams, ctx context.Context
 		return nil, err
 	}
 
-	_, err = s.ChangeModuleState(course.Uuid, module.Uuid, "open", ctx)
+	_, err = s.ChangeModuleState(course.Uuid, module.Uuid, "open", nil, ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -347,12 +352,13 @@ func (s *Service) CreateModule(courseId string, moduleId string, name string, de
 	now := time.Now().Unix()
 
 	dbModule, err := s.q.CreateModule(ctx, db.CreateModuleParams{
-		Uuid:        moduleId,
-		CourseUuid:  courseId,
-		Name:        name,
-		Description: description,
-		CreatedAt:   now,
-		UpdatedAt:   now,
+		Uuid:         moduleId,
+		CourseUuid:   courseId,
+		CourseUuid_2: courseId,
+		Name:         name,
+		Description:  description,
+		CreatedAt:    now,
+		UpdatedAt:    now,
 	})
 	if err != nil {
 		return Module{}, err
@@ -361,7 +367,7 @@ func (s *Service) CreateModule(courseId string, moduleId string, name string, de
 	return s.dbModuleToModule(dbModule), nil
 }
 
-func (s *Service) ChangeModuleState(courseId string, moduleId string, state string, ctx context.Context) (Module, error) {
+func (s *Service) ChangeModuleState(courseId string, moduleId string, state string, order *int, ctx context.Context) (Module, error) {
 
 	if !slices.Contains(ALLOWED_MODULE_STATES, state) {
 		return Module{}, ErrBadModuleState
@@ -369,10 +375,17 @@ func (s *Service) ChangeModuleState(courseId string, moduleId string, state stri
 
 	now := time.Now().Unix()
 
+	var moduleOrder sql.NullInt64
+	if order != nil {
+		moduleOrder.Valid = true
+		moduleOrder.Int64 = int64(*order)
+	}
+
 	dbModule, err := s.q.ChangeModuleState(ctx, db.ChangeModuleStateParams{
-		State:     state,
-		Uuid:      moduleId,
-		UpdatedAt: now,
+		ModuleOrder: moduleOrder,
+		State:       state,
+		Uuid:        moduleId,
+		UpdatedAt:   now,
 	})
 	if err != nil {
 		return Module{}, err

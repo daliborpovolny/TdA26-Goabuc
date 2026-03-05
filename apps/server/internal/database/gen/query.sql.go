@@ -153,19 +153,27 @@ func (q *Queries) ChangeMaterialInModuleOrder(ctx context.Context, arg ChangeMat
 const changeModuleState = `-- name: ChangeModuleState :one
 UPDATE module
 SET
-    state = ?,
-    updated_at = ?
-WHERE uuid = ? RETURNING uuid, course_uuid, name, description, state, created_at, updated_at
+    module_order = COALESCE(?1, module_order),
+    state = ?2,
+    updated_at = ?3
+WHERE uuid = ?4
+RETURNING uuid, course_uuid, name, description, state, module_order, created_at, updated_at
 `
 
 type ChangeModuleStateParams struct {
-	State     string `json:"state"`
-	UpdatedAt int64  `json:"updated_at"`
-	Uuid      string `json:"uuid"`
+	ModuleOrder sql.NullInt64 `json:"module_order"`
+	State       string        `json:"state"`
+	UpdatedAt   int64         `json:"updated_at"`
+	Uuid        string        `json:"uuid"`
 }
 
 func (q *Queries) ChangeModuleState(ctx context.Context, arg ChangeModuleStateParams) (Module, error) {
-	row := q.db.QueryRowContext(ctx, changeModuleState, arg.State, arg.UpdatedAt, arg.Uuid)
+	row := q.db.QueryRowContext(ctx, changeModuleState,
+		arg.ModuleOrder,
+		arg.State,
+		arg.UpdatedAt,
+		arg.Uuid,
+	)
 	var i Module
 	err := row.Scan(
 		&i.Uuid,
@@ -173,6 +181,7 @@ func (q *Queries) ChangeModuleState(ctx context.Context, arg ChangeModuleStatePa
 		&i.Name,
 		&i.Description,
 		&i.State,
+		&i.ModuleOrder,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -354,19 +363,35 @@ func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) 
 const createModule = `-- name: CreateModule :one
 
 INSERT INTO module (
-    uuid, course_uuid, name, description, created_at, updated_at
-) VALUES (
-    ?, ?, ?, ?, ?, ?
-) RETURNING uuid, course_uuid, name, description, state, created_at, updated_at
+    uuid,
+    course_uuid,
+    name,
+    description,
+    module_order,
+    created_at,
+    updated_at
+)
+SELECT
+    ?,
+    ?,
+    ?,
+    ?,
+    COALESCE(MAX(module_order), 0) + 1,
+    ?,
+    ?
+FROM module
+WHERE module.course_uuid = ?
+RETURNING uuid, course_uuid, name, description, state, module_order, created_at, updated_at
 `
 
 type CreateModuleParams struct {
-	Uuid        string `json:"uuid"`
-	CourseUuid  string `json:"course_uuid"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	CreatedAt   int64  `json:"created_at"`
-	UpdatedAt   int64  `json:"updated_at"`
+	Uuid         string `json:"uuid"`
+	CourseUuid   string `json:"course_uuid"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	CreatedAt    int64  `json:"created_at"`
+	UpdatedAt    int64  `json:"updated_at"`
+	CourseUuid_2 string `json:"course_uuid_2"`
 }
 
 // * Module
@@ -378,6 +403,7 @@ func (q *Queries) CreateModule(ctx context.Context, arg CreateModuleParams) (Mod
 		arg.Description,
 		arg.CreatedAt,
 		arg.UpdatedAt,
+		arg.CourseUuid_2,
 	)
 	var i Module
 	err := row.Scan(
@@ -386,6 +412,7 @@ func (q *Queries) CreateModule(ctx context.Context, arg CreateModuleParams) (Mod
 		&i.Name,
 		&i.Description,
 		&i.State,
+		&i.ModuleOrder,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -768,7 +795,7 @@ func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error
 }
 
 const getModule = `-- name: GetModule :one
-SELECT uuid, course_uuid, name, description, state, created_at, updated_at FROM module WHERE uuid = ? AND course_uuid = ?
+SELECT uuid, course_uuid, name, description, state, module_order, created_at, updated_at FROM module WHERE uuid = ? AND course_uuid = ?
 `
 
 type GetModuleParams struct {
@@ -785,6 +812,7 @@ func (q *Queries) GetModule(ctx context.Context, arg GetModuleParams) (Module, e
 		&i.Name,
 		&i.Description,
 		&i.State,
+		&i.ModuleOrder,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -1328,7 +1356,7 @@ func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid strin
 }
 
 const listAllModules = `-- name: ListAllModules :many
-SELECT uuid, course_uuid, name, description, state, created_at, updated_at FROM module WHERE course_uuid = ?
+SELECT uuid, course_uuid, name, description, state, module_order, created_at, updated_at FROM module WHERE course_uuid = ?
 `
 
 func (q *Queries) ListAllModules(ctx context.Context, courseUuid string) ([]Module, error) {
@@ -1346,6 +1374,7 @@ func (q *Queries) ListAllModules(ctx context.Context, courseUuid string) ([]Modu
 			&i.Name,
 			&i.Description,
 			&i.State,
+			&i.ModuleOrder,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -1667,7 +1696,7 @@ SET
     state = ?
 WHERE
     uuid = ? and course_uuid = ?
-RETURNING uuid, course_uuid, name, description, state, created_at, updated_at
+RETURNING uuid, course_uuid, name, description, state, module_order, created_at, updated_at
 `
 
 type UpdateModuleParams struct {
@@ -1693,6 +1722,7 @@ func (q *Queries) UpdateModule(ctx context.Context, arg UpdateModuleParams) (Mod
 		&i.Name,
 		&i.Description,
 		&i.State,
+		&i.ModuleOrder,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

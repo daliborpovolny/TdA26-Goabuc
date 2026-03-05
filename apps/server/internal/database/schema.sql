@@ -50,6 +50,8 @@ CREATE TABLE IF NOT EXISTS module (
     description TEXT NOT NULL,
     state TEXT NOT NULL DEFAULT 'open',  -- preparation | open | closed
     
+    module_order INTEGER NOT NULL,
+
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
 

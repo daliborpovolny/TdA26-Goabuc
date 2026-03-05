@@ -83,6 +83,7 @@ type Module struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	State       string `json:"state"`
+	ModuleOrder int64  `json:"module_order"`
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
 }
