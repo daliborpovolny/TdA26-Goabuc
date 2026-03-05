@@ -92,7 +92,6 @@
 			<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
 				{#each accessibleCourses as course (course.uuid)}
 					{@const style = stateStyles[course.state] || stateStyles.closed}
-
 					<div in:fly={{ y: 20, duration: 400 }}>
 						<svelte:element
 							this={style.clickable ? 'a' : 'div'}
@@ -131,7 +130,9 @@
 											Enter Course
 											<span class="transition-transform group-hover:translate-x-2">→</span>
 										{:else}
-											Access Locked
+											{course.state == 'closed'
+												? 'Access Locked Temporairly'
+												: 'Under Construction'}
 										{/if}
 									</div>
 								</div>
