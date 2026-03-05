@@ -8,7 +8,9 @@
 		type = 'button',
 		disabled = false,
 		isSaving = false,
-		class: className = ''
+		class: className = '',
+		target,
+		download
 	}: {
 		children: Snippet;
 		onclick?: (e: MouseEvent | KeyboardEvent) => void;
@@ -17,6 +19,8 @@
 		disabled?: boolean;
 		isSaving?: boolean;
 		class?: string;
+		target?: string;
+		download?: string;
 	} = $props();
 
 	function handleKeyDown(e: KeyboardEvent) {
@@ -49,6 +53,8 @@
 	this={href ? 'a' : 'button'}
 	{href}
 	{type}
+	{target}
+	{download}
 	{onclick}
 	onkeydown={handleKeyDown}
 	{disabled}

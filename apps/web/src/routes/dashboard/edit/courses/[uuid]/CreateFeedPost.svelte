@@ -37,16 +37,16 @@
 
 <div class="mb-6">
 	<div class="flex items-center gap-4">
-		<UniButton 
-			type="button" 
+		<UniButton
+			type="button"
 			more_style="flex items-center gap-2 tracking-widest {collapsed
 				? 'shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]'
 				: 'translate-x-1 translate-y-1 bg-p-blue text-white shadow-none'}"
 			shadow={collapsed}
 			uppercase
 			text="text-l"
-			bgcolor={collapsed ? undefined : "bg-p-blue"}
-			hv_bgcolor={collapsed ? undefined : ""}
+			bgcolor={collapsed ? undefined : 'bg-p-blue'}
+			hv_bgcolor={collapsed ? undefined : ''}
 			onclick={() => (collapsed = !collapsed)}
 		>
 			<span>📢</span>

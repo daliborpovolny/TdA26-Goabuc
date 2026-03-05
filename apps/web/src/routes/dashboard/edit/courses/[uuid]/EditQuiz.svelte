@@ -286,25 +286,16 @@
 								module?.uuid +
 								'/quizzes/' +
 								quiz.uuid}
-							class="text-xs px-4 py-2"
+							class="px-4 py-2 text-xs"
 						>
 							Results
 						</PrimaryButton>
 
-						<DangerButton
-							type="button"
-							onclick={deleteQuiz}
-							class="text-xs"
-						>
+						<DangerButton type="button" onclick={deleteQuiz} class="text-xs">
 							Delete Quiz
 						</DangerButton>
 					{/if}
-					<SuccessButton
-						type="submit"
-						class="text-xs"
-					>
-						Submit
-					</SuccessButton>
+					<SuccessButton type="submit" class="text-xs">Submit</SuccessButton>
 				</div>
 			</form>
 		</div>

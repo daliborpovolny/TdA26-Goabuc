@@ -77,7 +77,7 @@
 >
 	<button
 		type="button"
-		class="flex w-full items-center justify-between p-4 text-left hover:bg-p-green/5 cursor-pointer"
+		class="flex w-full cursor-pointer items-center justify-between p-4 text-left hover:bg-p-green/5"
 		onclick={() => (collapsed = !collapsed)}
 	>
 		<div class="flex items-center gap-3">

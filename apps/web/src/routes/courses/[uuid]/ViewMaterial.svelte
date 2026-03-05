@@ -37,7 +37,7 @@
 					<img src={getFavicon(material.url)} alt="site icon" class="h-7 w-7 rounded-sm" />
 				{/if}
 			</span>
-			<span class="text-xl font-black uppercase tracking-tight md:text-2xl">{material.name}</span>
+			<span class="text-xl font-black tracking-tight uppercase md:text-2xl">{material.name}</span>
 		</div>
 
 		<span class="text-xl transition-transform duration-300 {collapsed ? '' : 'rotate-180'}">
@@ -48,7 +48,7 @@
 	{#if !collapsed}
 		<div transition:slide class="space-y-6 border-t-4 border-s-black bg-white p-6">
 			{#if material.description}
-				<p class="text-lg font-bold leading-relaxed text-s-black/80 italic">
+				<p class="text-lg leading-relaxed font-bold text-s-black/80 italic">
 					{material.description}
 				</p>
 			{/if}

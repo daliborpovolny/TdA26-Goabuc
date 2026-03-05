@@ -79,7 +79,12 @@
 										hv_bgcolor=""
 										more_style="text-white hover:bg-p-blue"
 									/>
-									<UniLink href="/courses/{course.uuid}" content="👁️" hv_bgcolor='' more_style="hover:bg-p-blue"/>
+									<UniLink
+										href="/courses/{course.uuid}"
+										content="👁️"
+										hv_bgcolor=""
+										more_style="hover:bg-p-blue"
+									/>
 								</div>
 							</div>
 						</div>
