@@ -4,6 +4,9 @@
 	import { modal } from '$lib/modal.svelte';
 	import UniButton from '../../../../UniButton.svelte';
 
+	import DangerButton from '$lib/components/DangerButton.svelte';
+	import SuccessButton from '$lib/components/SuccessButton.svelte';
+
 	let {
 		material,
 		courseUuid,
@@ -17,7 +20,6 @@
 	} = $props();
 
 	let collapsed = $state(true);
-	let isSaving = $state(false);
 	let showSuccess = $state(false);
 
 	let module = modules.find((x: Module) => x.uuid === material.moduleId) || {
@@ -25,24 +27,31 @@
 		uuid: 'm uuid'
 	};
 
+	let isDeleting = $state(false)
 	async function remove(e: Event) {
 		e.preventDefault();
+		isDeleting = true;
 
-		const confirmed = await modal.confirm(
-			`Delete materail "${material.name}"? This action cannot be undone.`
-		);
-		if (!confirmed) {
-			return;
+		try{
+			const confirmed = await modal.confirm(
+				`Delete materail "${material.name}"? This action cannot be undone.`
+			);
+			if (!confirmed) {
+				return;
+			}
+			await fetch(`/api/courses/${courseUuid}/modules/${module.uuid}/materials/${material.uuid}`, {
+				method: 'DELETE'
+			});
+		} finally {
+			isDeleting = false
 		}
-		await fetch(`/api/courses/${courseUuid}/modules/${module.uuid}/materials/${material.uuid}`, {
-			method: 'DELETE'
-		});
 		onchange();
 	}
 
+	let isUpdating = $state(false);
 	async function handleUpdate(e: Event, type: 'file' | 'url') {
 		e.preventDefault();
-		isSaving = true;
+		isUpdating = true;
 
 		const form = e.target as HTMLFormElement;
 		const formData = new FormData(form);
@@ -67,7 +76,7 @@
 				setTimeout(() => (showSuccess = false), 2000);
 			}
 		} finally {
-			isSaving = false;
+			isUpdating = false;
 		}
 	}
 </script>
@@ -178,23 +187,55 @@
 						{/if}
 					</div>
 
-					<div class="gap-3 max-md:space-y-3 md:flex">
-						<UniButton
+				<div
+					class="border-t-2 border-gray-200 pt-4 max-md:space-y-5 md:flex md:items-center md:justify-between"
+				>						<!-- <button
 							type="button"
 							onclick={remove}
-							disabled={isSaving}
-							content={isSaving ? 'Deleting...' : 'Delete'}
+							class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
+						>
+							Delete
+						</button> -->
+
+						<!-- <UniButton
+							type="button"
+							onclick={remove}
+							disabled={isUpdating}
+							content={isUpdating ? 'Deleting...' : 'Delete'}
 							bgcolor="bg-red-400"
 							hv_bgcolor="bg-red-500"
-						/>
+						/> -->
 
-						<UniButton
+						<SuccessButton
+							type="submit"
+							isSaving={isUpdating}
+						>
+						Save Changes
+
+						</SuccessButton>
+
+						<DangerButton
+						isSaving={isDeleting}
+						onclick={remove}>
+						Delete
+						</DangerButton>
+
+
+						<!-- <button
+							type="submit"
+							disabled={isSaving}
+							class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-6 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50"
+						>
+							{isSaving ? 'Saving...' : 'Save Changes'}
+						</button> -->
+
+						<!-- <UniButton
 							type="submit"
 							disabled={isSaving}
 							content={isSaving ? 'Saving...' : 'Save Changes'}
 							bgcolor="bg-p-green"
 							hv_bgcolor="bg-green-400"
-						/>
+						/> -->
 					</div>
 				</div>
 			</form>
