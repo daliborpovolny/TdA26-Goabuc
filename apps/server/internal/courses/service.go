@@ -21,6 +21,7 @@ var ALLOWED_COURSE_STATES []string = []string{
 	"preparation",
 	"open",
 	"closed",
+	"waiting",
 }
 
 var ALLOWED_MODULE_STATES []string = []string{
@@ -286,13 +287,45 @@ func (s *Service) ListAllCourses(ctx context.Context) ([]db.Course, error) {
 	return courses, nil
 }
 
-func (s *Service) ChangeCourseState(courseId string, state string, ctx context.Context) (db.Course, error) {
+func (s *Service) ChangeCourseState(courseId string, state string, openTime *string, ctx context.Context) (db.Course, error) {
+
+	now := time.Now().Unix()
+
+	if openTime != nil {
+		// course, err := s.q.ChangeCourseState(ctx, db.ChangeCourseStateParams{
+		// 	State:     "waiting",
+		// 	Uuid:      courseId,
+		// 	UpdatedAt: now,
+		// })
+		// if err != nil {
+		// 	return db.Course{}, err
+		// }
+
+		fmt.Println("doing timded cahnge")
+
+		// RFC3339 is the Go equivalent of ISO 8601
+		openingTime, err := time.Parse(time.RFC3339, *openTime)
+		if err != nil {
+			return db.Course{}, err
+		}
+
+		time.AfterFunc(time.Until(openingTime), func() {
+			_, err = s.q.ChangeCourseState(ctx, db.ChangeCourseStateParams{
+				State:     state,
+				UpdatedAt: time.Now().Unix(),
+				Uuid:      courseId,
+			})
+			if err != nil {
+				fmt.Println("failed to update course", courseId, "at the given time")
+			}
+		})
+
+		return db.Course{}, err
+	}
 
 	if !slices.Contains(ALLOWED_COURSE_STATES, state) {
 		return db.Course{}, ErrBadCourseState
 	}
-
-	now := time.Now().Unix()
 
 	course, err := s.q.ChangeCourseState(ctx, db.ChangeCourseStateParams{
 		State:     state,
