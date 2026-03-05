@@ -37,12 +37,20 @@
 		let formData = new FormData(e.target as HTMLFormElement);
 		let formEntries = Object.fromEntries(formData);
 
-		// Include the current state AND the scheduled time
-		let formJson = JSON.stringify({
+		let formJson
+		if (isScheduled) {
+
+			formJson = JSON.stringify({
 			...formEntries,
 			state: currentState,
-			execute_at: getISOTime() // This maps to your Go struct
-		});
+			openTime: getISOTime() // This maps to your Go struct
+		})
+		} else {
+			formJson = JSON.stringify({
+			...formEntries,
+			state: currentState,
+		})	
+		}
 
 		try {
 			const res = await fetch(`/api/courses/${course.uuid}`, {
@@ -80,6 +88,24 @@
 			isDeleting = false;
 		}
 	}
+
+
+	import StateController from '$lib/components/StateController.svelte';
+    
+    async function updateCourseStatus(newState: Course["state"], date?: string) {
+
+		let body = {state: newState, openTime: date}
+
+		await fetch(`/api/courses/${course.uuid}/state`, {
+			method: 'PUT',
+			body: JSON.stringify(body),
+
+			headers: { 'Content-type': 'application/json' },
+		})
+    
+		onchange()
+	}
+
 </script>
 
 <div class="space-y-6">
@@ -98,6 +124,14 @@
 	<div
 		class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] md:p-8"
 	>
+	<StateController 
+		bind:currentState={course.state} 
+		onchange={updateCourseStatus} 
+		enableTimer={true} 
+	/>
+
+	<br>
+
 		<form onsubmit={updateCourse} class="space-y-6">
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
 				<div class="space-y-2 md:col-span-2">
@@ -114,7 +148,7 @@
 					/>
 				</div>
 
-				<div class="relative space-y-2 md:col-span-1">
+				<!-- <div class="relative space-y-2 md:col-span-1">
 					<label class="block text-lg font-black tracking-wide text-s-black uppercase"
 						>Course State</label
 					>
@@ -189,7 +223,7 @@
 							</div>
 						{/if}
 					</div>
-				</div>
+				</div> -->
 			</div>
 
 			<div class="space-y-2">
@@ -223,7 +257,6 @@
 					bgcolor="bg-red-400"
 					hv_bgcolor="bg-red-500"
 				/> -->
-
 				<SuccessButton isSaving={isUpdating} type="submit">Save Changes</SuccessButton>
 
 				<DangerButton isSaving={isUpdating} onclick={deleteCourse}>Delete Course</DangerButton>
@@ -232,11 +265,11 @@
 	</div>
 </div>
 
-{#if showStateDropdown}
+<!-- {#if showStateDropdown}
 	<button
 		title="show dropdown"
 		tabindex="-1"
 		class="fixed inset-0 z-40 h-full w-full cursor-default bg-transparent outline-none"
 		onclick={() => (showStateDropdown = false)}
 	></button>
-{/if}
+{/if} -->
