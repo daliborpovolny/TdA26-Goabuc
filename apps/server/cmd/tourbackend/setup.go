@@ -156,7 +156,8 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		fmt.Println("assign quiz to course 1 module 1 failed")
 	}
 
-	_, err = cs.ChangeCourseState(course1.Uuid, "open", nil, ctx)
+	msg := "Focus on this module"
+	_, err = cs.ChangeCourseState(course1.Uuid, "open", nil, &module.Uuid, &msg, ctx)
 	if err != nil {
 		fmt.Println("failed to change course 1 state")
 	}

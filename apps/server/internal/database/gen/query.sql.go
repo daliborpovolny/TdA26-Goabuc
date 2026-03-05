@@ -84,19 +84,29 @@ func (q *Queries) AssignQuizToModule(ctx context.Context, arg AssignQuizToModule
 const changeCourseState = `-- name: ChangeCourseState :one
 UPDATE course
 SET
-    state = ?,
-    updated_at = ?
-WHERE uuid = ? RETURNING uuid, name, description, created_at, updated_at, archived, state
+    state = ?1,
+    updated_at = ?2,
+    highlighted_module_message = ?3,
+    highlighted_module_uuid = ?4
+WHERE uuid = ?5 RETURNING uuid, name, description, created_at, updated_at, highlighted_module_uuid, highlighted_module_message, archived, state
 `
 
 type ChangeCourseStateParams struct {
-	State     string `json:"state"`
-	UpdatedAt int64  `json:"updated_at"`
-	Uuid      string `json:"uuid"`
+	State         string         `json:"state"`
+	UpdatedAt     int64          `json:"updated_at"`
+	ModuleMessage sql.NullString `json:"module_message"`
+	ModuleUuid    sql.NullString `json:"module_uuid"`
+	Uuid          string         `json:"uuid"`
 }
 
 func (q *Queries) ChangeCourseState(ctx context.Context, arg ChangeCourseStateParams) (Course, error) {
-	row := q.db.QueryRowContext(ctx, changeCourseState, arg.State, arg.UpdatedAt, arg.Uuid)
+	row := q.db.QueryRowContext(ctx, changeCourseState,
+		arg.State,
+		arg.UpdatedAt,
+		arg.ModuleMessage,
+		arg.ModuleUuid,
+		arg.Uuid,
+	)
 	var i Course
 	err := row.Scan(
 		&i.Uuid,
@@ -104,6 +114,8 @@ func (q *Queries) ChangeCourseState(ctx context.Context, arg ChangeCourseStatePa
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.HighlightedModuleUuid,
+		&i.HighlightedModuleMessage,
 		&i.Archived,
 		&i.State,
 	)
@@ -236,7 +248,7 @@ INSERT INTO course (
     uuid, name, description, created_at, updated_at
 ) VALUES (
     ?, ?, ?, ?, ?
-) RETURNING uuid, name, description, created_at, updated_at, archived, state
+) RETURNING uuid, name, description, created_at, updated_at, highlighted_module_uuid, highlighted_module_message, archived, state
 `
 
 type CreateCourseParams struct {
@@ -263,6 +275,8 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.HighlightedModuleUuid,
+		&i.HighlightedModuleMessage,
 		&i.Archived,
 		&i.State,
 	)
@@ -735,7 +749,7 @@ func (q *Queries) GetAnswersOfQuiz(ctx context.Context, quizUuid string) ([]GetA
 }
 
 const getCourse = `-- name: GetCourse :one
-SELECT uuid, name, description, created_at, updated_at, archived, state FROM course WHERE course.uuid == ?
+SELECT uuid, name, description, created_at, updated_at, highlighted_module_uuid, highlighted_module_message, archived, state FROM course WHERE course.uuid == ?
 `
 
 func (q *Queries) GetCourse(ctx context.Context, uuid string) (Course, error) {
@@ -747,6 +761,8 @@ func (q *Queries) GetCourse(ctx context.Context, uuid string) (Course, error) {
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.HighlightedModuleUuid,
+		&i.HighlightedModuleMessage,
 		&i.Archived,
 		&i.State,
 	)
@@ -1256,7 +1272,7 @@ func (q *Queries) InvalidateSession(ctx context.Context, token string) error {
 }
 
 const listAllCourses = `-- name: ListAllCourses :many
-SELECT uuid, name, description, created_at, updated_at, archived, state FROM course
+SELECT uuid, name, description, created_at, updated_at, highlighted_module_uuid, highlighted_module_message, archived, state FROM course
 `
 
 func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
@@ -1274,6 +1290,8 @@ func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
 			&i.Description,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.HighlightedModuleUuid,
+			&i.HighlightedModuleMessage,
 			&i.Archived,
 			&i.State,
 		); err != nil {
@@ -1535,7 +1553,7 @@ SET
     name = ?,
     description = ?,
     updated_at = ?
-WHERE course.uuid = ? RETURNING uuid, name, description, created_at, updated_at, archived, state
+WHERE course.uuid = ? RETURNING uuid, name, description, created_at, updated_at, highlighted_module_uuid, highlighted_module_message, archived, state
 `
 
 type UpdateCourseParams struct {
@@ -1561,6 +1579,8 @@ func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) (Cou
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.HighlightedModuleUuid,
+		&i.HighlightedModuleMessage,
 		&i.Archived,
 		&i.State,
 	)
