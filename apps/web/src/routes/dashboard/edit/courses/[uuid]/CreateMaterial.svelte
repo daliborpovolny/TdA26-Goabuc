@@ -54,9 +54,11 @@
 
 <div class="space-y-4">
 	<div class="flex flex-wrap gap-4">
-		<UniButton 
+		<UniButton
 			onclick={() => (materialType = materialType === 'file' ? '' : 'file')}
-			more_style={materialType === 'file' ? 'translate-x-1 translate-y-1 text-white shadow-none tracking-widest gap-2' : 'tracking-widest gap-2'}
+			more_style={materialType === 'file'
+				? 'translate-x-1 translate-y-1 text-white shadow-none tracking-widest gap-2'
+				: 'tracking-widest gap-2'}
 			bgcolor={materialType === 'file' ? 'bg-p-blue' : undefined}
 			hv_bgcolor={materialType === 'file' ? '' : undefined}
 			uppercase
@@ -67,7 +69,9 @@
 
 		<UniButton
 			onclick={() => (materialType = materialType === 'url' ? '' : 'url')}
-			more_style={materialType === 'url' ? 'translate-x-1 translate-y-1 text-white shadow-none tracking-widest gap-2' : 'tracking-widest gap-2'}
+			more_style={materialType === 'url'
+				? 'translate-x-1 translate-y-1 text-white shadow-none tracking-widest gap-2'
+				: 'tracking-widest gap-2'}
 			bgcolor={materialType === 'url' ? 'bg-p-blue' : undefined}
 			hv_bgcolor={materialType === 'file' ? '' : undefined}
 			uppercase

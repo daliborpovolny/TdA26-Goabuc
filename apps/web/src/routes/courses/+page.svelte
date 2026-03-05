@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { auth } from '$lib/auth.svelte';
 	import type { Course } from '$lib/types';
 	import { fade, fly } from 'svelte/transition';
 
@@ -6,7 +7,6 @@
 	let allCourses = $state<Course[]>([]);
 	let loading = $state(true);
 
-	// Initial load
 	const coursesPromise = loadCourses().then((data) => {
 		allCourses = data;
 		loading = false;
@@ -19,9 +19,14 @@
 		return res.json();
 	}
 
-	// Derived state for filtering
+	let accessibleCourses = $derived(
+		allCourses.filter((course) => course.state === 'open' || auth.user?.isAdmin)
+	);
+
 	let filteredCourses = $derived(
-		allCourses.filter((course) => course.name.toLowerCase().includes(searchTerm.toLowerCase()))
+		accessibleCourses.filter((course) =>
+			course.name.toLowerCase().includes(searchTerm.toLowerCase())
+		)
 	);
 
 	const stateStyles = {
@@ -85,7 +90,7 @@
 			</div>
 		{:then _}
 			<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-				{#each filteredCourses as course (course.uuid)}
+				{#each accessibleCourses as course (course.uuid)}
 					{@const style = stateStyles[course.state] || stateStyles.closed}
 
 					<div in:fly={{ y: 20, duration: 400 }}>
