@@ -17,7 +17,8 @@
 		py = 'py-4',
 		shadow = true,
 		border = true,
-		translate = true
+		translate = true,
+		text_color = 'text-s-black'
 	}: {
 		content?: string;
 		onclick?: (() => void) | ((e: Event) => Promise<void>);
@@ -34,6 +35,7 @@
 		shadow?: boolean;
 		border?: boolean;
 		translate?: boolean;
+		text_color?: string;
 	} = $props();
 </script>
 
@@ -43,7 +45,7 @@
 	{disabled}
 	class="cursor-pointer {border
 		? 'rounded-xl border-4 border-s-black'
-		: ''} {bgcolor} {px} {py} {text} font-black text-s-black {uppercase ? 'uppercase' : ''} {shadow
+		: ''} {bgcolor} {px} {py} {text} font-black {text_color} {uppercase ? 'uppercase' : ''} {shadow
 		? 'shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]'
 		: ''} transition-all hover:{hv_bgcolor} {translate
 		? 'active:translate-x-1 active:translate-y-1'

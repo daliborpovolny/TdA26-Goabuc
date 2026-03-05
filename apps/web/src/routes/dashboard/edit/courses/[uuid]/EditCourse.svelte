@@ -184,14 +184,6 @@
 			</div>
 
 			<div class="flex flex-wrap gap-4 pt-4">
-				<!-- <button
-					type="submit"
-					disabled={isSaving}
-					class="group relative flex-1 cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-p-blue px-8 py-3 text-xl font-black tracking-widest text-white uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
-				>
-					{isSaving ? 'Syncing...' : 'Save Settings'}
-				</button> -->
-
 				<UniButton
 					type="submit"
 					disabled={isSaving}
@@ -207,23 +199,14 @@
 					class="group relative cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-yellow-400 px-8 py-3 text-xl font-black tracking-widest text-white uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
 				>
 					{isSaving ? 'Archiving...' : 'Archive'}
-				</button>
-
-				<button
-					type="button"
-					onclick={deleteCourse}
-					disabled={isSaving}
-					class="group relative cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-red-400 px-8 py-3 text-xl font-black tracking-widest text-white uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
-				>
-					{isSaving ? 'Deleting...' : 'Delete'}
-				</button> -->
+				</button>-->
 
 				<UniButton
 					type="button"
 					onclick={deleteCourse}
 					disabled={isSaving}
 					content={isSaving ? 'Deleting...' : 'Delete'}
-					bgcolor="bg-red-300"
+					bgcolor="bg-red-400"
 					hv_bgcolor="bg-red-500"
 				/>
 			</div>

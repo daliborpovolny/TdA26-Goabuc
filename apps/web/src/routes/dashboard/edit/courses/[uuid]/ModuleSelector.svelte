@@ -31,16 +31,6 @@
 <div class="relative w-full max-w-xs">
 	<span class="mb-1 block text-xs font-black tracking-widest text-gray-500 uppercase">{label}</span>
 
-	<!-- <button
-		type="button"
-		onclick={() => (isOpen = !isOpen)}
-		class="relative flex w-full items-center justify-between rounded-xl border-4 border-s-black bg-white p-3 font-bold transition-all hover:bg-gray-50 active:translate-y-1 active:shadow-none"
-		style="box-shadow: {isOpen ? 'none' : '4px 4px 0px 0px rgba(26,26,26,1)'}"
-	>
-		<span class="truncate">{selectedModuleName}</span>
-		<span class="transition-transform duration-200 {isOpen ? 'rotate-180' : ''}">▼</span>
-	</button> -->
-
 	<UniButton
 		type="button"
 		onclick={() => (isOpen = !isOpen)}
@@ -60,15 +50,22 @@
 		>
 			<div class="max-h-60 overflow-y-auto">
 				{#each modules as module}
-					<button
+					<UniButton 
 						type="button"
 						onclick={() => selectModule(module.uuid)}
-						class="w-full border-b-2 border-gray-100 p-3 text-left font-bold transition-colors last:border-0 hover:bg-p-green"
-						class:bg-p-blue={selectedId === module.uuid}
-						class:text-white={selectedId === module.uuid}
+						more_style={"w-full"}
+						px="px-3"
+						py="py-2"
+						bgcolor={selectedId === module.uuid ? 'bg-p-blue' : undefined}
+						text_color={selectedId === module.uuid ? 'text-white' : undefined}
+						uppercase
+						text="text-l"
+						border={false}
+						shadow={false}
+						translate={false}
 					>
 						{module.name}
-					</button>
+					</UniButton>
 				{:else}
 					<p class="p-3 text-sm italic text-gray-400">No modules available</p>
 				{/each}
