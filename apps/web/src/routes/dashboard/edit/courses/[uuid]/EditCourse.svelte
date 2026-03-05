@@ -14,6 +14,7 @@
 
 	let showSuccess = $state(false);
 	let showStateDropdown = $state(false);
+	// svelte-ignore state_referenced_locally
 	let currentState = $state(course.state);
 
 	let isScheduled = $state(false);

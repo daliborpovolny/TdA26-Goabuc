@@ -22,6 +22,7 @@
 	let collapsed = $state(true);
 	let showSuccess = $state(false);
 
+	// svelte-ignore state_referenced_locally
 	let module = modules.find((x: Module) => x.uuid === material.moduleId) || {
 		name: 'm name',
 		uuid: 'm uuid'

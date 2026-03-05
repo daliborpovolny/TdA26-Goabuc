@@ -214,7 +214,7 @@
 
 					<SuccessButton isSaving={isUpdating} type="submit">Save Changes</SuccessButton>
 
-					<DangerButton isSaving={isUpdating} onclick={deleteModule}>Delete Module</DangerButton>
+					<DangerButton isSaving={isDeleting} onclick={deleteModule}>Delete Module</DangerButton>
 				</div>
 			</form>
 		</div>
