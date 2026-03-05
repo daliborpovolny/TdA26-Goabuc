@@ -139,7 +139,7 @@
 				<div
 					class="w-full space-y-8 lg:w-2/3 {activeTab === 'modules' ? 'block' : 'hidden lg:block'}"
 				>
-					{#if highlightedModule && course?.highlightedModuleMessage}
+					{#if highlightedModule}
 						<section in:fade class="relative mb-12">
 							<div
 								class="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-s-black"
@@ -158,7 +158,7 @@
 								</div>
 
 								<div class="rounded-xl border-2 border-white/20 bg-s-black/20 p-4 font-bold italic">
-									"{course.highlightedModuleMessage}"
+									"{course.highlightedModuleMessage || 'Focus on this module.'}"
 								</div>
 							</div>
 						</section>
@@ -191,38 +191,60 @@
 
 						{#if regularModules.length > 0}
 							<div class="space-y-12">
-								{#each regularModules as module, i}
-									{#if module.state == 'open'}
-										<section class="relative">
-											<div
-												class="absolute -top-3 -left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border-4 border-s-black bg-p-green font-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-											>
-												{i + 1}
-											</div>
+								{#if regularModules.length > 0}
+									<div class="space-y-12">
+										{#each regularModules as module, i}
+											{#if module.state == 'open'}
+												{@const isHighlighted = module.uuid === course?.highlightedModuleId}
 
-											<div
-												class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]"
-											>
-												<div class="mb-6 border-b-2 border-gray-100 pb-4">
-													<h3 class="text-2xl font-black tracking-tight uppercase">
-														{module.name}
-													</h3>
-													<p class="font-bold text-gray-500 italic">{module.description}</p>
-												</div>
+												<section class="relative">
+													<div
+														class="absolute -top-3 -left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border-4 border-s-black {isHighlighted
+															? 'bg-p-blue text-white'
+															: 'bg-p-green text-s-black'} font-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+													>
+														{isHighlighted ? '⭐' : i + 1}
+													</div>
 
-												<div class="space-y-3">
-													{#each module.items as item}
-														{#if isQuiz(item)}
-															<TakeQuiz quiz={item} courseId={course.uuid} />
-														{:else if isMaterial(item)}
-															<ViewMaterial material={item} />
-														{/if}
-													{/each}
-												</div>
-											</div>
-										</section>
-									{/if}
-								{/each}
+													<div
+														class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] {isHighlighted
+															? 'ring-4 ring-p-blue/30'
+															: ''}"
+													>
+														<div
+															class="mb-6 flex items-start justify-between border-b-2 border-gray-100 pb-4"
+														>
+															<div>
+																<h3 class="text-2xl font-black tracking-tight uppercase">
+																	{module.name}
+																</h3>
+																<p class="font-bold text-gray-500 italic">{module.description}</p>
+															</div>
+
+															{#if isHighlighted}
+																<span
+																	class="rounded-lg border-2 border-s-black bg-p-blue px-3 py-1 text-[10px] font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+																>
+																	Featured
+																</span>
+															{/if}
+														</div>
+
+														<div class="space-y-3">
+															{#each module.items as item}
+																{#if isQuiz(item)}
+																	<TakeQuiz quiz={item} courseId={course.uuid} />
+																{:else if isMaterial(item)}
+																	<ViewMaterial material={item} />
+																{/if}
+															{/each}
+														</div>
+													</div>
+												</section>
+											{/if}
+										{/each}
+									</div>
+								{/if}
 							</div>
 						{:else if !unassignedModule || unassignedModule.items.length === 0}
 							<div
