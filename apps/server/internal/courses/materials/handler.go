@@ -260,6 +260,18 @@ func (h *Handler) DeleteMaterial(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+func (h *Handler) IncrementMaterialAccessedCounter(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	materialId := c.Param("materialId")
+
+	err := h.service.IncrementMaterialAccessedCounter(materialId, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+	return r.JSONMsg(http.StatusCreated, "incremented accessed count")
+}
+
 func (h *Handler) ChangeMaterialInModuleOrder(c echo.Context) error {
 	r := h.NewReqCtx(c)
 

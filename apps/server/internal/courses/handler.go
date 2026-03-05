@@ -175,6 +175,18 @@ func (h *CourseHandler) DeleteCourse(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+func (h *CourseHandler) ArchiveCourse(c echo.Context) error {
+	r := h.NewReqCtx(c)
+
+	courseId := c.Param("courseId")
+
+	err := h.service.ArchiveCourse(courseId, r.Ctx)
+	if err != nil {
+		return r.ServerError(err)
+	}
+	return c.NoContent(http.StatusNoContent)
+}
+
 type ListAllCoursesResponse struct {
 	Uuid        string `json:"uuid"`
 	Name        string `json:"name"`

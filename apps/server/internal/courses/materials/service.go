@@ -72,6 +72,8 @@ type FileMaterial struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 
+	TimesAccessed int `json:"timesAccessed"`
+
 	FileUrl   string `json:"fileUrl"`
 	MimeType  string `json:"mimeType"`
 	SizeBytes int    `json:"sizeBytes"`
@@ -101,6 +103,8 @@ type UrlMaterial struct {
 	Type        string `json:"type"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+
+	TimesAccessed int `json:"timesAccessed"`
 
 	Url        string `json:"url"`
 	FaviconUrl string `json:"faviconUrl"`
@@ -195,6 +199,8 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 				Name:        material.Name,
 				Description: material.Description,
 
+				TimesAccessed: int(material.TimesAccessed),
+
 				FileUrl:   material.Url,
 				MimeType:  material.MimeType.String,
 				SizeBytes: int(material.ByteSize.Int64),
@@ -209,6 +215,8 @@ func (s *Service) ListMaterials(courseId string, host string, scheme string, ctx
 				Type:        "url",
 				Name:        material.Name,
 				Description: material.Description,
+
+				TimesAccessed: int(material.TimesAccessed),
 
 				Url:        material.Url,
 				FaviconUrl: material.FaviconUrl.String,
@@ -523,13 +531,14 @@ func (s *Service) UpdateFileMaterial(req *UpdateFileMaterialRequest, fileHeader 
 
 	s.feedsService.CreateAutomaticPost("File material: "+*req.Name+" updated", req.CourseId, ctx)
 	return FileMaterial{
-		Uuid:        dbMat.Uuid,
-		Type:        dbMat.Type,
-		Name:        dbMat.Name,
-		Description: dbMat.Description,
-		FileUrl:     dbMat.Url,
-		MimeType:    dbMat.MimeType.String,
-		SizeBytes:   int(dbMat.ByteSize.Int64),
+		Uuid:          dbMat.Uuid,
+		Type:          dbMat.Type,
+		Name:          dbMat.Name,
+		Description:   dbMat.Description,
+		TimesAccessed: int(dbMat.TimesAccessed),
+		FileUrl:       dbMat.Url,
+		MimeType:      dbMat.MimeType.String,
+		SizeBytes:     int(dbMat.ByteSize.Int64),
 	}, nil
 }
 
@@ -558,12 +567,13 @@ func (s *Service) UpdateUrlMaterial(req *UpdateUrlMaterialRequest, ctx context.C
 
 	s.feedsService.CreateAutomaticPost("Url material: "+*req.Name+" updated", req.CourseId, ctx)
 	return UrlMaterial{
-		Uuid:        dbMat.Uuid,
-		Type:        dbMat.Type,
-		Name:        dbMat.Name,
-		Description: dbMat.Description,
-		Url:         dbMat.Url,
-		FaviconUrl:  dbMat.FaviconUrl.String,
+		Uuid:          dbMat.Uuid,
+		Type:          dbMat.Type,
+		Name:          dbMat.Name,
+		TimesAccessed: int(dbMat.TimesAccessed),
+		Description:   dbMat.Description,
+		Url:           dbMat.Url,
+		FaviconUrl:    dbMat.FaviconUrl.String,
 	}, nil
 }
 
@@ -584,6 +594,10 @@ func (s *Service) DeleteMaterial(materialId string, ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (s *Service) IncrementMaterialAccessedCounter(materialId string, ctx context.Context) error {
+	return s.q.IncrementMaterialAccessedCount(ctx, materialId)
 }
 
 // Material to Module

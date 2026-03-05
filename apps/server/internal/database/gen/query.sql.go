@@ -10,6 +10,17 @@ import (
 	"database/sql"
 )
 
+const archiveCourse = `-- name: ArchiveCourse :exec
+UPDATE course
+SET archived = 1
+WHERE uuid = ?
+`
+
+func (q *Queries) ArchiveCourse(ctx context.Context, uuid string) error {
+	_, err := q.db.ExecContext(ctx, archiveCourse, uuid)
+	return err
+}
+
 const assignHeadingToModule = `-- name: AssignHeadingToModule :one
 
 
@@ -325,7 +336,7 @@ INSERT INTO material (
     uuid, course_uuid, name, description, url, type, favicon_url, byte_size, mime_type, created_at, updated_at
 ) VALUES (
     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-) RETURNING uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
+) RETURNING uuid, course_uuid, name, description, url, type, times_accessed, favicon_url, mime_type, byte_size, created_at, updated_at
 `
 
 type CreateMaterialParams struct {
@@ -365,6 +376,7 @@ func (q *Queries) CreateMaterial(ctx context.Context, arg CreateMaterialParams) 
 		&i.Description,
 		&i.Url,
 		&i.Type,
+		&i.TimesAccessed,
 		&i.FaviconUrl,
 		&i.MimeType,
 		&i.ByteSize,
@@ -788,7 +800,7 @@ func (q *Queries) GetHeading(ctx context.Context, uuid string) (Heading, error) 
 }
 
 const getMaterial = `-- name: GetMaterial :one
-SELECT uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at FROM material WHERE material.uuid = ?
+SELECT uuid, course_uuid, name, description, url, type, times_accessed, favicon_url, mime_type, byte_size, created_at, updated_at FROM material WHERE material.uuid = ?
 `
 
 func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error) {
@@ -801,6 +813,7 @@ func (q *Queries) GetMaterial(ctx context.Context, uuid string) (Material, error
 		&i.Description,
 		&i.Url,
 		&i.Type,
+		&i.TimesAccessed,
 		&i.FaviconUrl,
 		&i.MimeType,
 		&i.ByteSize,
@@ -1193,6 +1206,19 @@ func (q *Queries) GetUserBySessionToken(ctx context.Context, token string) (GetU
 	return i, err
 }
 
+const incrementMaterialAccessedCount = `-- name: IncrementMaterialAccessedCount :exec
+UPDATE material
+SET
+    times_accessed = times_accessed + 1
+WHERE
+    uuid = ?
+`
+
+func (q *Queries) IncrementMaterialAccessedCount(ctx context.Context, uuid string) error {
+	_, err := q.db.ExecContext(ctx, incrementMaterialAccessedCount, uuid)
+	return err
+}
+
 const incrementQuizAttemptsCount = `-- name: IncrementQuizAttemptsCount :exec
 UPDATE quiz
 SET
@@ -1272,7 +1298,7 @@ func (q *Queries) InvalidateSession(ctx context.Context, token string) error {
 }
 
 const listAllCourses = `-- name: ListAllCourses :many
-SELECT uuid, name, description, created_at, updated_at, highlighted_module_uuid, highlighted_module_message, archived, state FROM course
+SELECT uuid, name, description, created_at, updated_at, highlighted_module_uuid, highlighted_module_message, archived, state FROM course WHERE archived = 0
 `
 
 func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
@@ -1310,7 +1336,7 @@ func (q *Queries) ListAllCourses(ctx context.Context) ([]Course, error) {
 
 const listAllMaterialsOfCourse = `-- name: ListAllMaterialsOfCourse :many
 SELECT
-    uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at, module_uuid, material_uuid, "order"
+    uuid, course_uuid, name, description, url, type, times_accessed, favicon_url, mime_type, byte_size, created_at, updated_at, module_uuid, material_uuid, "order"
     -- material_to_module."order"
 FROM material
 JOIN material_to_module ON material_to_module.material_uuid = material.uuid
@@ -1319,20 +1345,21 @@ ORDER BY created_at DESC
 `
 
 type ListAllMaterialsOfCourseRow struct {
-	Uuid         string         `json:"uuid"`
-	CourseUuid   string         `json:"course_uuid"`
-	Name         string         `json:"name"`
-	Description  string         `json:"description"`
-	Url          string         `json:"url"`
-	Type         string         `json:"type"`
-	FaviconUrl   sql.NullString `json:"favicon_url"`
-	MimeType     sql.NullString `json:"mime_type"`
-	ByteSize     sql.NullInt64  `json:"byte_size"`
-	CreatedAt    int64          `json:"created_at"`
-	UpdatedAt    int64          `json:"updated_at"`
-	ModuleUuid   string         `json:"module_uuid"`
-	MaterialUuid string         `json:"material_uuid"`
-	Order        int64          `json:"order"`
+	Uuid          string         `json:"uuid"`
+	CourseUuid    string         `json:"course_uuid"`
+	Name          string         `json:"name"`
+	Description   string         `json:"description"`
+	Url           string         `json:"url"`
+	Type          string         `json:"type"`
+	TimesAccessed int64          `json:"times_accessed"`
+	FaviconUrl    sql.NullString `json:"favicon_url"`
+	MimeType      sql.NullString `json:"mime_type"`
+	ByteSize      sql.NullInt64  `json:"byte_size"`
+	CreatedAt     int64          `json:"created_at"`
+	UpdatedAt     int64          `json:"updated_at"`
+	ModuleUuid    string         `json:"module_uuid"`
+	MaterialUuid  string         `json:"material_uuid"`
+	Order         int64          `json:"order"`
 }
 
 func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid string) ([]ListAllMaterialsOfCourseRow, error) {
@@ -1351,6 +1378,7 @@ func (q *Queries) ListAllMaterialsOfCourse(ctx context.Context, courseUuid strin
 			&i.Description,
 			&i.Url,
 			&i.Type,
+			&i.TimesAccessed,
 			&i.FaviconUrl,
 			&i.MimeType,
 			&i.ByteSize,
@@ -1622,7 +1650,7 @@ SET
     name = ?,
     description = ?,
     url = ?
-WHERE material.uuid = ? RETURNING uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
+WHERE material.uuid = ? RETURNING uuid, course_uuid, name, description, url, type, times_accessed, favicon_url, mime_type, byte_size, created_at, updated_at
 `
 
 type UpdateMaterialParams struct {
@@ -1647,6 +1675,7 @@ func (q *Queries) UpdateMaterial(ctx context.Context, arg UpdateMaterialParams) 
 		&i.Description,
 		&i.Url,
 		&i.Type,
+		&i.TimesAccessed,
 		&i.FaviconUrl,
 		&i.MimeType,
 		&i.ByteSize,
@@ -1666,7 +1695,7 @@ SET
     byte_size   = COALESCE(?5, byte_size),
     mime_type   = COALESCE(?6, mime_type),
     updated_at  = ?7
-WHERE uuid = ?8 RETURNING uuid, course_uuid, name, description, url, type, favicon_url, mime_type, byte_size, created_at, updated_at
+WHERE uuid = ?8 RETURNING uuid, course_uuid, name, description, url, type, times_accessed, favicon_url, mime_type, byte_size, created_at, updated_at
 `
 
 type UpdateMaterialPartialParams struct {
@@ -1699,6 +1728,7 @@ func (q *Queries) UpdateMaterialPartial(ctx context.Context, arg UpdateMaterialP
 		&i.Description,
 		&i.Url,
 		&i.Type,
+		&i.TimesAccessed,
 		&i.FaviconUrl,
 		&i.MimeType,
 		&i.ByteSize,

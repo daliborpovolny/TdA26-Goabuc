@@ -384,6 +384,10 @@ func (s *Service) ChangeCourseState(courseId string, state string, openTime *str
 	return course, err
 }
 
+func (s *Service) ArchiveCourse(courseId string, ctx context.Context) error {
+	return s.q.ArchiveCourse(ctx, courseId)
+}
+
 //* Modules
 
 func (s *Service) CreateModule(courseId string, moduleId string, name string, description string, ctx context.Context) (Module, error) {

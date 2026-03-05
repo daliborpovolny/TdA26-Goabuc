@@ -60,17 +60,18 @@ type HeadingToModule struct {
 }
 
 type Material struct {
-	Uuid        string         `json:"uuid"`
-	CourseUuid  string         `json:"course_uuid"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Url         string         `json:"url"`
-	Type        string         `json:"type"`
-	FaviconUrl  sql.NullString `json:"favicon_url"`
-	MimeType    sql.NullString `json:"mime_type"`
-	ByteSize    sql.NullInt64  `json:"byte_size"`
-	CreatedAt   int64          `json:"created_at"`
-	UpdatedAt   int64          `json:"updated_at"`
+	Uuid          string         `json:"uuid"`
+	CourseUuid    string         `json:"course_uuid"`
+	Name          string         `json:"name"`
+	Description   string         `json:"description"`
+	Url           string         `json:"url"`
+	Type          string         `json:"type"`
+	TimesAccessed int64          `json:"times_accessed"`
+	FaviconUrl    sql.NullString `json:"favicon_url"`
+	MimeType      sql.NullString `json:"mime_type"`
+	ByteSize      sql.NullInt64  `json:"byte_size"`
+	CreatedAt     int64          `json:"created_at"`
+	UpdatedAt     int64          `json:"updated_at"`
 }
 
 type MaterialToModule struct {

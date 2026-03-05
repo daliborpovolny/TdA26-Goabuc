@@ -88,7 +88,25 @@
 		}
 	}
 
+	let isArchiving = $state(false);
+	async function archiveCourse(e: Event) {
+		e.preventDefault();
+
+		isArchiving = true;
+
+		const confirmed = await modal.confirm(`Archive entire course "${course.name}"?`);
+		if (!confirmed) return;
+		isUpdating = true;
+		try {
+			const res = await fetch(`/api/courses/${course.uuid}/archive`, { method: 'POST' });
+			if (res.ok) goto('/dashboard');
+		} finally {
+			isArchiving = false;
+		}
+	}
+
 	import StateController from '$lib/components/StateController.svelte';
+	import WarningButton from '$lib/components/WarningButton.svelte';
 
 	async function updateCourseStatus(newState: Course['state'], date?: string) {
 		let body = { state: newState, openTime: date };
@@ -255,7 +273,9 @@
 				/> -->
 				<SuccessButton isSaving={isUpdating} type="submit">Save Changes</SuccessButton>
 
-				<DangerButton isSaving={isUpdating} onclick={deleteCourse}>Delete Course</DangerButton>
+				<DangerButton isSaving={isDeleting} onclick={deleteCourse}>Delete Course</DangerButton>
+
+				<WarningButton isSaving={isArchiving} onclick={archiveCourse}>Archive Course</WarningButton>
 			</div>
 		</form>
 	</div>

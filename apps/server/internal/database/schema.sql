@@ -119,6 +119,8 @@ CREATE TABLE IF NOT EXISTS material (
     url TEXT NOT NULL,
     type TEXT NOT NULL,
 
+    times_accessed INTEGER NOT NULL DEFAULT 0,
+
     favicon_url TEXT,
 
     mime_type TEXT,

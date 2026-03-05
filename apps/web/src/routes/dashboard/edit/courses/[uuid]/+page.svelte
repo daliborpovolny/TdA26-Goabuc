@@ -188,9 +188,9 @@
 			/>
 		</div>
 	{:else if course}
-		<div class="mx-auto max-w-5xl">
+		<div class="mx-auto w-full max-w-[1600px]">
 			<header
-				class="mb-8 flex flex-col justify-between gap-4 border-b-4 border-s-black pb-6 md:flex-row md:items-end"
+				class="mb-10 flex flex-col justify-between gap-6 border-b-8 border-s-black pb-8 md:flex-row md:items-end"
 			>
 				<div>
 					<a href="/dashboard" class="text-sm font-black text-p-blue uppercase hover:underline"
@@ -203,8 +203,8 @@
 				<UniLink href="/courses/{course.uuid}" content="View 👁️" target="_blank" />
 			</header>
 
-			<div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
-				<nav class="space-y-2 lg:col-span-3">
+			<div class="grid grid-cols-1 gap-10 lg:grid-cols-12">
+				<nav class="sticky top-8 h-fit space-y-3 lg:col-span-3 xl:col-span-2">
 					{#each sections as section}
 						<UniButton
 							onclick={() => (activeSection = section.id)}
@@ -220,9 +220,9 @@
 					{/each}
 				</nav>
 
-				<main class="lg:col-span-9">
+				<main class="lg:col-span-9 xl:col-span-10">
 					<div
-						class="rounded-2xl border-4 border-s-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]"
+						class="rounded-3xl border-4 border-s-black bg-white p-8 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] md:p-12"
 					>
 						{#if activeSection === 'general'}
 							<div in:fade>

@@ -65,7 +65,7 @@ DELETE FROM course WHERE course.uuid = ?;
 SELECT * FROM course WHERE course.uuid == ?;
 
 -- name: ListAllCourses :many
-SELECT * FROM course;
+SELECT * FROM course WHERE archived = 0;
 
 -- name: CheckCourseExists :one
 SELECT EXISTS (SELECT 1 FROM course WHERE uuid = ?) AS course_exists;
@@ -78,6 +78,11 @@ SET
     highlighted_module_message = sqlc.narg(module_message),
     highlighted_module_uuid = sqlc.narg(module_uuid)
 WHERE uuid = sqlc.arg(uuid) RETURNING *;
+
+-- name: ArchiveCourse :exec
+UPDATE course
+SET archived = 1
+WHERE uuid = ?;
 
 
 --* Module
@@ -134,6 +139,13 @@ RETURNING *;
 
 -- name: DeleteModule :exec
 DELETE FROM module WHERE uuid = ? AND course_uuid = ?;
+
+-- name: IncrementMaterialAccessedCount :exec
+UPDATE material
+SET
+    times_accessed = times_accessed + 1
+WHERE
+    uuid = ?;
 
 --* Heading
 

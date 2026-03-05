@@ -104,6 +104,7 @@ func main() {
 
 	e.POST("/courses", coursesHandler.CreateCourse, auth.AdminRequired())
 	e.PUT("/courses/:courseId", coursesHandler.UpdateCourse, auth.AdminRequired())
+	e.POST("/courses/:courseId/archive", coursesHandler.ArchiveCourse, auth.AdminRequired())
 	e.DELETE("/courses/:courseId", coursesHandler.DeleteCourse, auth.AdminRequired())
 
 	e.PUT("/courses/:courseId/state", coursesHandler.ChangeCourseState, auth.AdminRequired())
@@ -128,6 +129,8 @@ func main() {
 	materials.POST("", materialsHandler.CreateMaterial, auth.AdminRequired())
 	materials.PUT("/:materialId", materialsHandler.UpdateMaterial, auth.AdminRequired())
 	materials.DELETE("/:materialId", materialsHandler.DeleteMaterial, auth.AdminRequired())
+
+	materials.POST("/:materialId/increment", materialsHandler.IncrementMaterialAccessedCounter)
 	materials.POST("/:materialId/:order", materialsHandler.ChangeMaterialInModuleOrder, auth.AdminRequired())
 
 	//* Course Quizes
