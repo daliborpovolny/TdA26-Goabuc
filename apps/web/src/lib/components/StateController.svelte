@@ -54,8 +54,8 @@
 					onclick={() => (selectedState = stage)}
 					class="flex flex-col items-center justify-center rounded-xl border-4 border-s-black p-4 transition-all
                     {selectedState === stage
-						? '-translate-y-1 bg-s-black text-white shadow-[4px_4px_0px_0px_rgba(145,245,173,1)] cursor-not-allowed'
-						: 'bg-white text-s-black hover:bg-gray-50 cursor-pointer'}"
+						? '-translate-y-1 bg-s-black text-white shadow-[4px_4px_0px_0px_rgba(145,245,173,1)]'
+						: 'bg-white text-s-black hover:bg-gray-50'}"
 				>
 					<span class="text-2xl">{stageMeta[stage].icon}</span>
 					<span class="mt-1 text-xs font-black tracking-tighter uppercase"

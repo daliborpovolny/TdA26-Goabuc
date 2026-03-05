@@ -34,8 +34,11 @@
         
         /* Neobrutalist Shadow & Movement */
         shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]
-        active:translate-x-1 active:translate-y-1 active:shadow-none
+        hover:translate-x-1 hover:translate-y-1 hover:shadow-none
         hover:bg-s-2 /* Your lighter blue for hover */
+        
+        /* Tactical Click Depth */
+        active:translate-x-1.5 active:translate-y-1.5
         
         /* State Handling */
         disabled:cursor-not-allowed disabled:opacity-50 disabled:translate-x-0 disabled:translate-y-0
