@@ -7,7 +7,8 @@
 		href,
 		type = 'button',
 		disabled = false,
-		class: className = ''
+		class: className = '',
+        target
 	}: {
 		children: Snippet;
 		onclick?: (e: MouseEvent | KeyboardEvent) => void;
@@ -15,6 +16,7 @@
 		type?: 'button' | 'submit';
 		disabled?: boolean;
 		class?: string;
+        target?: string
 	} = $props();
 
 	// Handle Keyboard "Enter" or "Space" for accessibility
@@ -45,6 +47,7 @@
 	this={href ? 'a' : 'button'}
 	{href}
 	{type}
+    {target}
 	{onclick}
 	onkeydown={handleKeyDown}
 	{disabled}

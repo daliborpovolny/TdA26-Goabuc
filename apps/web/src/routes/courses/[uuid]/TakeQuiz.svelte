@@ -145,14 +145,14 @@
 							</p>
 						</div>
 
-						{#if showResultsButton}
+						<!-- {#if showResultsButton}
 							<SecondaryButton
 								href={`/courses/${courseId}/quizzes/${quiz.uuid}/results`}
 								class="border-2 !py-2 !text-sm"
 							>
 								Detailed View →
 							</SecondaryButton>
-						{/if}
+						{/if} -->
 					</div>
 				</div>
 			{/if}

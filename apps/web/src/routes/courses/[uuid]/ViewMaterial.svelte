@@ -1,11 +1,14 @@
 <script lang="ts">
 	import type { Material } from '$lib/types';
+	import { slide } from 'svelte/transition';
+
+	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
+	import SecondaryButton from '$lib/components/SecondaryButton.svelte';
 
 	let { material }: { material: Material } = $props();
 
 	let collapsed = $state(true);
 
-	// Helper to get the favicon from a URL
 	function getFavicon(url: string) {
 		try {
 			const domain = new URL(url).hostname;
@@ -17,7 +20,7 @@
 </script>
 
 <div
-	class="overflow-hidden rounded-xl border-2 border-s-black bg-p-green shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] transition-all"
+	class="overflow-hidden rounded-xl border-4 border-s-black bg-p-green shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] transition-all"
 >
 	<button
 		class="flex w-full cursor-pointer items-center justify-between p-4 text-left transition-colors hover:bg-black/5"
@@ -26,15 +29,15 @@
 	>
 		<div class="flex items-center gap-3">
 			<span
-				class="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-s-black bg-white text-2xl"
+				class="flex h-12 w-12 items-center justify-center rounded-xl border-4 border-s-black bg-white text-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
 			>
 				{#if material.type === 'file'}
 					📁
 				{:else if material.type === 'url'}
-					<img src={getFavicon(material.url)} alt="site icon" class="h-6 w-6 rounded-sm" />
+					<img src={getFavicon(material.url)} alt="site icon" class="h-7 w-7 rounded-sm" />
 				{/if}
 			</span>
-			<span class="text-xl font-bold md:text-2xl">{material.name}</span>
+			<span class="text-xl font-black uppercase tracking-tight md:text-2xl">{material.name}</span>
 		</div>
 
 		<span class="text-xl transition-transform duration-300 {collapsed ? '' : 'rotate-180'}">
@@ -43,37 +46,30 @@
 	</button>
 
 	{#if !collapsed}
-		<div class="space-y-4 border-t-2 border-s-black bg-white p-4">
+		<div transition:slide class="space-y-6 border-t-4 border-s-black bg-white p-6">
 			{#if material.description}
-				<p class="text-lg leading-relaxed text-s-black/80">
+				<p class="text-lg font-bold leading-relaxed text-s-black/80 italic">
 					{material.description}
 				</p>
 			{/if}
 
-			<div class="flex flex-wrap gap-3">
+			<div class="flex flex-wrap gap-4">
 				{#if material.type === 'file'}
-					<a
-						href={material.fileUrl}
-						target="_blank"
-						class="flex items-center gap-2 rounded-lg border-2 border-s-black bg-s-2 px-4 py-2 font-bold text-white transition-all hover:bg-s-1 hover:text-s-black active:translate-y-1"
-					>
+					<SecondaryButton href={material.fileUrl} target="_blank" class="!text-sm md:!text-base">
 						<span>👁️</span> View File
-					</a>
-					<a
-						download={material.name}
+					</SecondaryButton>
+
+					<PrimaryButton
 						href={material.fileUrl}
-						class="flex items-center gap-2 rounded-lg border-2 border-s-black bg-p-blue px-4 py-2 font-bold text-white transition-all hover:opacity-90 active:translate-y-1"
+						download={material.name}
+						class="!text-sm md:!text-base"
 					>
 						<span>📥</span> Download
-					</a>
+					</PrimaryButton>
 				{:else if material.type === 'url'}
-					<a
-						target="_blank"
-						href={material.url}
-						class="flex items-center gap-2 rounded-lg border-2 border-s-black bg-s-2 px-4 py-2 font-bold text-white transition-all hover:bg-s-1 hover:text-s-black active:translate-y-1"
-					>
+					<PrimaryButton href={material.url} target="_blank" class="!text-sm md:!text-base">
 						<span>🌐</span> Open Link
-					</a>
+					</PrimaryButton>
 				{/if}
 			</div>
 		</div>
