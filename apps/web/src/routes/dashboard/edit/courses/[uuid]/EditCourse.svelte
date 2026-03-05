@@ -134,7 +134,7 @@
 											? 'bg-p-blue'
 											: 'bg-red-500'}"
 								></span>
-								{currentState}
+								{currentState == 'closed' ? 'paused' : currentState}
 							</span>
 							<span class="w-full text-right">{showStateDropdown ? '▲' : '▼'}</span>
 						</UniButton>
@@ -146,7 +146,7 @@
 							>
 								{#each STAGES as stage}
 									<UniButton
-										content={stage}
+										content={stage == 'closed' ? 'paused' : stage}
 										border={false}
 										shadow={false}
 										more_style="w-full"
