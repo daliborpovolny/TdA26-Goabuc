@@ -6,12 +6,12 @@
 
 	let { post, courseId }: { post: FeedPost; courseId: string } = $props();
 
-	let message = $state(post.message);
-	let initialMessage = $state(post.message);
+	let message = $derived(post.message);
+	let initialMessage = $derived(post.message);
 	let isSaving = $state(false);
 	let showSuccess = $state(false);
 
-	const isManual = post.type === 'manual';
+	const isManual = $derived(post.type === 'manual');
 	const isEdited = $derived(message !== initialMessage);
 
 	async function editFeedPost(e: Event) {
@@ -82,26 +82,10 @@
 
 				<div class="flex items-center gap-2">
 					{#if isEdited}
-						<!-- <button
-							transition:fade
-							disabled={isSaving}
-							class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-3 py-1 text-xs font-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
-						>
-							{isSaving ? '...' : 'Save Edit'}
-						</button> -->
-
 						<SuccessButton type="submit" disabled={isSaving} class="text-xs">
 							{isSaving ? '...' : 'Save Edit'}
 						</SuccessButton>
 					{/if}
-
-					<!-- <button
-						type="button"
-						onclick={deleteFeedPost}
-						class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-3 py-1 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition active:translate-y-0.5 active:shadow-none"
-					>
-						Delete
-					</button> -->
 
 					<DangerButton type="button" onclick={deleteFeedPost} class="text-center text-xs">
 						Delete
@@ -113,9 +97,5 @@
 				{message}
 			</p>
 		{/if}
-
-		<!-- {#if post.createdAt !== post.updatedAt}
-			<p class="text-[9px] font-bold text-gray-300 uppercase">Edited: {post.updatedAt}</p>
-		{/if} -->
 	</form>
 </div>
