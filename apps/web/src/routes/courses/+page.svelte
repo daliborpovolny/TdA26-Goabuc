@@ -40,13 +40,13 @@
 			bg: 'bg-yellow-300',
 			badge: 'bg-s-black text-white',
 			label: 'COMING SOON',
-			clickable: false
+			clickable: auth.user?.isAdmin || false
 		},
 		closed: {
 			bg: 'bg-red-400',
 			badge: 'bg-s-black text-white',
 			label: 'CLOSED',
-			clickable: false
+			clickable: auth.user?.isAdmin || false
 		}
 	};
 </script>

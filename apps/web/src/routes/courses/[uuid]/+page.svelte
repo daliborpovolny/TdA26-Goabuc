@@ -92,9 +92,31 @@
 		<div class="mx-auto flex w-full flex-col gap-8 md:max-w-[90%]">
 			<header class="space-y-4">
 				<div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-					<h1 class="text-5xl font-black tracking-tighter text-s-black uppercase md:text-7xl">
-						{course.name}
-					</h1>
+					<div class="flex flex-wrap items-center gap-4">
+						<h1 class="text-5xl font-black tracking-tighter text-s-black uppercase md:text-7xl">
+							{course.name}
+						</h1>
+
+						{#if auth.user?.isAdmin}
+							<div
+								in:fade
+								class="flex items-center gap-2 rounded-full border-4 border-s-black px-4 py-1 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
+                    {course.state === 'open' ? 'bg-p-green' : ''}
+                    {course.state === 'preparation' ? 'bg-amber-400' : ''}
+                    {course.state === 'closed' ? 'bg-red-500 text-white' : ''}"
+							>
+								<span class="text-xs font-black tracking-widest uppercase">
+									{#if course.state === 'open'}
+										OPENED
+									{:else if course.state === 'preparation'}
+										IN PREPARATION
+									{:else}
+										CLOSED
+									{/if}
+								</span>
+							</div>
+						{/if}
+					</div>
 
 					{#if auth.user?.isAdmin}
 						<div in:fade>
