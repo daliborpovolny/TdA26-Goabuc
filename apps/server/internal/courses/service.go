@@ -370,6 +370,19 @@ func (s *Service) ChangeCourseState(courseId string, state string, openTime *str
 				fmt.Println(err)
 				fmt.Println("failed to update course", courseId, "at the given time")
 			}
+
+			var message string
+			switch state {
+			case "closed":
+				message = "Course is closed now"
+			case "preparation":
+				message = "Course is under construction now"
+			case "open":
+				message = "Course is open now"
+			}
+
+			s.feedsService.CreateAutomaticPost(message, courseId, context.Background())
+
 			// fmt.Println("updated satte after time!")
 		})
 
