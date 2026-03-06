@@ -144,7 +144,7 @@
 	{:else if course}
 		<div class="mx-auto w-full max-w-[1600px]">
 			<header
-				class="mb-8 flex flex-col justify-between gap-6 border-b-8 border-s-black pb-8 md:flex-row md:items-end"
+				class="mb-10 flex flex-col justify-between gap-6 border-b-8 border-s-black pb-8 md:flex-row md:items-end"
 			>
 				<div class="space-y-2">
 					<a href="/dashboard" class="text-xs font-black text-p-blue uppercase hover:underline"
@@ -160,32 +160,39 @@
 			</header>
 
 			<div class="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-10">
-				<nav
-					class="scrollbar-hide sticky top-4 z-40 flex flex-nowrap gap-2 overflow-x-auto bg-s-white/80 pb-4 backdrop-blur-sm lg:static lg:col-span-3 lg:flex-col lg:overflow-visible lg:pb-0 xl:col-span-2"
-				>
-					{#each sections as section}
-						{#if activeSection === section.id}
-							<PrimaryButton
-								class="min-w-fit flex-shrink-0 translate-x-1 translate-y-1 !shadow-none lg:w-full lg:justify-start lg:gap-4"
-							>
-								<span class="text-xl">{section.icon}</span>
-								<span class="hidden text-xs font-black uppercase sm:inline lg:inline"
-									>{section.label}</span
+				<div class="nav-mask lg:col-span-3 xl:col-span-2">
+					<div class="mb-2 flex items-center justify-between px-1 lg:hidden">
+						<span class="text-[10px] font-black tracking-widest text-gray-400 uppercase"
+							>Sections</span
+						>
+						<span class="animate-pulse text-[10px] font-black tracking-widest text-p-blue uppercase"
+							>Swipe for more →</span
+						>
+					</div>
+
+					<nav
+						class="brutal-scroll sticky top-4 z-40 flex flex-nowrap gap-2 overflow-x-auto bg-s-white/80 pb-4 backdrop-blur-sm lg:static lg:flex-col lg:overflow-visible lg:pb-0"
+					>
+						{#each sections as section}
+							{#if activeSection === section.id}
+								<PrimaryButton
+									class="min-w-fit flex-shrink-0 translate-x-1 translate-y-1 !shadow-none lg:w-full lg:justify-start lg:gap-4"
 								>
-							</PrimaryButton>
-						{:else}
-							<SecondaryButton
-								onclick={() => (activeSection = section.id)}
-								class="min-w-fit flex-shrink-0 lg:w-full lg:justify-start lg:gap-4"
-							>
-								<span class="text-xl">{section.icon}</span>
-								<span class="hidden text-xs font-black uppercase sm:inline lg:inline"
-									>{section.label}</span
+									<span class="text-xl">{section.icon}</span>
+									<span class="text-xs font-black uppercase">{section.label}</span>
+								</PrimaryButton>
+							{:else}
+								<SecondaryButton
+									onclick={() => (activeSection = section.id)}
+									class="min-w-fit flex-shrink-0 lg:w-full lg:justify-start lg:gap-4"
 								>
-							</SecondaryButton>
-						{/if}
-					{/each}
-				</nav>
+									<span class="text-xl">{section.icon}</span>
+									<span class="text-xs font-black uppercase">{section.label}</span>
+								</SecondaryButton>
+							{/if}
+						{/each}
+					</nav>
+				</div>
 
 				<main class="lg:col-span-9 xl:col-span-10">
 					<div
@@ -400,11 +407,36 @@
 </div>
 
 <style>
-	.scrollbar-hide::-webkit-scrollbar {
-		display: none;
+	/* Custom Scrollbar - Brutalist Style */
+	.brutal-scroll::-webkit-scrollbar {
+		height: 8px; /* Thick enough to see */
 	}
-	.scrollbar-hide {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
+	.brutal-scroll::-webkit-scrollbar-track {
+		background: #f3f4f6; /* Gray-100 */
+		border-top: 2px solid #1a1a1a; /* Black top border */
+		border-bottom: 2px solid #1a1a1a;
+	}
+	.brutal-scroll::-webkit-scrollbar-thumb {
+		background: #1a1a1a; /* Pure black thumb */
+		border: 1px solid #fff;
+	}
+
+	/* Edge Fade Mask - Shows content is cut off */
+	.nav-mask {
+		position: relative;
+	}
+
+	@media (max-width: 1024px) {
+		.nav-mask::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			right: 0;
+			height: calc(100% - 8px); /* Account for scrollbar height */
+			width: 50px;
+			background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.9));
+			pointer-events: none;
+			z-index: 50;
+		}
 	}
 </style>
