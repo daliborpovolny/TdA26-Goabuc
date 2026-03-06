@@ -90,8 +90,8 @@
 	}
 
 	//* Highlight stuff
-	let highlightedModuleId = $state(course?.highlightedModuleId || '');
-	let highlightedMessage = $state(course?.highlightedModuleMessage || '');
+	let highlightedModuleId = $derived(course?.highlightedModuleId || '');
+	let highlightedMessage = $derived(course?.highlightedModuleMessage || '');
 	let isSavingHighlight = $state(false);
 
 	async function updateHighlight(newUuid?: string) {
@@ -152,7 +152,7 @@
 						Editor: <span class="text-p-blue">{course.name}</span>
 					</h1>
 				</div>
-				<SecondaryButton href="/courses/{course.uuid}" target="_blank" class="!py-2">
+				<SecondaryButton href="/courses/{course.uuid}" target="_blank" class="py-2!">
 					View Live 👁️
 				</SecondaryButton>
 			</header>
@@ -174,7 +174,7 @@
 						{#each sections as section}
 							{#if activeSection === section.id}
 								<PrimaryButton
-									class="min-w-fit flex-shrink-0 translate-x-1 translate-y-1 !shadow-none lg:w-full lg:justify-start lg:gap-4"
+									class="min-w-fit shrink-0 translate-x-1 translate-y-1 shadow-none! lg:w-full lg:justify-start lg:gap-4"
 								>
 									<span class="text-xl">{section.icon}</span>
 									<span class="text-xs font-black uppercase">{section.label}</span>
@@ -182,7 +182,7 @@
 							{:else}
 								<SecondaryButton
 									onclick={() => (activeSection = section.id)}
-									class="min-w-fit flex-shrink-0 lg:w-full lg:justify-start lg:gap-4"
+									class="min-w-fit shrink-0 lg:w-full lg:justify-start lg:gap-4"
 								>
 									<span class="text-xl">{section.icon}</span>
 									<span class="text-xs font-black uppercase">{section.label}</span>
@@ -245,7 +245,7 @@
 													<SuccessButton
 														onclick={() => updateHighlight()}
 														isSaving={isSavingHighlight}
-														class="!py-3">Update Highlight</SuccessButton
+														class="py-3!">Update Highlight</SuccessButton
 													>
 												</div>
 											</div>
@@ -263,19 +263,19 @@
 												<SuccessButton
 													onclick={saveModuleOrder}
 													isSaving={isSavingOrder}
-													class="!py-2 !text-xs">Save Order</SuccessButton
+													class="py-2! text-xs!">Save Order</SuccessButton
 												>
 											{/if}
 
 											{#if showCreateModule}
 												<WarningButton
 													onclick={() => (showCreateModule = false)}
-													class="!py-2 !text-xs">Cancel</WarningButton
+													class="py-2! text-xs!">Cancel</WarningButton
 												>
 											{:else}
 												<PrimaryButton
 													onclick={() => (showCreateModule = true)}
-													class="!py-2 !text-xs">+ New Module</PrimaryButton
+													class="py-2! text-xs!">+ New Module</PrimaryButton
 												>
 											{/if}
 										</div>
@@ -356,11 +356,11 @@
 								<div class="flex items-center justify-between">
 									<h2 class="text-3xl font-black uppercase">Exams</h2>
 									{#if showCreateQuiz}
-										<WarningButton onclick={() => (showCreateQuiz = false)} class="!py-2"
+										<WarningButton onclick={() => (showCreateQuiz = false)} class="py-2!"
 											>Cancel</WarningButton
 										>
 									{:else}
-										<PrimaryButton onclick={() => (showCreateQuiz = true)} class="!py-2"
+										<PrimaryButton onclick={() => (showCreateQuiz = true)} class="py-2!"
 											>+ New Quiz</PrimaryButton
 										>
 									{/if}
