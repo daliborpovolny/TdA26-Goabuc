@@ -20,7 +20,7 @@
 	}
 
 	let accessibleCourses = $derived(
-		allCourses.filter((course) => course.state === 'open' || auth.user?.isAdmin)
+		allCourses.filter((course) => course.state !== 'preparation' || auth.user?.isAdmin)
 	);
 
 	let filteredCourses = $derived(
