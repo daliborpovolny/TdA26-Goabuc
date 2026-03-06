@@ -2,7 +2,6 @@
 	import type { Material, Module } from '$lib/types';
 	import { fade, slide } from 'svelte/transition';
 	import { modal } from '$lib/modal.svelte';
-	import UniButton from '../../../../UniButton.svelte';
 
 	import DangerButton from '$lib/components/DangerButton.svelte';
 	import SuccessButton from '$lib/components/SuccessButton.svelte';
@@ -190,43 +189,9 @@
 				</div>
 
 				<div class="max-md:space-y-5 md:flex md:items-center md:justify-between">
-					<!-- <button
-							type="button"
-							onclick={remove}
-							class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-4 py-2 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
-						>
-							Delete
-						</button> -->
-
-					<!-- <UniButton
-							type="button"
-							onclick={remove}
-							disabled={isUpdating}
-							content={isUpdating ? 'Deleting...' : 'Delete'}
-							bgcolor="bg-red-400"
-							hv_bgcolor="bg-red-500"
-						/> -->
-
 					<SuccessButton type="submit" isSaving={isUpdating}>Save Changes</SuccessButton>
 
 					<DangerButton isSaving={isDeleting} onclick={remove}>Delete</DangerButton>
-
-					<!-- <button
-							type="submit"
-							disabled={isSaving}
-							class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-6 py-2 text-xs font-black text-s-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50"
-						>
-							{isSaving ? 'Saving...' : 'Save Changes'}
-						</button> -->
-
-					<!-- <UniButton
-							type="submit"
-							disabled={isSaving}
-							content={isSaving ? 'Saving...' : 'Save Changes'}
-							bgcolor="bg-p-green"
-							hv_bgcolor="bg-green-400"
-						/> -->
-					<!-- </div> -->
 				</div>
 			</form>
 		</div>
