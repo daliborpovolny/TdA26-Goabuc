@@ -5,7 +5,7 @@
 
 	import ViewFeedItem from './ViewFeedItem.svelte';
 
-	let { courseId, onUpdate }: { courseId: string, onUpdate?: () => void } = $props();
+	let { courseId, onUpdate }: { courseId: string; onUpdate?: () => void } = $props();
 
 	let collapsed = $state(false);
 
@@ -54,10 +54,9 @@
 				}
 
 				if (newPost.type != 'manual' && onUpdate) {
-					console.log("system update detected!")
-					onUpdate()
+					console.log('system update detected!');
+					onUpdate();
 				}
-
 			} catch (err) {
 				console.error('Error parsing SSE message:', err);
 			}

@@ -304,81 +304,82 @@
 							</div>
 						{:else if activeSection === 'modules'}
 							<div in:fade class="space-y-8">
-								<section
-									class="rounded-2xl border-4 border-s-black bg-p-blue/5 p-6 shadow-[4px_4px_0px_0px_rgba(2,87,165,1)]"
-								>
-									<div
-										class="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center"
+								{#if course.modules.length > 1}
+									<section
+										class="rounded-2xl border-4 border-s-black bg-p-blue/5 p-6 shadow-[4px_4px_0px_0px_rgba(2,87,165,1)]"
 									>
-										<div>
-											<h2 class="text-xl font-black tracking-tight text-p-blue uppercase">
-												Featured Module
-											</h2>
-											<p class="text-xs font-bold text-gray-500 uppercase">
-												Direct student focus to a specific module
-											</p>
-										</div>
-
-										<ModuleSelector
-											modules={localModules}
-											bind:selectedId={highlightedModuleId}
-											label="Choose Highlight"
-										/>
-									</div>
-
-									{#if activeHighlight}
-										<div transition:slide class="space-y-4">
-											<div
-												class="flex items-center gap-4 rounded-xl border-4 border-s-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
-											>
-												<span class="text-4xl">🌟</span>
-												<div>
-													<p class="text-xs font-black text-p-blue uppercase">Target:</p>
-													<h3 class="text-xl font-black tracking-tighter uppercase">
-														{activeHighlight.name}
-													</h3>
-												</div>
-											</div>
-
-											<div class="relative space-y-2">
-												<label
-													for="highlight_msg"
-													class="text-[10px] font-black tracking-widest text-gray-400 uppercase"
-												>
-													Lecturer's Note (Explain why this is featured)
-												</label>
-												<div class="flex flex-col gap-3 sm:flex-row">
-													<input
-														id="highlight_msg"
-														type="text"
-														bind:value={highlightedMessage}
-														placeholder="e.g., Focus on this module for this week's midterm!"
-														class="flex-1 rounded-xl border-4 border-s-black bg-white p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
-													/>
-
-													<!-- {#if messageChanged} -->
-													<div in:fade>
-														<SuccessButton
-															onclick={() => updateHighlight()}
-															isSaving={isSavingHighlight}
-															class="!py-3 !text-sm whitespace-nowrap"
-														>
-															Highlight
-														</SuccessButton>
-													</div>
-													<!-- {/if} -->
-												</div>
-											</div>
-										</div>
-									{:else}
-										<p
-											class="rounded-xl border-2 border-dashed border-p-blue/30 p-4 text-center text-sm font-bold text-p-blue/50 italic"
+										<div
+											class="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center"
 										>
-											No module currently featured. Use the selector above to pin one.
-										</p>
-									{/if}
-								</section>
+											<div>
+												<h2 class="text-xl font-black tracking-tight text-p-blue uppercase">
+													Featured Module
+												</h2>
+												<p class="text-xs font-bold text-gray-500 uppercase">
+													Direct student focus to a specific module
+												</p>
+											</div>
 
+											<ModuleSelector
+												modules={localModules}
+												bind:selectedId={highlightedModuleId}
+												label="Choose Highlight"
+											/>
+										</div>
+
+										{#if activeHighlight}
+											<div transition:slide class="space-y-4">
+												<div
+													class="flex items-center gap-4 rounded-xl border-4 border-s-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
+												>
+													<span class="text-4xl">🌟</span>
+													<div>
+														<p class="text-xs font-black text-p-blue uppercase">Target:</p>
+														<h3 class="text-xl font-black tracking-tighter uppercase">
+															{activeHighlight.name}
+														</h3>
+													</div>
+												</div>
+
+												<div class="relative space-y-2">
+													<label
+														for="highlight_msg"
+														class="text-[10px] font-black tracking-widest text-gray-400 uppercase"
+													>
+														Lecturer's Note (Explain why this is featured)
+													</label>
+													<div class="flex flex-col gap-3 sm:flex-row">
+														<input
+															id="highlight_msg"
+															type="text"
+															bind:value={highlightedMessage}
+															placeholder="e.g., Focus on this module for this week's midterm!"
+															class="flex-1 rounded-xl border-4 border-s-black bg-white p-3 font-bold focus:ring-4 focus:ring-p-green focus:outline-none"
+														/>
+
+														<!-- {#if messageChanged} -->
+														<div in:fade>
+															<SuccessButton
+																onclick={() => updateHighlight()}
+																isSaving={isSavingHighlight}
+																class="!py-3 !text-sm whitespace-nowrap"
+															>
+																Highlight
+															</SuccessButton>
+														</div>
+														<!-- {/if} -->
+													</div>
+												</div>
+											</div>
+										{:else}
+											<p
+												class="rounded-xl border-2 border-dashed border-p-blue/30 p-4 text-center text-sm font-bold text-p-blue/50 italic"
+											>
+												No module currently featured. Use the selector above to pin one.
+											</p>
+										{/if}
+									</section>
+								{/if}
 								<hr class="border-2 border-dashed border-gray-200" />
 
 								<div class="flex items-center justify-between">
