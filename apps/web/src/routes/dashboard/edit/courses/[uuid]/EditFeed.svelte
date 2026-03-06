@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
-	import { fade, slide } from 'svelte/transition';
+	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import type { FeedPost } from '$lib/types';
 	import EditFeedPost from './EditFeedPost.svelte';
 
