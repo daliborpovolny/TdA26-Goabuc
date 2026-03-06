@@ -122,7 +122,7 @@
 						<div in:fade>
 							<SecondaryButton
 								href={`/dashboard/edit/courses/${course.uuid}`}
-								class="!px-4 !py-2 !text-sm md:!text-base"
+								class="px-4! py-2! text-sm! md:text-base!"
 							>
 								Edit Course ✏️
 							</SecondaryButton>
