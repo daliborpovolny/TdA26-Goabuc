@@ -4,7 +4,6 @@
 	import { flip } from 'svelte/animate';
 	import type { Course, Module } from '$lib/types';
 
-	// Components
 	import EditCourse from './EditCourse.svelte';
 	import CreateMaterial from './CreateMaterial.svelte';
 	import EditMaterial from './EditMaterial.svelte';
@@ -15,7 +14,6 @@
 	import EditModule from './EditModule.svelte';
 	import ModuleSelector from './ModuleSelector.svelte';
 
-	// Your Branded Button Suite
 	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
 	import SecondaryButton from '$lib/components/SecondaryButton.svelte';
 	import SuccessButton from '$lib/components/SuccessButton.svelte';
@@ -51,7 +49,7 @@
 	}
 	loadCourse();
 
-	// Module Reordering Logic
+	//* Module reordering
 	let localModules = $state<Module[]>([]);
 	let orderChanged = $state(false);
 	let isSavingOrder = $state(false);
@@ -91,7 +89,7 @@
 		}
 	}
 
-	// Highlight Logic
+	//* Highlight stuff
 	let highlightedModuleId = $state(course?.highlightedModuleId || '');
 	let highlightedMessage = $state(course?.highlightedModuleMessage || '');
 	let isSavingHighlight = $state(false);
@@ -407,21 +405,19 @@
 </div>
 
 <style>
-	/* Custom Scrollbar - Brutalist Style */
 	.brutal-scroll::-webkit-scrollbar {
-		height: 8px; /* Thick enough to see */
+		height: 8px;
 	}
 	.brutal-scroll::-webkit-scrollbar-track {
-		background: #f3f4f6; /* Gray-100 */
-		border-top: 2px solid #1a1a1a; /* Black top border */
+		background: #f3f4f6;
+		border-top: 2px solid #1a1a1a;
 		border-bottom: 2px solid #1a1a1a;
 	}
 	.brutal-scroll::-webkit-scrollbar-thumb {
-		background: #1a1a1a; /* Pure black thumb */
+		background: #1a1a1a;
 		border: 1px solid #fff;
 	}
 
-	/* Edge Fade Mask - Shows content is cut off */
 	.nav-mask {
 		position: relative;
 	}

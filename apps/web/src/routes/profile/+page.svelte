@@ -53,9 +53,7 @@
 						Edit Account Settings
 					</button> -->
 
-					<PrimaryButton class="text-sm w-full">
-						Edit Account Settings
-					</PrimaryButton>
+					<PrimaryButton class="w-full text-sm">Edit Account Settings</PrimaryButton>
 				</div>
 			</div>
 		</div>

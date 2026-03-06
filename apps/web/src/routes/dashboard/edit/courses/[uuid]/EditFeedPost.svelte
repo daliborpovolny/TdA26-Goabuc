@@ -103,7 +103,7 @@
 						Delete
 					</button> -->
 
-					<DangerButton type="button" onclick={deleteFeedPost} class="text-xs text-center">
+					<DangerButton type="button" onclick={deleteFeedPost} class="text-center text-xs">
 						Delete
 					</DangerButton>
 				</div>

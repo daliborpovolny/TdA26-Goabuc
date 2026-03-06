@@ -32,7 +32,10 @@
 				</div>
 			</button> -->
 
-			<PrimaryButton onclick={() => (activeTab = 'terms')} class={activeTab === 'terms' ? 'shadow-none translate-x-1 translate-y-1' : ''}>
+			<PrimaryButton
+				onclick={() => (activeTab = 'terms')}
+				class={activeTab === 'terms' ? 'translate-x-1 translate-y-1 shadow-none' : ''}
+			>
 				Terms of Service
 			</PrimaryButton>
 
@@ -51,7 +54,10 @@
 				</div>
 			</button> -->
 
-			<PrimaryButton onclick={() => (activeTab = 'privacy')} class={activeTab === 'privacy' ? 'shadow-none translate-x-1 translate-y-1' : ''}>
+			<PrimaryButton
+				onclick={() => (activeTab = 'privacy')}
+				class={activeTab === 'privacy' ? 'translate-x-1 translate-y-1 shadow-none' : ''}
+			>
 				Privacy Policy
 			</PrimaryButton>
 		</div>

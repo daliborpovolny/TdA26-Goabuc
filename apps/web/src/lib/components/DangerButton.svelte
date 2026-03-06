@@ -35,12 +35,7 @@
 	`;
 </script>
 
-<button
-	{type}
-	{onclick}
-	disabled={disabled || isSaving}
-	class="{baseClass} {className}"
->
+<button {type} {onclick} disabled={disabled || isSaving} class="{baseClass} {className}">
 	{#if isSaving}
 		<span class="flex items-center gap-2">
 			<span class="animate-pulse">⏳</span> Processing...
