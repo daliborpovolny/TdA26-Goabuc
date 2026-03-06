@@ -94,7 +94,7 @@
 <div
 	class="overflow-hidden rounded-xl border-4 border-s-black bg-p-green shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] transition-all"
 >
-	<div class="flex w-full items-center bg-p-green hover:bg-black/5">
+	<div class="flex w-full items-center bg-p-green hover:bg-black/5 max-md:overflow-scroll">
 		<button
 			type="button"
 			class="flex flex-1 cursor-pointer items-center justify-between p-4 text-left"

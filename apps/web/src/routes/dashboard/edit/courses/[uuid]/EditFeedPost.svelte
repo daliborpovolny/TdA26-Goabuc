@@ -1,4 +1,6 @@
 <script lang="ts">
+	import DangerButton from '$lib/components/DangerButton.svelte';
+	import SuccessButton from '$lib/components/SuccessButton.svelte';
 	import type { FeedPost } from '$lib/types';
 	import { fade } from 'svelte/transition';
 
@@ -80,22 +82,30 @@
 
 				<div class="flex items-center gap-2">
 					{#if isEdited}
-						<button
+						<!-- <button
 							transition:fade
 							disabled={isSaving}
 							class="cursor-pointer rounded-lg border-2 border-s-black bg-p-green px-3 py-1 text-xs font-black uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-y-0.5 active:shadow-none"
 						>
 							{isSaving ? '...' : 'Save Edit'}
-						</button>
+						</button> -->
+
+						<SuccessButton type="submit" disabled={isSaving} class="text-xs">
+							{isSaving ? '...' : 'Save Edit'}
+						</SuccessButton>
 					{/if}
 
-					<button
+					<!-- <button
 						type="button"
 						onclick={deleteFeedPost}
 						class="cursor-pointer rounded-lg border-2 border-s-black bg-red-500 px-3 py-1 text-xs font-black text-white uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition active:translate-y-0.5 active:shadow-none"
 					>
 						Delete
-					</button>
+					</button> -->
+
+					<DangerButton type="button" onclick={deleteFeedPost} class="text-xs text-center">
+						Delete
+					</DangerButton>
 				</div>
 			</div>
 		{:else}

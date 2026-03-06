@@ -50,7 +50,7 @@
 			{:then courses}
 				<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 					{#each courses as course}
-						<div class="group relative transition hover:-translate-x-1 hover:-translate-y-1">
+						<div class="group relative transition">
 							<div
 								class="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-s-black"
 							></div>

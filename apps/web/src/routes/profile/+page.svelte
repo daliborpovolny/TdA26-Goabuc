@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
 	import { fade } from 'svelte/transition';
 
 	let dataPromise = fetch('/api/me').then((r) => {
@@ -46,11 +47,15 @@
 						<p class="text-xl font-bold text-p-blue">{user.email}</p>
 					</div>
 
-					<button
+					<!-- <button
 						class="mt-4 w-full cursor-pointer rounded-xl border-4 border-s-black bg-s-black py-4 text-sm font-black text-white uppercase transition-all hover:bg-p-green hover:text-s-black active:translate-y-1 active:shadow-none"
 					>
 						Edit Account Settings
-					</button>
+					</button> -->
+
+					<PrimaryButton class="text-sm w-full">
+						Edit Account Settings
+					</PrimaryButton>
 				</div>
 			</div>
 		</div>

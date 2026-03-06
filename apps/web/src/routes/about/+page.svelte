@@ -2,6 +2,7 @@
 	import TermsOfService from './TermsOfService.svelte';
 	import PrivacyPolicy from './PrivacyPolicy.svelte';
 	import { fade } from 'svelte/transition';
+	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
 
 	let activeTab = $state<'terms' | 'privacy'>('terms');
 </script>
@@ -19,7 +20,7 @@
 		</header>
 
 		<div class="mb-12 flex flex-col gap-4 sm:flex-row sm:justify-center">
-			<button onclick={() => (activeTab = 'terms')} class="group relative px-8 py-4 transition-all">
+			<!-- <button onclick={() => (activeTab = 'terms')} class="group relative px-8 py-4 transition-all">
 				<div class="absolute inset-0 translate-x-1 translate-y-1 rounded-xl bg-s-black"></div>
 				<div
 					class="relative border-4 border-s-black px-8 py-4 text-xl font-black uppercase transition-transform
@@ -29,9 +30,13 @@
 				>
 					Terms of Service
 				</div>
-			</button>
+			</button> -->
 
-			<button
+			<PrimaryButton onclick={() => (activeTab = 'terms')} class={activeTab === 'terms' ? 'shadow-none translate-x-1 translate-y-1' : ''}>
+				Terms of Service
+			</PrimaryButton>
+
+			<!-- <button
 				onclick={() => (activeTab = 'privacy')}
 				class="group relative px-8 py-4 transition-all"
 			>
@@ -44,7 +49,11 @@
 				>
 					Privacy Policy
 				</div>
-			</button>
+			</button> -->
+
+			<PrimaryButton onclick={() => (activeTab = 'privacy')} class={activeTab === 'privacy' ? 'shadow-none translate-x-1 translate-y-1' : ''}>
+				Privacy Policy
+			</PrimaryButton>
 		</div>
 
 		<main class="relative">

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
 	import UniButton from '../../../../UniButton.svelte';
+	import SuccessButton from '$lib/components/SuccessButton.svelte';
 
 	let { courseId }: { courseId: string } = $props();
 
@@ -80,13 +81,17 @@
 					</div>
 
 					<div class="flex justify-end pt-2">
-						<button
+						<!-- <button
 							type="submit"
 							disabled={isSaving}
 							class="group relative cursor-pointer overflow-hidden rounded-xl border-4 border-s-black bg-p-green px-8 py-3 text-xl font-black tracking-widest text-s-black uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-2 active:translate-y-2 disabled:opacity-50"
 						>
 							{isSaving ? 'Sending...' : 'Post Update →'}
-						</button>
+						</button> -->
+
+						<SuccessButton type="submit" disabled={isSaving}>
+							{isSaving ? 'Sending...' : 'Post Update →'}
+						</SuccessButton>
 					</div>
 				</form>
 			</div>

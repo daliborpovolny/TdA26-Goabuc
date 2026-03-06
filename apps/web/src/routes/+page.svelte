@@ -42,6 +42,8 @@
 								Open Dashboard
 							</a> -->
 
+							<!-- <UniLink href="/dashboard" content="Open Dashboard" uppercase /> -->
+
 							<SimpleGreenLink link="/dashboard">Open Dashboard</SimpleGreenLink>
 						</div>
 					</div>
@@ -66,9 +68,13 @@
 								Lecturer Login
 							</a> -->
 
-							<SimpleGreenLink link="/courses">Courses</SimpleGreenLink>
+							<!-- <SimpleGreenLink link="/courses">Courses</SimpleGreenLink>
 
-							<SimpleGreenLink link="/login">Lecturer Login</SimpleGreenLink>
+							<SimpleGreenLink link="/login">Lecturer Login</SimpleGreenLink> -->
+
+							<UniLink href="/courses" content="Courses" uppercase />
+
+							<UniLink href="/login" content="Lecturer Login" uppercase />
 
 							<!-- <UniLink href="/register" content="Get Started" uppercase={true} /> -->
 							<!-- <UniLink href="/login" content="Member Login" uppercase={true} /> -->
@@ -82,7 +88,7 @@
 			<div
 				class="rounded-full border-4 border-s-black bg-s-2 p-10 text-4xl font-black uppercase shadow-lg"
 			>
-				V0.1
+				V0.2
 			</div>
 		</div>
 	</section>
