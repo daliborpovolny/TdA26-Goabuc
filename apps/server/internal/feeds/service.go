@@ -140,6 +140,19 @@ func (s *Service) CreateAutomaticPost(message string, courseId string, ctx conte
 	return resp, nil
 }
 
+// special type of post signifing to frontend to reload the course -- mainly for small changes that don't deserve to appear to users in the feed on frontend but still need to be visible elsewhere - like module order changes
+func (s *Service) CreateInfoPost(message string, courseId string, ctx context.Context) (FeedPostResponse, error) {
+
+	resp := FeedPostResponse{
+		Type:    "info",
+		Message: message,
+	}
+
+	go s.broadcast(courseId, resp)
+
+	return resp, nil
+}
+
 func (s *Service) UpdatePost(ctx context.Context, courseID, postID, message string) (FeedPostResponse, error) {
 
 	post, err := s.q.GetPost(ctx, postID)

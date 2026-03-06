@@ -14,6 +14,10 @@ type FeedPostResponse struct {
 	UpdatedAt string `json:"updatedAt"`
 }
 
+type InfoFeedPostResponse struct {
+	Type string `json:"type"` // "info"
+}
+
 type CreatePostRequest struct {
 	Message string `json:"message"`
 }

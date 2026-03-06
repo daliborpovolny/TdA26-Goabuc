@@ -74,7 +74,7 @@ func (h *Handler) CreateQuiz(c echo.Context) error {
 		return r.ServerError(err)
 	}
 
-	_, err = h.service.AssignQuizToModule(dbQuiz.Uuid, moduleId, quiz.ModuleOrder, r.Ctx)
+	_, err = h.service.AssignQuizToModule(dbQuiz.Uuid, moduleId, quiz.ModuleOrder, courseId, r.Ctx)
 	if err != nil {
 		return r.ServerError(err)
 	}
@@ -145,7 +145,9 @@ func (h *Handler) DeleteQuiz(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
 	quizId := r.Echo.Param("quizId")
-	err := h.service.DeleteQuiz(quizId, r.Ctx)
+	courseId := r.Echo.Param("courseId")
+
+	err := h.service.DeleteQuiz(quizId, courseId, r.Ctx)
 	if err != nil {
 		if err == ErrQuizNotFound {
 			return r.Error(http.StatusNotFound, "quiz not found")
@@ -184,13 +186,14 @@ func (h *Handler) SubmitQuizAnswers(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
 	quizId := r.Echo.Param("quizId")
+	courseId := r.Echo.Param("courseId")
 
 	var answers SubmitQuizAnswersRequest
 	if err := c.Bind(&answers); err != nil {
 		return r.Error(http.StatusBadRequest, "bad request")
 	}
 
-	outcome, err := h.service.SubmitQuizAnswers(quizId, answers, r.Ctx)
+	outcome, err := h.service.SubmitQuizAnswers(quizId, answers, courseId, r.Ctx)
 	if err != nil {
 		if err == ErrBadNumberOfAnswers {
 			return r.Error(http.StatusBadRequest, err.Error())
@@ -201,7 +204,7 @@ func (h *Handler) SubmitQuizAnswers(c echo.Context) error {
 			return r.Error(http.StatusBadRequest, ebr.Error())
 		}
 
-		fmt.Println("ERRORROOOOO: \n\n\n\n", err)
+		// fmt.Println("ERRORROOOOO: \n\n\n\n", err)
 		return r.ServerError(err)
 	}
 
@@ -233,6 +236,7 @@ func (h *Handler) ChangeQuizInModuleOrder(c echo.Context) error {
 
 	quizId := c.Param("quizId")
 	moduleId := c.Param("moduleId")
+	courseId := r.Echo.Param("courseId")
 
 	orderStr := c.Param("order")
 	order, err := strconv.Atoi(orderStr)
@@ -240,7 +244,7 @@ func (h *Handler) ChangeQuizInModuleOrder(c echo.Context) error {
 		return r.Error(http.StatusBadRequest, "order must be a number")
 	}
 
-	_, err = h.service.ChangeQuizInModuleOrder(quizId, moduleId, order, r.Ctx)
+	_, err = h.service.ChangeQuizInModuleOrder(quizId, moduleId, order, courseId, r.Ctx)
 	if err != nil {
 		return r.ServerError(err)
 	}

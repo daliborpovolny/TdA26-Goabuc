@@ -5,7 +5,7 @@
 
 	import ViewFeedItem from './ViewFeedItem.svelte';
 
-	let { courseId }: { courseId: string } = $props();
+	let { courseId, onUpdate }: { courseId: string, onUpdate?: () => void } = $props();
 
 	let collapsed = $state(false);
 
@@ -52,6 +52,12 @@
 				} else {
 					posts = [newPost, ...posts];
 				}
+
+				if (newPost.type != 'manual' && onUpdate) {
+					console.log("system update detected!")
+					onUpdate()
+				}
+
 			} catch (err) {
 				console.error('Error parsing SSE message:', err);
 			}
@@ -78,7 +84,9 @@
 		{#if !collapsed}
 			<div class="flex flex-col gap-4">
 				{#each posts as post (post.uuid)}
-					<ViewFeedItem {post} />
+					{#if post.type === 'manual' || post.type === 'system'}
+						<ViewFeedItem {post} />
+					{/if}
 				{/each}
 			</div>
 		{/if}

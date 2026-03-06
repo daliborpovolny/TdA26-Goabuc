@@ -264,7 +264,7 @@
 						<div
 							class="rounded-2xl border-4 border-s-black bg-p-blue/5 p-2 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]"
 						>
-							<ViewFeed courseId={course.uuid} />
+							<ViewFeed courseId={course.uuid} onUpdate={loadCourse} />
 						</div>
 					</div>
 				</div>

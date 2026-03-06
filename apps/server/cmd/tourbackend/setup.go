@@ -76,10 +76,14 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		return err
 	}
 
+	time.Sleep(time.Second)
+
 	module, err := cs.CreateModule(course1.Uuid, uuid.NewString(), "Module 1", "light introduction to the course", ctx)
 	if err != nil {
 		fmt.Println("create course 1 module failed")
 	}
+
+	time.Sleep(time.Second)
 
 	m1, err := ms.CreateUrlMaterial(materials.CreateUrlMaterialRequest{
 		CourseId:    course1.Uuid,
@@ -93,11 +97,15 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		return err
 	}
 
-	_, err = ms.AssignMaterialToModule(m1.GetUuid(), module.Uuid, 1, ctx)
+	time.Sleep(time.Second)
+
+	_, err = ms.AssignMaterialToModule(m1.GetUuid(), module.Uuid, 1, course1.Uuid, ctx)
 	if err != nil {
 		fmt.Println("assign material 1 to course 1 module 1 failed")
 		return err
 	}
+
+	time.Sleep(time.Second)
 
 	m2, err := ms.CreateUrlMaterial(materials.CreateUrlMaterialRequest{
 		CourseId:    course1.Uuid,
@@ -111,11 +119,15 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		return err
 	}
 
-	_, err = ms.AssignMaterialToModule(m2.GetUuid(), module.Uuid, 2, ctx)
+	time.Sleep(time.Second)
+
+	_, err = ms.AssignMaterialToModule(m2.GetUuid(), module.Uuid, 2, course1.Uuid, ctx)
 	if err != nil {
 		fmt.Println("assign material 2 to course 1 module 1 failed")
 		return err
 	}
+
+	time.Sleep(time.Second)
 
 	one := 1
 	quiz1 := quizzes.Quiz{
@@ -145,22 +157,30 @@ func seed(q *db.Queries, cs *courses.Service, fs *feeds.Service, ms *materials.S
 		return err
 	}
 
+	time.Sleep(time.Second)
+
 	_, err = fs.CreateManualPost(ctx, course1.Uuid, "Pottery Course Has Been Published!")
 	if err != nil {
 		fmt.Println("create course 1 manual post failed")
 		return err
 	}
 
-	_, err = qs.AssignQuizToModule(quizSaved.Uuid, module.Uuid, 3, ctx)
+	time.Sleep(time.Second)
+
+	_, err = qs.AssignQuizToModule(quizSaved.Uuid, module.Uuid, 3, course1.Uuid, ctx)
 	if err != nil {
 		fmt.Println("assign quiz to course 1 module 1 failed")
 	}
+
+	time.Sleep(time.Second)
 
 	msg := "Focus on this module"
 	_, err = cs.ChangeCourseState(course1.Uuid, "open", nil, &module.Uuid, &msg, ctx)
 	if err != nil {
 		fmt.Println("failed to change course 1 state")
 	}
+
+	time.Sleep(time.Second)
 
 	return nil
 

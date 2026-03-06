@@ -75,8 +75,8 @@ UPDATE course
 SET
     state = sqlc.arg(state),
     updated_at = sqlc.arg(updated_at),
-    highlighted_module_message = sqlc.narg(module_message),
-    highlighted_module_uuid = sqlc.narg(module_uuid)
+    highlighted_module_message = COALESCE(sqlc.narg(module_message), highlighted_module_message),
+    highlighted_module_uuid = COALESCE(sqlc.narg(module_uuid), highlighted_module_uuid)
 WHERE uuid = sqlc.arg(uuid) RETURNING *;
 
 -- name: ArchiveCourse :exec

@@ -270,7 +270,7 @@ func (s *Service) UpdateQuiz(quiz *Quiz, ctx context.Context) (*Quiz, error) {
 		dbQuestions = append(dbQuestions, dbQuestion)
 	}
 
-	s.feedsService.CreateAutomaticPost("Quiz:"+quiz.Title+"updated", quiz.Uuid, ctx)
+	s.feedsService.CreateAutomaticPost("Quiz: "+quiz.Title+" updated", dbQuiz.CourseUuid, ctx)
 	return s.dbQuizToQuiz(dbQuiz, dbQuestions)
 }
 
@@ -437,7 +437,7 @@ func (s *Service) ListQuizes(courseId string, ctx context.Context) ([]Quiz, erro
 	return quizzes, nil
 }
 
-func (s *Service) DeleteQuiz(quizId string, ctx context.Context) error {
+func (s *Service) DeleteQuiz(quizId string, courseId string, ctx context.Context) error {
 
 	res, err := s.q.DeleteQuiz(ctx, quizId)
 	if err != nil {
@@ -455,10 +455,12 @@ func (s *Service) DeleteQuiz(quizId string, ctx context.Context) error {
 		return ErrQuizNotFound
 	}
 
+	s.feedsService.CreateAutomaticPost("Quiz: "+quizId+" deleted", courseId, ctx)
+
 	return nil
 }
 
-func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequest, ctx context.Context) (*SubmittedAnswersOutcome, error) {
+func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequest, courseId string, ctx context.Context) (*SubmittedAnswersOutcome, error) {
 
 	now := time.Now().Unix()
 
@@ -553,8 +555,9 @@ func (s *Service) SubmitQuizAnswers(quizId string, answers SubmitQuizAnswersRequ
 		return nil, err
 	}
 
-	return &outcome, nil
+	s.feedsService.CreateInfoPost("Quiz "+quizId+" has had an attempt submited", courseId, ctx)
 
+	return &outcome, nil
 }
 
 type Outcome struct {
@@ -603,7 +606,7 @@ func (s *Service) GetAnswersOfQuiz(quizId string, ctx context.Context) ([]Outcom
 	return outcomes, nil
 }
 
-func (s *Service) AssignQuizToModule(quizId string, moduleId string, order int, ctx context.Context) (db.QuizToModule, error) {
+func (s *Service) AssignQuizToModule(quizId string, moduleId string, order int, courseId string, ctx context.Context) (db.QuizToModule, error) {
 
 	mm, err := s.q.AssignQuizToModule(ctx, db.AssignQuizToModuleParams{
 		ModuleUuid: moduleId,
@@ -614,10 +617,12 @@ func (s *Service) AssignQuizToModule(quizId string, moduleId string, order int, 
 		return db.QuizToModule{}, err
 	}
 
+	s.feedsService.CreateInfoPost("Quiz "+quizId+" assigned to module", courseId, ctx)
+
 	return mm, nil
 }
 
-func (s *Service) ChangeQuizInModuleOrder(quizId string, moduleId string, order int, ctx context.Context) (db.QuizToModule, error) {
+func (s *Service) ChangeQuizInModuleOrder(quizId string, moduleId string, order int, courseId string, ctx context.Context) (db.QuizToModule, error) {
 
 	mm, err := s.q.ChangeQuizInModuleOrder(ctx, db.ChangeQuizInModuleOrderParams{
 		ModuleUuid: moduleId,
@@ -628,10 +633,12 @@ func (s *Service) ChangeQuizInModuleOrder(quizId string, moduleId string, order 
 		return db.QuizToModule{}, err
 	}
 
+	s.feedsService.CreateInfoPost("Quiz "+quizId+" changed order", courseId, ctx)
+
 	return mm, nil
 }
 
-func (s *Service) RemoveQuizToModule(quizId string, moduleId string, order int, ctx context.Context) error {
+func (s *Service) RemoveQuizToModule(quizId string, moduleId string, order int, courseId string, ctx context.Context) error {
 
 	err := s.q.RemoveQuizFromModule(ctx, db.RemoveQuizFromModuleParams{
 		ModuleUuid: moduleId,
@@ -640,5 +647,8 @@ func (s *Service) RemoveQuizToModule(quizId string, moduleId string, order int, 
 	if err != nil {
 		return err
 	}
+
+	s.feedsService.CreateInfoPost("Quiz "+quizId+" removed from module", courseId, ctx)
+
 	return nil
 }

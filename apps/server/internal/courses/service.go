@@ -115,6 +115,8 @@ func (s *Service) CreateCourse(params db.CreateCourseParams, ctx context.Context
 		return nil, err
 	}
 
+	s.feedsService.CreateAutomaticPost("Course "+course.Name+" created", course.Uuid, ctx)
+
 	return &course, nil
 }
 
@@ -292,6 +294,8 @@ func (s *Service) DeleteCourse(courseId string, ctx context.Context) error {
 		return ErrCourseNotFound
 	}
 
+	s.feedsService.CreateAutomaticPost("Course "+courseId+" deleted", courseId, ctx)
+
 	return nil
 }
 
@@ -307,7 +311,7 @@ func (s *Service) ChangeCourseState(courseId string, state string, openTime *str
 
 	now := time.Now().Unix()
 
-	fmt.Println(openTime)
+	// fmt.Println(openTime)
 
 	if openTime != nil {
 
@@ -320,10 +324,28 @@ func (s *Service) ChangeCourseState(courseId string, state string, openTime *str
 			return db.Course{}, err
 		}
 
-		fmt.Println("changing in:", time.Until(openingTime))
+		until := time.Until(openingTime)
 
-		time.AfterFunc(time.Until(openingTime), func() {
-			fmt.Println("preping for change")
+		var message string
+		switch state {
+		case "closed":
+			message = "Course will be closed at" + openingTime.String()
+		case "preparation":
+			message = "Course will switch to under contruction at" + openingTime.String()
+		case "open":
+			message = "Course will open at " + openingTime.String()
+		}
+
+		// if hmM != nil {
+		// 	message = " and there will be a new highlighted module and a message from the lecturer: '" + *hmM + "'"
+		// }
+
+		s.feedsService.CreateAutomaticPost(message, courseId, ctx)
+
+		// fmt.Println("changing in:", until)
+
+		time.AfterFunc(until, func() {
+			// fmt.Println("preping for change")
 
 			var mM sql.NullString
 			if hmM != nil {
@@ -348,7 +370,7 @@ func (s *Service) ChangeCourseState(courseId string, state string, openTime *str
 				fmt.Println(err)
 				fmt.Println("failed to update course", courseId, "at the given time")
 			}
-			fmt.Println("updated satte after time!")
+			// fmt.Println("updated satte after time!")
 		})
 
 		return db.Course{}, nil
@@ -381,10 +403,29 @@ func (s *Service) ChangeCourseState(courseId string, state string, openTime *str
 		return db.Course{}, err
 	}
 
+	var message string
+	switch state {
+	case "closed":
+		message = "Course is closed now"
+	case "preparation":
+		message = "Course is under construction now"
+	case "open":
+		message = "Course is open now"
+	}
+
+	if hmM != nil {
+		message = "Module has been highlighted with the message: '" + mM.String + "'"
+	}
+
+	s.feedsService.CreateAutomaticPost(message, courseId, ctx)
+
 	return course, err
 }
 
 func (s *Service) ArchiveCourse(courseId string, ctx context.Context) error {
+
+	s.feedsService.CreateInfoPost("Course is archived now", courseId, ctx)
+
 	return s.q.ArchiveCourse(ctx, courseId)
 }
 
@@ -407,7 +448,10 @@ func (s *Service) CreateModule(courseId string, moduleId string, name string, de
 		return Module{}, err
 	}
 
+	s.feedsService.CreateInfoPost("Module "+dbModule.Name+" has been created", courseId, ctx)
+
 	return s.dbModuleToModule(dbModule), nil
+
 }
 
 func (s *Service) ChangeModuleState(courseId string, moduleId string, state string, order *int, ctx context.Context) (Module, error) {
@@ -432,6 +476,21 @@ func (s *Service) ChangeModuleState(courseId string, moduleId string, state stri
 	})
 	if err != nil {
 		return Module{}, err
+	}
+
+	// module with the name 'Unassigned' is automatically created with every module and exists for fallback reasons - no need to show this in messages
+	if dbModule.Name != "Unassigned" {
+		var message string
+		switch state {
+		case "closed":
+			message = "Module " + dbModule.Name + " is closed now"
+		case "preparation":
+			message = "Module " + dbModule.Name + " is under construction now"
+		case "open":
+			message = "Module " + dbModule.Name + " is open now"
+		}
+
+		s.feedsService.CreateAutomaticPost(message, courseId, ctx)
 	}
 
 	return s.dbModuleToModule(dbModule), err
@@ -479,6 +538,8 @@ func (s *Service) UpdateModule(courseId string, moduleId string, name string, de
 		return Module{}, err
 	}
 
+	s.feedsService.CreateAutomaticPost("Module "+newModule.Name+" updated", courseId, ctx)
+
 	return s.dbModuleToModule(newModule), nil
 }
 
@@ -491,5 +552,8 @@ func (s *Service) DeleteModule(courseId string, moduleId string, ctx context.Con
 	if err != nil {
 		return err
 	}
+
+	s.feedsService.CreateInfoPost("Module "+moduleId+" deleted", courseId, ctx)
+
 	return nil
 }

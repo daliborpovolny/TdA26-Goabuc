@@ -97,8 +97,8 @@ UPDATE course
 SET
     state = ?1,
     updated_at = ?2,
-    highlighted_module_message = ?3,
-    highlighted_module_uuid = ?4
+    highlighted_module_message = COALESCE(?3, highlighted_module_message),
+    highlighted_module_uuid = COALESCE(?4, highlighted_module_uuid)
 WHERE uuid = ?5 RETURNING uuid, name, description, created_at, updated_at, highlighted_module_uuid, highlighted_module_message, archived, state
 `
 

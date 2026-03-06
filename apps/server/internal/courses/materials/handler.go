@@ -110,7 +110,7 @@ func (h *Handler) createFileMaterial(r *handlers.RequestCtx) error {
 		// 	return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
 		// }
 
-		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), req.ModuleId, req.ModuleOrder, r.Ctx)
+		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), req.ModuleId, req.ModuleOrder, req.CourseId, r.Ctx)
 		if err != nil {
 			return r.ServerError(err)
 		}
@@ -158,7 +158,7 @@ func (h *Handler) createUrlMaterial(r *handlers.RequestCtx) error {
 		// 	return r.Error(http.StatusBadRequest, "module order must be provided along with moduleId")
 		// }
 
-		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), req.ModuleId, req.ModuleOrder, r.Ctx)
+		_, err := h.service.AssignMaterialToModule(mat.GetUuid(), req.ModuleId, req.ModuleOrder, req.CourseId, r.Ctx)
 		if err != nil {
 			return r.ServerError(err)
 		}
@@ -264,8 +264,9 @@ func (h *Handler) IncrementMaterialAccessedCounter(c echo.Context) error {
 	r := h.NewReqCtx(c)
 
 	materialId := c.Param("materialId")
+	courseId := c.Param("courseId")
 
-	err := h.service.IncrementMaterialAccessedCounter(materialId, r.Ctx)
+	err := h.service.IncrementMaterialAccessedCounter(materialId, courseId, r.Ctx)
 	if err != nil {
 		return r.ServerError(err)
 	}
@@ -277,6 +278,7 @@ func (h *Handler) ChangeMaterialInModuleOrder(c echo.Context) error {
 
 	materialId := c.Param("materialId")
 	moduleId := c.Param("moduleId")
+	courseId := c.Param("courseId")
 
 	orderStr := c.Param("order")
 	order, err := strconv.Atoi(orderStr)
@@ -284,7 +286,7 @@ func (h *Handler) ChangeMaterialInModuleOrder(c echo.Context) error {
 		return r.Error(http.StatusBadRequest, "order must be a number")
 	}
 
-	_, err = h.service.ChangeMaterialInModuleOrder(materialId, moduleId, order, r.Ctx)
+	_, err = h.service.ChangeMaterialInModuleOrder(materialId, moduleId, order, courseId, r.Ctx)
 	if err != nil {
 		return r.ServerError(err)
 	}

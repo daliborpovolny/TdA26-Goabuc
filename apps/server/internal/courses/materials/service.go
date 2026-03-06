@@ -596,13 +596,20 @@ func (s *Service) DeleteMaterial(materialId string, ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) IncrementMaterialAccessedCounter(materialId string, ctx context.Context) error {
-	return s.q.IncrementMaterialAccessedCount(ctx, materialId)
+func (s *Service) IncrementMaterialAccessedCounter(materialId string, courseId string, ctx context.Context) error {
+
+	err := s.q.IncrementMaterialAccessedCount(ctx, materialId)
+	if err != nil {
+		return err
+	}
+
+	s.feedsService.CreateInfoPost("Material: "+materialId+" viewed", courseId, ctx)
+	return nil
 }
 
 // Material to Module
 
-func (s *Service) AssignMaterialToModule(materialId string, moduleId string, order int, ctx context.Context) (db.MaterialToModule, error) {
+func (s *Service) AssignMaterialToModule(materialId string, moduleId string, order int, courseId string, ctx context.Context) (db.MaterialToModule, error) {
 
 	mm, err := s.q.AssignMaterialToModule(ctx, db.AssignMaterialToModuleParams{
 		ModuleUuid:   moduleId,
@@ -613,10 +620,12 @@ func (s *Service) AssignMaterialToModule(materialId string, moduleId string, ord
 		return db.MaterialToModule{}, err
 	}
 
+	s.feedsService.CreateInfoPost("Material: "+materialId+" assigned to module "+moduleId, courseId, ctx)
+
 	return mm, nil
 }
 
-func (s *Service) ChangeMaterialInModuleOrder(materialId string, moduleId string, order int, ctx context.Context) (db.MaterialToModule, error) {
+func (s *Service) ChangeMaterialInModuleOrder(materialId string, moduleId string, order int, courseId string, ctx context.Context) (db.MaterialToModule, error) {
 
 	mm, err := s.q.ChangeMaterialInModuleOrder(ctx, db.ChangeMaterialInModuleOrderParams{
 		ModuleUuid:   moduleId,
@@ -627,10 +636,12 @@ func (s *Service) ChangeMaterialInModuleOrder(materialId string, moduleId string
 		return db.MaterialToModule{}, err
 	}
 
+	s.feedsService.CreateInfoPost("Material: "+materialId+" order changed "+moduleId, courseId, ctx)
+
 	return mm, nil
 }
 
-func (s *Service) RemoveMaterialToModule(materialId string, moduleId string, order int, ctx context.Context) error {
+func (s *Service) RemoveMaterialToModule(materialId string, moduleId string, order int, courseId string, ctx context.Context) error {
 
 	err := s.q.RemoveMaterialFromModule(ctx, db.RemoveMaterialFromModuleParams{
 		ModuleUuid:   moduleId,
@@ -639,5 +650,8 @@ func (s *Service) RemoveMaterialToModule(materialId string, moduleId string, ord
 	if err != nil {
 		return err
 	}
+
+	s.feedsService.CreateInfoPost("Material: "+materialId+" removed from module "+moduleId, courseId, ctx)
+
 	return nil
 }
