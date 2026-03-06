@@ -29,10 +29,9 @@
 		if (onChange) onChange(uuid);
 	}
 
-	$inspect(modules);
-
 	if (selectedId == '') {
-		selectedId = modules[0].uuid; // this could be included only if we can always be certain that there's allways a module present
+		// svelte-ignore state_referenced_locally
+		selectedId = modules[0].uuid; // this can be included as there's always at least one module
 	}
 </script>
 
