@@ -1,19 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { Course } from '$lib/types';
-	import { fade, slide } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import { modal } from '$lib/modal.svelte';
-	import UniButton from '../../../../UniButton.svelte';
 
 	import DangerButton from '$lib/components/DangerButton.svelte';
 	import SuccessButton from '$lib/components/SuccessButton.svelte';
 
 	let { course, onchange }: { course: Course; onchange: () => void } = $props();
 
-	const STAGES = ['preparation', 'open', 'closed'] as const;
-
 	let showSuccess = $state(false);
-	let showStateDropdown = $state(false);
+
 	// svelte-ignore state_referenced_locally
 	let currentState = $state(course.state);
 
@@ -42,7 +39,7 @@
 			formJson = JSON.stringify({
 				...formEntries,
 				state: currentState,
-				openTime: getISOTime() // This maps to your Go struct
+				openTime: getISOTime()
 			});
 		} else {
 			formJson = JSON.stringify({
@@ -62,7 +59,7 @@
 				onchange();
 				showSuccess = true;
 				setTimeout(() => (showSuccess = false), 2000);
-				// Reset scheduling after success
+
 				isScheduled = false;
 				scheduledTime = '';
 			}
@@ -161,83 +158,6 @@
 						class="w-full rounded-xl border-4 border-s-black bg-white p-3 font-bold text-s-black focus:ring-4 focus:ring-p-green focus:outline-none"
 					/>
 				</div>
-
-				<!-- <div class="relative space-y-2 md:col-span-1">
-					<label class="block text-lg font-black tracking-wide text-s-black uppercase"
-						>Course State</label
-					>
-					<div class="relative">
-						<UniButton
-							type="button"
-							onclick={() => (showStateDropdown = !showStateDropdown)}
-							more_style="tracking-tight w-full flex items-center"
-							text="text-l"
-							uppercase
-							px="px-4"
-						>
-							<span class="flex items-center gap-2">
-								<span
-									class="h-3 w-3 rounded-full {currentState === 'open'
-										? 'bg-p-green'
-										: currentState === 'preparation'
-											? 'bg-p-blue'
-											: 'bg-red-500'}"
-								></span>
-								{currentState == 'closed' ? 'paused' : currentState}
-							</span>
-							<span class="w-full text-right">{showStateDropdown ? '▲' : '▼'}</span>
-						</UniButton>
-
-						{#if showStateDropdown}
-							<div
-								transition:slide={{ duration: 150 }}
-								class="absolute top-[calc(100%+8px)] right-0 left-0 z-50 overflow-hidden rounded-xl border-4 border-s-black bg-white shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]"
-							>
-								{#each STAGES as stage}
-									<UniButton
-										content={stage == 'closed' ? 'paused' : stage}
-										border={false}
-										shadow={false}
-										more_style="w-full"
-										px="px-0"
-										text="text-l"
-										uppercase
-										translate={false}
-										onclick={() => {
-											currentState = stage;
-											showStateDropdown = false;
-										}}
-									/>
-								{/each}
-							</div>
-						{/if}
-					</div>
-
-					<div class="mt-4 space-y-3">
-						<label class="flex cursor-pointer items-center gap-3">
-							<input
-								type="checkbox"
-								bind:checked={isScheduled}
-								class="h-6 w-6 cursor-pointer appearance-none border-4 border-s-black bg-white checked:bg-p-green"
-							/>
-							<span class="text-sm font-black tracking-wide uppercase">Schedule Change?</span>
-						</label>
-
-						{#if isScheduled}
-							<div transition:slide={{ duration: 150 }} class="space-y-1">
-								<label class="block text-xs font-black text-s-black/60 uppercase"
-									>Execution Time</label
-								>
-								<input
-									type="datetime-local"
-									bind:value={scheduledTime}
-									required={isScheduled}
-									class="w-full rounded-xl border-4 border-s-black bg-white p-2 font-bold shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] focus:outline-none"
-								/>
-							</div>
-						{/if}
-					</div>
-				</div> -->
 			</div>
 
 			<div class="space-y-2">
@@ -256,21 +176,6 @@
 			</div>
 
 			<div class="flex flex-wrap gap-4 pt-4">
-				<!-- <UniButton
-					type="submit"
-					disabled={isSaving}
-					content={isSaving ? 'Syncing...' : 'Save Settings'}
-					bgcolor="bg-p-green"
-					hv_bgcolor="bg-green-400"
-				/> -->
-				<!-- <UniButton
-					type="button"
-					onclick={deleteCourse}
-					disabled={isSaving}
-					content={isSaving ? 'Deleting...' : 'Delete'}
-					bgcolor="bg-red-400"
-					hv_bgcolor="bg-red-500"
-				/> -->
 				<SuccessButton isSaving={isUpdating} type="submit">Save Changes</SuccessButton>
 
 				<DangerButton isSaving={isDeleting} onclick={deleteCourse}>Delete Course</DangerButton>
@@ -280,12 +185,3 @@
 		</form>
 	</div>
 </div>
-
-<!-- {#if showStateDropdown}
-	<button
-		title="show dropdown"
-		tabindex="-1"
-		class="fixed inset-0 z-40 h-full w-full cursor-default bg-transparent outline-none"
-		onclick={() => (showStateDropdown = false)}
-	></button>
-{/if} -->

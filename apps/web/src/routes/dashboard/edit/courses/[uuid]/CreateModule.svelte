@@ -83,15 +83,6 @@
 		{:else}
 			<div></div>
 		{/if}
-
-		<!-- <button
-			type="submit"
-			disabled={isSaving}
-			class="rounded-xl border-4 border-s-black bg-p-green px-8 py-2 text-lg font-black tracking-widest uppercase shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:opacity-50"
-		>
-			{isSaving ? 'Creating...' : 'Launch Module'}
-		</button> -->
-
 		<SuccessButton {isSaving} type="submit">Create Module</SuccessButton>
 	</div>
 </form>
