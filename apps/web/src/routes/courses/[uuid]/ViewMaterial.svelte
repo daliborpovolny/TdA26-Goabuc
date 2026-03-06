@@ -21,7 +21,6 @@
 	}
 
 	async function incrementAccessedCounter() {
-		// console.log('incrementing')
 		await fetch(
 			`/api/courses/${page.params.uuid}/modules/${material.moduleId}/materials/${material.uuid}/increment`,
 			{ method: 'POST' }
@@ -70,21 +69,25 @@
 				</p>
 			{/if}
 
+			<!-- This is used for stats tracking -> no need to do any aria stuff -->
+
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div class="flex flex-wrap gap-4" onclick={incrementAccessedCounter}>
 				{#if material.type === 'file'}
-					<SecondaryButton href={material.fileUrl} target="_blank" class="!text-sm md:!text-base">
+					<SecondaryButton href={material.fileUrl} target="_blank" class="text-sm! md:text-base!">
 						<span>👁️</span> View File
 					</SecondaryButton>
 
 					<PrimaryButton
 						href={material.fileUrl}
 						download={material.name}
-						class="!text-sm md:!text-base"
+						class="!md:text-base! text-sm"
 					>
 						<span>📥</span> Download
 					</PrimaryButton>
 				{:else if material.type === 'url'}
-					<PrimaryButton href={material.url} target="_blank" class="!text-sm md:!text-base">
+					<PrimaryButton href={material.url} target="_blank" class="text-sm! md:text-base!">
 						<span>🌐</span> Open Link
 					</PrimaryButton>
 				{/if}
