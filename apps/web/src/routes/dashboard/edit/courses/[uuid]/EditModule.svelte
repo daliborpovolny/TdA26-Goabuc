@@ -3,7 +3,6 @@
 	import { fade, slide } from 'svelte/transition';
 	import { modal } from '$lib/modal.svelte';
 	import UniButton from '../../../../UniButton.svelte';
-	import UniLink from '../../../../UniLink.svelte';
 
 	import SuccessButton from '$lib/components/SuccessButton.svelte';
 	import DangerButton from '$lib/components/DangerButton.svelte';
@@ -18,9 +17,9 @@
 	let showStateDropdown = $state(false);
 
 	// Initial state for editing
-	let name = $state(module.name);
-	let description = $state(module.description);
-	let currentState = $state(module.state);
+	let name = $derived(module.name);
+	let description = $derived(module.description);
+	let currentState = $derived(module.state);
 
 	let isUpdating = $state(false);
 	async function handleUpdate(e: Event) {
@@ -129,8 +128,9 @@
 					</div>
 
 					<div class="relative space-y-1 md:col-span-1">
-						<label class="text-xs font-black tracking-widest text-gray-500 uppercase"
-							>Module State</label
+						<label
+							class="text-xs font-black tracking-widest text-gray-500 uppercase"
+							for="module_state">Module State</label
 						>
 
 						<div class="relative">
@@ -142,7 +142,7 @@
 								uppercase
 								px="px-4"
 							>
-								<span class="flex items-center gap-2">
+								<span class="flex items-center gap-2" id="module_state">
 									<span
 										class="h-3 w-3 rounded-full {currentState === 'open'
 											? 'bg-p-green'
@@ -197,21 +197,6 @@
 				<div
 					class="border-t-2 border-gray-200 pt-4 max-md:space-y-5 md:flex md:items-center md:justify-between"
 				>
-					<!-- <UniButton
-						type="button"
-						onclick={deleteModule}
-						content="Delete Module"
-						bgcolor="bg-red-300"
-						hv_bgcolor="bg-red-400"
-					/>
-					<UniButton
-						type="submit"
-						disabled={isSaving}
-						content={isSaving ? 'Saving...' : 'Save Changes'}
-						bgcolor="bg-p-green"
-						hv_bgcolor="bg-green-500"
-					/> -->
-
 					<SuccessButton isSaving={isUpdating} type="submit">Save Changes</SuccessButton>
 
 					<DangerButton isSaving={isDeleting} onclick={deleteModule}>Delete Module</DangerButton>
